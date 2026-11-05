@@ -1113,54 +1113,49 @@ async function doRegister(){
   const phone=normPhone(document.getElementById("rg-phone").value);
   if(!nick||pass.length<6||!phone){ setMsg("rg-msg","Ошибка: ник, пароль (мин. 6 симв.) и номер обязательны."); return; }
   try{
-    const email = nick.toLowerCase().replace(/[^a-z0-9_.@-]/g,"") + "@memento.shop";
+    const email = phone.replace(/[^\d]/g,"") + "@memento.shop";
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     const uid = cred.user.uid;
-    // Проверим, нет ли пользователя с таким номером
-    const snap = await firestore.collection("users").where("phone","==",phone).get();
-    if(!snap.empty){
-      await auth.currentUser.delete();
-      setMsg("rg-msg","Ошибка: такой номер уже зарегистрирован.");
-      return;
-    }
     await firestore.collection("users").doc(uid).set({
       nick: nick, searchNick: nick.toLowerCase(), phone: phone,
       balance: 0, history: [], gifts: [], createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    // Отдельная коллекция для входа по нику (разрешена на чтение авторизованным)
+    await firestore.collection("names").doc(nick.toLowerCase()).set({ uid: uid, phone: phone });
     currentUser = { nick: nick, phone: phone, uid: uid };
     userData = { nick: nick, phone: phone, balance:0, history:[], gifts:[], _ref: firestore.collection("users").doc(uid) };
     setMsg("rg-msg","Регистрация успешна! Вы вошли как "+nick+".");
     afterLogin(nick);
   }catch(e){ setMsg("rg-msg","Ошибка: "+e.message); }
 }
+async function resolveUserEmail(id){
+  // id = номер / ник / email; возвращает email аккаунта в Auth
+  if(id.includes("@")) return id;
+  const isPhone = id.replace(/\D/g,"").length>=10;
+  if(isPhone){
+    const ph=normPhone(id);
+    return ph.replace(/[^\d]/g,"") + "@memento.shop";
+  }
+  try{
+    const snap = await firestore.collection("names").doc(id.toLowerCase()).get();
+    if(snap.exists){
+      const u = snap.data();
+      return u.phone ? u.phone.replace(/[^\d]/g,"")+"@memento.shop" : null;
+    }
+  }catch(e){}
+  return null;
+}
 async function doLogin(){
   const id=document.getElementById("li-id").value.trim();
   const pass=document.getElementById("li-pass").value;
   if(!id||!pass){ setMsg("li-msg","Ошибка: введите логин и пароль."); return; }
   try{
-    // Найти пользователя по нику или номеру, получить его email
-    let email=null;
-    if(id.includes("@")){ email=id; }
-    else{
-      const isPhone = /[+0-9]/.test(id) && id.replace(/\D/g,"").length>=10;
-      let snap;
-      if(isPhone){
-        const ph=normPhone(id);
-        snap=await firestore.collection("users").where("phone","==",ph).get();
-      }else{
-        snap=await firestore.collection("users").where("searchNick","==",id.toLowerCase()).get();
-      }
-      if(snap.empty){ setMsg("li-msg","Ошибка: пользователь не найден."); return; }
-      const doc=snap.docs[0];
-      const data=doc.data();
-      // email = nick в нижнем регистре + @memento.shop
-      email = data.nick.toLowerCase().replace(/[^a-z0-9_.@-]/g,"") + "@memento.shop";
-    }
+    const email = await resolveUserEmail(id);
+    if(!email){ setMsg("li-msg","Ошибка: пользователь не найден."); return; }
     const cred = await auth.signInWithEmailAndPassword(email, pass);
     const uid = cred.user.uid;
     const doc = await firestore.collection("users").doc(uid).get();
     if(!doc.exists){
-      // пользователь есть в auth, но нет в базе — создадим
       const nickFromEmail = email.split("@")[0];
       await firestore.collection("users").doc(uid).set({ nick:nickFromEmail, searchNick:nickFromEmail.toLowerCase(), phone:"", balance:0, history:[], gifts:[] });
     }
