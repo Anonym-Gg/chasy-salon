@@ -193,6 +193,41 @@
   .auth-msg.err{color:#b02323}
   .usrbadge{display:none;align-items:center;gap:8px;font-size:.9rem}
   .usrbadge.on{display:flex}
+
+  .about-block{
+    background:var(--cream);border:1px solid var(--line);
+    padding:26px;margin-top:6px;
+  }
+  .about-block p{color:var(--ink);margin-bottom:12px;max-width:760px}
+  .about-buttons{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+  .about-buttons button{
+    background:var(--ink);color:#fff;border:none;padding:12px 22px;
+    cursor:pointer;font-family:inherit;font-size:.95rem;letter-spacing:.5px;
+  }
+  .about-buttons button:hover{background:var(--gold-d)}
+  .docwrap{
+    position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:98;
+    display:none;align-items:center;justify-content:center;
+  }
+  .docwrap.show{display:flex}
+  .doc-box{background:#fff;width:640px;max-width:94vw;max-height:86vh;overflow-y:auto;display:flex;flex-direction:column}
+  .doc-box header{background:var(--ink);color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
+  .doc-box header h3{font-size:1.1rem;font-weight:normal;letter-spacing:1px;margin:0}
+  .doc-box header button{background:none;border:none;color:#fff;font-size:1.6rem;line-height:1;cursor:pointer}
+  .doc-body{padding:22px}
+  .doc-body p{margin-bottom:12px;font-size:.95rem}
+  .reviews{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+  .rev-summary{font-size:.82rem;color:var(--gold-d);margin-bottom:6px}
+  .rev-summary.muted{color:var(--muted)}
+  .rev-stars{color:var(--gold);letter-spacing:2px}
+  .rev-btn{background:none;border:none;color:var(--ink);cursor:pointer;text-decoration:underline;font-size:.82rem;font-family:inherit;padding:0}
+  .rev-list{margin-top:10px}
+  .rev-item{background:var(--cream);border:1px solid var(--line);padding:8px 10px;margin-bottom:8px;font-size:.85rem}
+  .rev-item b{color:var(--ink)}
+  .rev-item .rev-stars{font-size:.8rem}
+  .rev-form{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .rev-form input{padding:7px;border:1px solid var(--line);font-family:inherit;font-size:.85rem}
+  .rev-form button{background:var(--ink);color:#fff;border:none;padding:8px;cursor:pointer;font-family:inherit;font-size:.85rem}
   @media(max-width:600px){
     .hero h1{font-size:1.6rem}
     .grid{grid-template-columns:1fr 1fr;gap:12px}
@@ -211,6 +246,7 @@
       <a href="#" id="login-link" onclick="openAuth(event)">Вход</a>
       <span class="usrbadge" id="usrbadge"><span></span><a href="#" onclick="logoutUser()">Выйти</a></span>
       <a href="#catalog" onclick="filterCat(event,'all')">Каталог</a>
+      <a href="#about" onclick="showSection(event,'about')">О нас</a>
       <button class="cart-btn" onclick="openCart()">Корзина <b id="cart-count">0</b></button>
     </div>
   </div>
@@ -232,6 +268,16 @@
   <div class="grid" id="catalog-grid"></div>
   <div class="empty" id="empty">В этой категории пока пусто. Загляните позже.</div>
 
+  <div class="section-title" id="about">О нас</div>
+  <div class="about-block">
+    <p><strong>Memento</strong> — магазин классических наручных часов. Мы отбираем строгие мужские и изящные женские модели, которые подходят и для повседневной жизни, и для особых случаев.</p>
+    <p>Мы ценим качество и честные цены. Каждая модель проходит проверку перед продажей, а ваши заказы мы доставляем удобным способом и всегда на связи с покупателями.</p>
+    <div class="about-buttons">
+      <button onclick="openDoc('privacy')">Политика Безопасности</button>
+      <button onclick="openDoc('terms')">Условия Соглашения</button>
+    </div>
+  </div>
+
   <div class="section-title">Как заказать</div>
   <p>Выберите модель, добавьте в корзину, оформите заказ — мы перезвоним, уточним детали и договоримся о доставке.</p>
 
@@ -239,6 +285,38 @@
 
   <p class="hint">Это витрина-макет. Все данные (товары и контакты) вынесены в единый блок <i>ДАННЫЕ ДЛЯ РЕДАКТИРОВАНИЯ</i> в начале кода — меняйте там описания, цены, фото и контакты. Ваш аккаунт: DeepSeek. Фото добавляются путём замены строки photo: "..." на путь к вашей картинке.</p>
 </main>
+
+<div class="docwrap" id="privacy-modal" onclick="if(event.target===this)closeDoc()">
+  <div class="doc-box">
+    <header><h3>Политика Безопасности</h3><button onclick="closeDoc()">×</button></header>
+    <div class="doc-body" onclick="event.stopPropagation()">
+      <p><strong>1. Какие данные мы собираем</strong></p>
+      <p>При оформлении заказа мы запрашиваем ваше имя, номер телефона и, по желанию, комментарий. При регистрации — ник, пароль и телефон.</p>
+      <p><strong>2. Как мы используем данные</strong></p>
+      <p>Данные используются только для обработки ваших заказов и связи с вами. Мы не передаём их третьим лицам и не используем в рекламных целях без вашего согласия.</p>
+      <p><strong>3. Хранение данных</strong></p>
+      <p>Мы храним данные на защищённых серверах и применяем разумные меры для их защиты от несанкционированного доступа.</p>
+      <p><strong>4. Ваши права</strong></p>
+      <p>Вы можете запросить удаление своих данных, связавшись с нами по указанным в контактах каналам.</p>
+    </div>
+  </div>
+</div>
+
+<div class="docwrap" id="terms-modal" onclick="if(event.target===this)closeDoc()">
+  <div class="doc-box">
+    <header><h3>Условия Соглашения</h3><button onclick="closeDoc()">×</button></header>
+    <div class="doc-body">
+      <p><strong>1. Предмет соглашения</strong></p>
+      <p>Настоящие условия регулируют использование сайта и покупку товаров в магазине Memento.</p>
+      <p><strong>2. Оформление заказа</strong></p>
+      <p>Добавив товар в корзину и отправив заказ, вы соглашаетесь с условиями. После подтверждения мы свяжемся с вами для завершения покупки.</p>
+      <p><strong>3. Оплата и доставка</strong></p>
+      <p>Оплата и доставка согласовываются индивидуально при подтверждении заказа.</p>
+      <p><strong>4. Возврат</strong></p>
+      <p>На товары надлежащего качества действует право возврата в соответствии с законодательством.</p>
+    </div>
+  </div>
+</div>
 
 <footer>© 2026 Memento. Все права защищены.</footer>
 
@@ -350,17 +428,23 @@ const CONTACTS = {
 
 const PRODUCTS = [
   { cat:"men", name:"Классика Строгая", price:1250, image:"",
-    desc:"Мужские кварцевые часы, стальной корпус, кожаный ремешок." },
+    desc:"Мужские кварцевые часы, стальной корпус, кожаный ремешок.",
+    reviews:[{name:"Игорь", stars:5, text:"Отличные часы, смотрятся дороже своей цены."}] },
   { cat:"men", name:"Бизнес-Лайн", price:1400, image:"",
-    desc:"Строгий циферблат, хронограф, чёрное покрытие корпуса." },
+    desc:"Строгий циферблат, хронограф, чёрное покрытие корпуса.",
+    reviews:[] },
   { cat:"men", name:"Дейли", price:1100, image:"",
-    desc:"Лёгкие повседневные часы на каждый день, водозащита." },
+    desc:"Лёгкие повседневные часы на каждый день, водозащита.",
+    reviews:[] },
   { cat:"women", name:"Изящная", price:1300, image:"",
-    desc:"Тонкий корпус, золотистое покрытие, цепочка-браслет." },
+    desc:"Тонкий корпус, золотистое покрытие, цепочка-браслет.",
+    reviews:[] },
   { cat:"women", name:"Жемчужная", price:1450, image:"",
-    desc:"Женственные часы с декоративными элементами под жемчуг." },
+    desc:"Женственные часы с декоративными элементами под жемчуг.",
+    reviews:[] },
   { cat:"women", name:"Минимал", price:1200, image:"",
-    desc:"Аккуратный маленький циферблат, классический дизайн." }
+    desc:"Аккуратный маленький циферблат, классический дизайн.",
+    reviews:[] }
 ];
 /* ================== КОНЕЦ БЛОКА ДАННЫХ ===================== */
 
@@ -398,6 +482,12 @@ function render(){
   list.forEach(p => {
     const el = document.createElement("div");
     el.className = "card";
+    const note = p.reviews && p.reviews.length
+      ? '<div class="rev-summary"><span class="rev-stars">'+starStr(avgStars(p.reviews))+'</span> '+p.reviews.length+' отз.</div>'
+      : '<div class="rev-summary muted">Пока нет отзывов</div>';
+    const revList = p.reviews && p.reviews.length
+      ? p.reviews.map(rev => '<div class="rev-item"><b>'+esc(rev.name)+'</b> '+starStr(rev.stars)+'<div>'+esc(rev.text)+'</div></div>').join('')
+      : '';
     el.innerHTML =
       '<div class="img">' + (p.image
         ? '<img src="'+p.image+'" alt="'+p.name+'">'
@@ -406,9 +496,40 @@ function render(){
       '<h3>'+p.name+'</h3>' +
       '<div class="desc">'+p.desc+'</div>' +
       '<div class="row"><span class="price">'+p.price.toLocaleString('ru-RU')+' ₽</span>' +
-      '<button class="add" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button></div>';
+      '<button class="add" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button></div>' +
+      '<div class="reviews">'+note+
+        '<button class="rev-btn" onclick="openReviews(\''+esc(p.name)+'\')">Отзывы</button>'+
+        '<div class="rev-list hidden" style="display:none">'+revList+
+          '<div class="rev-form"><input class="rf-name" placeholder="Ваше имя"><input class="rf-text" placeholder="Ваш отзыв"><button onclick="addReview(this,\''+esc(p.name)+'\')">Оставить</button></div>'+
+        '</div>'+
+      '</div>';
     grid.appendChild(el);
   });
+}
+function avgStars(r){ return r.reduce(function(s,x){return s+(x.stars||0);},0)/r.length; }
+function starStr(v){
+  var s='';
+  for(var i=1;i<=5;i++){ s += i<=Math.round(v) ? '★' : '☆'; }
+  return s;
+}
+function openReviews(name){
+  var card = Array.prototype.slice.call(document.querySelectorAll('.card'))
+    .find(function(c){ return c.querySelector('h3').textContent==name; });
+  var list = card.querySelector('.rev-list');
+  list.style.display = list.style.display==='none' ? 'block' : 'none';
+}
+function addReview(btn,name){
+  var card = btn.closest('.card');
+  var rfName = card.querySelector('.rf-name').value.trim();
+  var rfText = card.querySelector('.rf-text').value.trim();
+  if(!rfText){ alert('Напишите текст отзыва.'); return; }
+  var p = PRODUCTScurrent.find(function(x){ return x.name==name; });
+  if(p){
+    if(!p.reviews) p.reviews=[];
+    p.reviews.push({ name: rfName||'Аноним', stars:5, text: rfText });
+    render();
+    saveData();
+  }
 }
 
 function filterCat(e,cat){
@@ -486,6 +607,15 @@ function submitOrder(e){
   setTimeout(function(){ document.getElementById("order-ok").style.display="none"; closePanels(); }, 4000);
 }
 function showContacts(e){ e.preventDefault(); document.getElementById("contact-block").scrollIntoView({behavior:'smooth'}); }
+function showSection(e,id){ e.preventDefault(); document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+function openDoc(id){
+  document.getElementById(id+'-modal').classList.add('show');
+  overlayShow();
+}
+function closeDoc(){
+  document.querySelectorAll('.docwrap').forEach(function(d){ d.classList.remove('show'); });
+  overlayHide();
+}
 function renderContacts(){
   const c = document.getElementById("contact-block");
   c.innerHTML =
