@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Часовой салон — Строгие мужские и красивые женские часы</title>
+<title>Memento — Строгие мужские и красивые женские часы</title>
 <style>
   :root{
     --ink:#1c1c1c;
@@ -203,13 +203,16 @@
 <body>
 
 <div class="topbar">
-  <div class="brand">Часовой <span>Салон</span></div>
-  <div style="display:flex;gap:18px;align-items:center">
-    <a href="#" onclick="showContacts(event)">Контакты</a>
-    <a href="#" id="login-link" onclick="openAuth(event)">Вход</a>
-    <span class="usrbadge" id="usrbadge"><span></span><a href="#" onclick="logoutUser()">Выйти</a></span>
-    <a href="#catalog" onclick="filterCat(event,'all')">Каталог</a>
-    <button class="cart-btn" onclick="openCart()">Корзина <b id="cart-count">0</b></button>
+  <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+    <div style="width:180px"></div>
+    <div class="brand">Memento</div>
+    <div style="display:flex;gap:18px;align-items:center;justify-content:flex-end;width:180px">
+      <a href="#" onclick="showContacts(event)">Контакты</a>
+      <a href="#" id="login-link" onclick="openAuth(event)">Вход</a>
+      <span class="usrbadge" id="usrbadge"><span></span><a href="#" onclick="logoutUser()">Выйти</a></span>
+      <a href="#catalog" onclick="filterCat(event,'all')">Каталог</a>
+      <button class="cart-btn" onclick="openCart()">Корзина <b id="cart-count">0</b></button>
+    </div>
   </div>
 </div>
 
@@ -237,7 +240,7 @@
   <p class="hint">Это витрина-макет. Все данные (товары и контакты) вынесены в единый блок <i>ДАННЫЕ ДЛЯ РЕДАКТИРОВАНИЯ</i> в начале кода — меняйте там описания, цены, фото и контакты. Ваш аккаунт: DeepSeek. Фото добавляются путём замены строки photo: "..." на путь к вашей картинке.</p>
 </main>
 
-<footer>© 2026 Часовой Салон. Все права защищены.</footer>
+<footer>© 2026 Memento. Все права защищены.</footer>
 
 <div class="authwrap" id="authwrap">
   <div class="auth-box">
@@ -327,7 +330,7 @@
   </form>
 </aside>
 
-<script id="seed" type="application/json">{"contacts":{"shop":"Часовой Салон","phone":"+7 (900) 000-00-00","email":"info@sharmtime.ru","address":"г. Москва, ул. Примерная, 12","hours":"Пн–Сб 10:00 – 20:00"},"products":[{"cat":"men","name":"Классика Строгая","price":1250,"image":"","desc":"Мужские кварцевые часы, стальной корпус, кожаный ремешок."},{"cat":"men","name":"Бизнес-Лайн","price":1400,"image":"","desc":"Строгий циферблат, хронограф, чёрное покрытие корпуса."},{"cat":"men","name":"Дейли","price":1100,"image":"","desc":"Лёгкие повседневные часы на каждый день, водозащита."},{"cat":"women","name":"Изящная","price":1300,"image":"","desc":"Тонкий корпус, золотистое покрытие, цепочка-браслет."},{"cat":"women","name":"Жемчужная","price":1450,"image":"","desc":"Женственные часы с декоративными элементами под жемчуг."},{"cat":"women","name":"Минимал","price":1200,"image":"","desc":"Аккуратный маленький циферблат, классический дизайн."}]}</script>
+<script id="seed" type="application/json">{"contacts":{"shop":"Memento","phone":"+7 (900) 000-00-00","email":"info@sharmtime.ru","address":"г. Москва, ул. Примерная, 12","hours":"Пн–Сб 10:00 – 20:00"},"products":[{"cat":"men","name":"Классика Строгая","price":1250,"image":"","desc":"Мужские кварцевые часы, стальной корпус, кожаный ремешок."},{"cat":"men","name":"Бизнес-Лайн","price":1400,"image":"","desc":"Строгий циферблат, хронограф, чёрное покрытие корпуса."},{"cat":"men","name":"Дейли","price":1100,"image":"","desc":"Лёгкие повседневные часы на каждый день, водозащита."},{"cat":"women","name":"Изящная","price":1300,"image":"","desc":"Тонкий корпус, золотистое покрытие, цепочка-браслет."},{"cat":"women","name":"Жемчужная","price":1450,"image":"","desc":"Женственные часы с декоративными элементами под жемчуг."},{"cat":"women","name":"Минимал","price":1200,"image":"","desc":"Аккуратный маленький циферблат, классический дизайн."}]}</script>
 
 <script>
 /* ============================================================
@@ -338,7 +341,7 @@
    image: URL или путь к фото. Если нет фото — будет заглушка.
    ============================================================ */
 const CONTACTS = {
-  shop:  "Часовой Салон",
+  shop:  "Memento",
   phone: "+7 (900) 000-00-00",
   email: "info@sharmtime.ru",
   address: "г. Москва, ул. Примерная, 12",
