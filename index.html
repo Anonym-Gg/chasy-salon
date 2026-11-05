@@ -939,9 +939,37 @@ function renderProfile(){
     (hist.length ? hist.map(h=>'<div class="history-item"><div class="h-date">'+h.date+'</div><span class="h-amount '+(h.amount>0?'plus':'minus')+'">'+(h.amount>0?'+':'−')+Math.abs(h.amount).toLocaleString('ru-RU')+' ₽</span> — '+esc(h.label)+'</div>').join('') : '<p style="color:var(--muted)">Операций пока нет.</p>')+
     (myGifts.length ? '<div class="section-title">Мои сертификаты</div>'+myGifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· '+g.code+'</span></div>').join('') : '')+
     '<div class="section-title">Мои заказы</div><div id="my-orders">Загрузка...</div>'+
-    (isAdmin() ? '<div class="section-title">Заявки на пополнение (админ)</div><div id="admin-topups">Загрузка...</div><div class="section-title">Заказы (админ)</div><div id="admin-orders">Загрузка...</div><div class="section-title">Заявки на сертификаты (админ)</div><div id="admin-gifts">Загрузка...</div>' : '');
+    (isAdmin() ? '<div class="section-title">Заявки на пополнение (админ)</div><div id="admin-topups">Загрузка...</div><div class="section-title">Заказы (админ)</div><div id="admin-orders">Загрузка...</div><div class="section-title">Заявки на сертификаты (админ)</div><div id="admin-gifts">Загрузка...</div><button style="background:var(--ink);color:#fff;border:none;padding:10px 16px;cursor:pointer;font-family:inherit;font-size:.9rem;margin-top:12px" onclick="syncNicks()">Синхронизировать ники (восстановить вход по нику)</button><div id="sync-result" style="font-size:.85rem;color:var(--muted);margin-top:8px"></div>' : '');
   if(currentUser) loadMyOrders();
   if(isAdmin()){ loadAdminTopups(); loadAdminOrders(); loadAdminGiftRequests(); }
+}
+async function syncNicks(){
+  if(!isAdmin()) return;
+  const res=document.getElementById("sync-result");
+  res.textContent="Синхронизация...";
+  try{
+    const snap=await firestore.collection("users").get();
+    let count=0, skipped=0;
+    for(const doc of snap.docs){
+      const data=doc.data();
+      if(!data.nick) continue;
+      const key=data.nick.toLowerCase();
+      const ref=firestore.collection("names").doc(key);
+      const existing=await ref.get();
+      if(!existing.exists){
+        await ref.set({ uid: doc.id, phone: data.phone||"" });
+        count++;
+      } else {
+        // проверим, совпадает ли uid
+        if(existing.data().uid !== doc.id){
+          // перезаписать, т.к. мог быть старый uid
+          await ref.set({ uid: doc.id, phone: data.phone||"" });
+          count++;
+        } else { skipped++; }
+      }
+    }
+    res.textContent="Готово! Добавлено записей: "+count+". Уже были: "+skipped+".";
+  }catch(e){ res.textContent="Ошибка: "+e.message; }
 }
 async function loadMyOrders(){
   const box=document.getElementById("my-orders");
