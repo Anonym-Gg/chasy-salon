@@ -561,6 +561,19 @@ const CONTACTS = { shop:"Memento", phone:"+7 (900) 000-00-00", email:"info@sharm
 const CARD_VTB = "2200 2480 0450 0459";
 const VTB_HOLDER = "Memento (ИП)";
 
+// Фиксированный список характеристик товара (заполняет админ)
+const SPEC_FIELDS = [
+  "Бренд","Модель / Артикул","Пол","Стиль","Тип движения","Производитель механизма",
+  "Страна производства механизма","Тип стекла","Тип циферблата","Форма циферблата",
+  "Диаметр корпуса","Толщина корпуса","Материал корпуса","Материал браслета",
+  "Тип застёжки","Материал застёжки","Коронка","Задняя крышка","Особенности",
+  "Водонепроницаемость","Нанесение логотипа на циферблат","Импортируемый товар",
+  "Таможенное оформление","Патентование источника происхождения",
+  "Спецпоставка для трансграничного экспорта","Регион происхождения","Упаковка",
+  "Сервис / гарантия","Год выпуска / сезон"
+];
+function getSpecs(p){ return p.specs || {}; }
+
 const PRODUCTS = [
   { cat:"men", name:"Классика Строгая", price:1250, color:"черный", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Кожа","Водозащита":"3 АТМ" }, desc:"Мужские кварцевые часы, стальной корпус, кожаный ремешок.", reviews:[{name:"Игорь",stars:5,text:"Отличные часы, смотрятся дороже своей цены."}] },
   { cat:"men", name:"Бизнес-Лайн", price:1400, color:"серебристый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Сталь","Водозащита":"5 АТМ" }, desc:"Строгий циферблат, хронограф, чёрное покрытие корпуса.", reviews:[] },
@@ -1252,7 +1265,9 @@ function drawProductBody(){
   body+='</div>';
   if(imgs.length>1){ body+='<div class="slider-dots">'+imgs.map(function(_,i){return '<span class="'+(i===curImg?'on':'')+'" onclick="jumpImg('+i+')"></span>';}).join('')+'</div>'; }
   body+='<div class="pm-specs"><h3 style="font-weight:normal;margin-bottom:8px">Характеристики</h3><table>';
-  Object.keys(p.specs||{}).forEach(function(k){ body+='<tr><td>'+k+'</td><td>'+p.specs[k]+'</td></tr>'; });
+  let hasSpec=false;
+  SPEC_FIELDS.forEach(function(k){ const v=getSpecs(p)[k]; if(v!==undefined && v!==""){ body+='<tr><td>'+k+'</td><td>'+esc(v)+'</td></tr>'; hasSpec=true; } });
+  if(!hasSpec) body+='<tr><td colspan="2" style="color:var(--muted)">Характеристики пока не заполнены.</td></tr>';
   body+='</table></div>';
   body+='<div class="pm-actions"><button class="pm-cart" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button><button class="pm-buy" onclick="goCheckout()">Купить</button></div>';
   const reviews=p.reviews||[];
@@ -1544,8 +1559,6 @@ async function saveAccount(){
   }catch(e){ res.textContent="Ошибка: "+e.message; res.style.color="#b02323"; }
 }
 function fillEditor(){ const c=CONTACTScurrent; document.getElementById("ec-shop").value=c.shop; document.getElementById("ec-phone").value=c.phone; document.getElementById("ec-email").value=c.email; document.getElementById("ec-address").value=c.address; document.getElementById("ec-hours").value=c.hours; drawEditorProducts(); }
-function specsToStr(specs){ if(!specs) return ""; return Object.keys(specs).map(function(k){return k+":"+specs[k];}).join("; "); }
-function strToSpecs(s){ const out={}; s.split(";").forEach(function(c){ const i=c.indexOf(":"); if(i>0){ out[c.slice(0,i).trim()]=c.slice(i+1).trim(); } }); return out; }
 function drawEditorProducts(){
   const box=document.getElementById("ed-products"); box.innerHTML="";
   PRODUCTScurrent.forEach(function(p,i){
@@ -1557,7 +1570,12 @@ function drawEditorProducts(){
       '<div class="pr-edit"><input data-idx="'+i+'" data-f="image" value="'+esc(p.image)+'" placeholder="Главное фото"></div>'+
       '<div class="pr-edit"><input data-idx="'+i+'" data-f="images" value="'+esc((p.images||[]).join(','))+'" placeholder="Фото слайдера (через ,)"></div>'+
       '<textarea data-idx="'+i+'" data-f="desc" placeholder="Описание">'+esc(p.desc)+'</textarea>'+
-      '<textarea data-idx="'+i+'" data-f="specs" placeholder="Хар-ки (Параметр:Значение; ...)">'+esc(specsToStr(p.specs))+'</textarea>'+
+      '<div style="font-size:.85rem;font-weight:bold;color:var(--muted);margin:6px 0 2px">Характеристики</div>'+
+      SPEC_FIELDS.map(function(f){
+        const val = (p.specs && p.specs[f]) ? p.specs[f] : "";
+        return '<div class="pr-edit" style="margin-bottom:4px"><label style="min-width:130px;font-size:.82rem;color:var(--muted);align-self:center">'+f+'</label>'+
+          '<input data-idx="'+i+'" data-spec="'+esc(f)+'" value="'+esc(val)+'" placeholder="—"></div>';
+      }).join('')+
       '<button class="del" data-i="'+i+'">Удалить</button>';
     box.appendChild(d);
   });
@@ -1565,11 +1583,16 @@ function drawEditorProducts(){
 document.getElementById("ed-products").addEventListener("input", handleEd);
 document.getElementById("ed-products").addEventListener("change", handleEd);
 function handleEd(e){
-  const t=e.target, idx=t.getAttribute("data-idx"), f=t.getAttribute("data-f");
-  if(idx===null||f===null) return;
+  const t=e.target, idx=t.getAttribute("data-idx"), f=t.getAttribute("data-f"), spec=t.getAttribute("data-spec");
+  if(idx===null) return;
+  if(spec!==null){
+    if(!PRODUCTScurrent[idx].specs) PRODUCTScurrent[idx].specs={};
+    PRODUCTScurrent[idx].specs[spec]=t.value;
+    return;
+  }
+  if(f===null) return;
   let val=f==="price"?parseFloat(t.value)||0:t.value;
   if(f==="images"){ val=t.value.split(",").map(function(s){return s.trim();}).filter(Boolean); }
-  if(f==="specs"){ val=strToSpecs(t.value); }
   PRODUCTScurrent[idx][f]=val;
 }
 document.getElementById("ed-products").addEventListener("click", function(e){ if(e.target.classList.contains("del")){ const idx=parseInt(e.target.getAttribute("data-i"),10); PRODUCTScurrent.splice(idx,1); drawEditorProducts(); } });
