@@ -903,7 +903,10 @@ async function adminSetBalance(uid, delta, label){
   if(!doc.exists) return false;
   const data = doc.data();
   const cur = data.balance||0;
+  const isUnl = (data.phone === UNLIMITED_PHONE);
   const newBal = cur + delta;
+  // Бесконечный аккаунт не списываем реально (баланс остаётся), остальным — нельзя в минус
+  if(isUnl && delta<0){ return true; }
   if(newBal < 0){ throw new Error("Нельзя списать больше, чем есть на балансе"); }
   const history = data.history||[];
   history.unshift({ date:new Date().toLocaleString('ru-RU'), amount:delta, label:label });
