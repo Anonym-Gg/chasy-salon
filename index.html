@@ -508,7 +508,7 @@
     <label>Телефон</label>
     <input type="tel" id="of-phone" required placeholder="+7 ___ ___-__-__">
     <label>Комментарий к заказу</label>
-    <textarea id="of-comment" placeholder="Модель, время доставки, вопросы"></textarea>
+    <textarea id="of-comment" placeholder="Комментарий к заказу (необязательно)"></textarea>
     <button type="submit">Отправить заказ</button>
     <div class="notice" id="order-ok" style="display:none">Спасибо! Заказ принят.</div>
   </form>
@@ -898,8 +898,29 @@ function renderProfile(){
     '<div class="section-title">История операций</div>'+
     (hist.length ? hist.map(h=>'<div class="history-item"><div class="h-date">'+h.date+'</div><span class="h-amount '+(h.amount>0?'plus':'minus')+'">'+(h.amount>0?'+':'−')+Math.abs(h.amount).toLocaleString('ru-RU')+' ₽</span> — '+esc(h.label)+'</div>').join('') : '<p style="color:var(--muted)">Операций пока нет.</p>')+
     (myGifts.length ? '<div class="section-title">Мои сертификаты</div>'+myGifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· '+g.code+'</span></div>').join('') : '')+
+    '<div class="section-title">Мои заказы</div><div id="my-orders">Загрузка...</div>'+
     (isAdmin() ? '<div class="section-title">Заявки на пополнение (админ)</div><div id="admin-topups">Загрузка...</div><div class="section-title">Заказы (админ)</div><div id="admin-orders">Загрузка...</div><div class="section-title">Заявки на сертификаты (админ)</div><div id="admin-gifts">Загрузка...</div>' : '');
+  if(currentUser) loadMyOrders();
   if(isAdmin()){ loadAdminTopups(); loadAdminOrders(); loadAdminGiftRequests(); }
+}
+async function loadMyOrders(){
+  const box=document.getElementById("my-orders");
+  if(!box||!currentUser) return;
+  try{
+    const snap = await firestore.collection("orders")
+      .where("uid","==",currentUser.uid)
+      .orderBy("createdAt","desc").limit(20).get();
+    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">У вас пока нет заказов.</p>'; return; }
+    box.innerHTML = snap.docs.map(function(d){
+      const o=d.data();
+      const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
+      const state = o.status==='approved' ? '<span style="color:var(--green)">выполнен</span>' : '<span style="color:#b02323">'+esc(o.status||"новый")+'</span>';
+      const payLabel = o.payMethod==='balance' ? 'баланс' : (o.payMethod==='cert' ? 'сертификат' : 'карта ВТБ');
+      return '<div class="rev-item"><b>'+date+'</b> — '+state+'<br>'+
+        '<span style="color:var(--muted)">'+esc((o.items||[]).join("; "))+'</span><br>'+
+        '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · оплата: '+payLabel+'</div>';
+    }).join('');
+  }catch(e){ console.error(e); box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
 }
 async function loadAdminTopups(){
   try{
