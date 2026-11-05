@@ -742,7 +742,7 @@ document.getElementById("checkout-form").addEventListener("submit", async functi
   Object.entries(cart).forEach(([n,x])=>{ lines.push(n+' × '+x.qty); total+=x.price*x.qty; });
   if(payMethod==='balance'){
     if(getBalance()<total){ alert("Недостаточно средств на балансе."); return; }
-    await addBalance(-total, "Оплата заказа");
+    // Баланс не списывается клиентом — спишет админ при подтверждении заказа (Вариант B)
   } else {
     const text2="ПЕРЕВОД НА КАРТУ\nКарта: "+CARD_VTB+"\nСумма: "+total.toLocaleString('ru-RU')+" ₽\nНазначение: заказ "+name;
     console.log(text2);
@@ -780,44 +780,42 @@ document.getElementById("checkout-form").addEventListener("submit", async functi
   setTimeout(function(){ document.getElementById("order-ok").style.display="none"; closePanels(); }, 5000);
 });
 
-/* ============ БАЛАНС / КОШЕЛЁК (Firestore) ============ */
+/* ============ БАЛАНС / КОШЕЛЁК (Вариант B: только админ меняет баланс) ============ */
 function ensureUserLoaded(){ return !!userData; }
 function isUnlimited(){
   return currentUser && currentUser.phone === UNLIMITED_PHONE;
 }
+function isAdmin(){ return isUnlimited(); }
 function getBalance(){
   if(!userData) return 0;
   if(isUnlimited()) return 999999;
   return userData.balance||0;
 }
 function userDocRef(){
-  // userData хранит ссылку на документ
   return userData ? userData._ref : null;
 }
 async function reloadUserData(){
   if(!currentUser) return;
-  const doc=await loadUserFromFirestore(currentUser.phone || currentUser.nick);
-  if(doc){ userData = Object.assign({}, doc.data(), { _ref: doc.ref, _id: doc.id }); }
+  const doc = await firestore.collection("users").doc(currentUser.uid).get();
+  if(doc.exists){
+    userData = Object.assign({}, doc.data(), { _ref: doc.ref, _id: doc.id });
+  }
   renderTopBalance();
   if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
   if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
 }
-async function addBalance(amount, label){
-  if(!currentUser||!userData) return;
-  if(isUnlimited()){ // для бесконечного аккаунта не списываем, но пишем историю
-    if(amount<0 && label.indexOf("Покупка")>-1){} // покупка сертификата не уменьшает баланс
-    return;
-  }
-  const cur = userData.balance||0;
-  const newBal = cur + amount;
-  const history = userData.history||[];
-  history.unshift({ date:new Date().toLocaleString('ru-RU'), amount:amount, label:label });
-  try{
-    await userData._ref.update({ balance:newBal, history: history });
-    userData.balance = newBal; userData.history = history;
-  }catch(e){ console.error(e); }
-  renderTopBalance();
-  if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+// Админская функция: начислить/списать баланс пользователю напрямую (вызывается только из админ-панели)
+async function adminSetBalance(uid, delta, label){
+  const ref = firestore.collection("users").doc(uid);
+  const doc = await ref.get();
+  if(!doc.exists) return false;
+  const data = doc.data();
+  const cur = data.balance||0;
+  const newBal = cur + delta;
+  const history = data.history||[];
+  history.unshift({ date:new Date().toLocaleString('ru-RU'), amount:delta, label:label });
+  await ref.update({ balance:newBal, history:history });
+  return true;
 }
 function renderTopBalance(){
   document.getElementById("top-balance").textContent = (getBalance()>=999999?'∞':getBalance().toLocaleString('ru-RU'))+' ₽';
@@ -836,34 +834,136 @@ function renderProfile(){
     '<div class="bal-actions"><button onclick="toggleOps(\'topup\')">+ Пополнить</button><button onclick="go(\'gifts\')">Купить сертификат</button></div></div>'+
     '<div class="wallet-ops" id="wallet-topup">'+
       '<h3 style="margin-bottom:8px;font-weight:normal">Пополнение баланса</h3>'+
-      '<p style="font-size:.9rem;color:var(--muted);margin-bottom:8px">Переведите нужную сумму на карту <b>'+CARD_VTB+'</b> (получатель '+VTB_HOLDER+') и нажмите кнопку «Я перевёл».</p>'+
+      '<p style="font-size:.9rem;color:var(--muted);margin-bottom:8px">Переведите нужную сумму на карту <b>'+CARD_VTB+'</b> (получатель '+VTB_HOLDER+') и нажмите «Я перевёл». После проверки перевода мы начислим баланс.</p>'+
       '<label>Сумма (₽)</label><input type="number" id="topup-amount" min="100" placeholder="Например 1000">'+
-      '<button class="btn" onclick="startTopup()" style="margin-top:10px;background:var(--gold)">Я перевёл — начислить</button>'+
+      '<button class="btn" onclick="startTopup()" style="margin-top:10px;background:var(--gold)">Я перевёл — отправить на проверку</button>'+
       '<div style="font-size:.78rem;color:var(--muted);margin-top:10px">⚠️ Мы не сохраняем данные вашей карты. Перевод идёт напрямую между картами. Зачисление — после подтверждения.</div>'+
     '</div>'+
     '<div class="section-title">История операций</div>'+
     (hist.length ? hist.map(h=>'<div class="history-item"><div class="h-date">'+h.date+'</div><span class="h-amount '+(h.amount>0?'plus':'minus')+'">'+(h.amount>0?'+':'−')+Math.abs(h.amount).toLocaleString('ru-RU')+' ₽</span> — '+esc(h.label)+'</div>').join('') : '<p style="color:var(--muted)">Операций пока нет.</p>')+
     (myGifts.length ? '<div class="section-title">Мои сертификаты</div>'+myGifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· '+g.code+'</span></div>').join('') : '')+
-    (isAdmin() ? '<div class="section-title">Все заказы (админ)</div><div id="admin-orders">Загрузка...</div>' : '');
-  if(isAdmin()) loadAdminOrders();
+    (isAdmin() ? '<div class="section-title">Заявки на пополнение (админ)</div><div id="admin-topups">Загрузка...</div><div class="section-title">Заказы (админ)</div><div id="admin-orders">Загрузка...</div><div class="section-title">Заявки на сертификаты (админ)</div><div id="admin-gifts">Загрузка...</div>' : '');
+  if(isAdmin()){ loadAdminTopups(); loadAdminOrders(); loadAdminGiftRequests(); }
 }
-function isAdmin(){
-  return currentUser && currentUser.phone === UNLIMITED_PHONE;
-}
-async function loadAdminOrders(){
+async function loadAdminTopups(){
   try{
-    const snap = await firestore.collection("orders").orderBy("createdAt","desc").limit(50).get();
-    const box=document.getElementById("admin-orders");
+    const snap = await firestore.collection("topups").orderBy("createdAt","desc").limit(30).get();
+    const box=document.getElementById("admin-topups");
     if(!box) return;
-    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заказов пока нет.</p>'; return; }
+    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заявок нет.</p>'; return; }
     box.innerHTML = snap.docs.map(function(d){
       const o=d.data();
       const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
+      const state = o.status==='approved' ? '<span style="color:var(--green)">одобрено</span>' : '<span style="color:#b02323">ожидает</span>';
+      return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+' / '+esc(o.phone||"")+'<br>'+
+        'Сумма: <b>'+parseInt(o.amount||0).toLocaleString('ru-RU')+' ₽</b> · '+state+'<br>'+
+        (o.status!=='approved' ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:6px" onclick="approveTopup(\''+d.id+'\',\''+o.uid+'\','+parseInt(o.amount||0)+',\''+esc(o.client||"").replace(/'/g,"")+'\')">Начислить</button>' : '')+'</div>';
+    }).join('');
+  }catch(e){ console.error(e); const box=document.getElementById("admin-topups"); if(box) box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
+}
+async function approveTopup(docId, uid, amount, client){
+  if(!isAdmin()) return;
+  if(!confirm("Начислить "+amount.toLocaleString('ru-RU')+" ₽ пользователю "+client+"?")) return;
+  try{
+    await adminSetBalance(uid, amount, "Пополнение баланса (подтверждено)");
+    await firestore.collection("topups").doc(docId).update({ status:"approved", approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert("Баланс начислен.");
+    loadAdminTopups();
+  }catch(e){ alert("Ошибка: "+e.message); }
+}
+async function loadAdminOrders(){
+  try{
+    const snap = await firestore.collection("orders").orderBy("createdAt","desc").limit(30).get();
+    const box=document.getElementById("admin-orders");
+    if(!box) return;
+    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заказов нет.</p>'; return; }
+    box.innerHTML = snap.docs.map(function(d){
+      const o=d.data();
+      const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
+      const state = o.status==='approved' ? '<span style="color:var(--green)">выполнен</span>' : '<span style="color:#b02323">'+esc(o.status||"новый")+'</span>';
+      const btn = (o.status!=='approved' && o.payMethod==='balance' && o.uid)
+        ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:6px" onclick="approveOrderBalance(\''+d.id+'\',\''+o.uid+'\','+parseInt(o.total||0)+',\''+esc(o.client||"").replace(/'/g,"")+'\')">Списать с баланса и выполнить</button>'
+        : (o.status!=='approved' && o.payMethod==='card') ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:6px" onclick="approveOrderCard(\''+d.id+'\')">Отметить выполненным</button>' : '';
       return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+' / '+esc(o.phone||"")+'<br>'+
         '<span style="color:var(--muted)">'+esc((o.items||[]).join("; "))+'</span><br>'+
-        '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · '+(o.payMethod==='balance'?'баланс':'карта ВТБ')+'</div>';
+        '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · '+(o.payMethod==='balance'?'баланс':'карта ВТБ')+' · '+state+'<br>'+btn+'</div>';
     }).join('');
   }catch(e){ console.error(e); const box=document.getElementById("admin-orders"); if(box) box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
+}
+async function approveOrderBalance(docId, uid, total, client){
+  if(!isAdmin()) return;
+  if(!confirm("Списать "+total.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и выполнить заказ?")) return;
+  try{
+    await adminSetBalance(uid, -total, "Оплата заказа");
+    await firestore.collection("orders").doc(docId).update({ status:"approved", approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await sendOrderEmail(docId);
+    alert("Заказ выполнен, баланс списан.");
+    loadAdminOrders();
+  }catch(e){ alert("Ошибка: "+e.message); }
+}
+async function approveOrderCard(docId){
+  if(!isAdmin()) return;
+  if(!confirm("Отметить заказ выполненным?")) return;
+  try{
+    await firestore.collection("orders").doc(docId).update({ status:"approved", approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await sendOrderEmail(docId);
+    alert("Заказ выполнен.");
+    loadAdminOrders();
+  }catch(e){ alert("Ошибка: "+e.message); }
+}
+// Отправка письма о выполненном заказе
+async function sendOrderEmail(docId){
+  try{
+    const doc = await firestore.collection("orders").doc(docId).get();
+    if(!doc.exists) return;
+    const o=doc.data();
+    await fetch("https://formsubmit.co/ajax/hibih228@gmail.com", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Accept":"application/json" },
+      body: JSON.stringify({
+        _subject:"Заказ выполнен — Memento",
+        Клиент: o.client, Телефон: o.phone,
+        "Состав": (o.items||[]).join("; "),
+        Сумма: parseInt(o.total||0).toLocaleString('ru-RU')+" ₽",
+        Статус: "Выполнен"
+      })
+    });
+  }catch(e){ console.error("email:", e); }
+}
+async function loadAdminGiftRequests(){
+  try{
+    const snap = await firestore.collection("giftRequests").orderBy("createdAt","desc").limit(30).get();
+    const box=document.getElementById("admin-gifts");
+    if(!box) return;
+    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заявок нет.</p>'; return; }
+    box.innerHTML = snap.docs.map(function(d){
+      const o=d.data();
+      const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
+      const state = o.status==='approved' ? '<span style="color:var(--green)">выдан</span>' : '<span style="color:#b02323">ожидает</span>';
+      return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+'<br>'+
+        'Сертификат на <b>'+parseInt(o.amount||0).toLocaleString('ru-RU')+' ₽</b> · '+state+'<br>'+
+        (o.status!=='approved' ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:6px" onclick="approveGiftRequest(\''+d.id+'\',\''+o.uid+'\','+parseInt(o.amount||0)+',\''+esc(o.client||"").replace(/'/g,"")+'\')">Выдать сертификат</button>' : '')+'</div>';
+    }).join('');
+  }catch(e){ console.error(e); const box=document.getElementById("admin-gifts"); if(box) box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
+}
+async function approveGiftRequest(docId, uid, amount, client){
+  if(!isAdmin()) return;
+  if(!confirm("Списать "+amount.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и выдать сертификат?")) return;
+  try{
+    await adminSetBalance(uid, -amount, "Покупка подарочного сертификата "+amount.toLocaleString('ru-RU'));
+    const code="MEM-"+Math.floor(100000+Math.random()*900000);
+    await firestore.collection("giftRequests").doc(docId).update({ status:"approved", code:code, approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    // добавить сертификат в документ пользователя
+    const ref = firestore.collection("users").doc(uid);
+    const doc = await ref.get();
+    if(doc.exists){
+      const gifts = doc.data().gifts||[];
+      gifts.push({amount:amount, code:code});
+      await ref.update({ gifts: gifts });
+    }
+    alert("Сертификат выдан. Код: "+code);
+    loadAdminGiftRequests();
+  }catch(e){ alert("Ошибка: "+e.message); }
 }
 function toggleOps(id){ document.getElementById('wallet-'+id).classList.toggle('show'); }
 async function startTopup(){
@@ -872,8 +972,18 @@ async function startTopup(){
   if(!amt||amt<100){ alert("Укажите сумму от 100 ₽."); return; }
   const text2="ПОПОЛНЕНИЕ БАЛАНСА\nКарта: "+CARD_VTB+"\nСумма: "+amt.toLocaleString('ru-RU')+" ₽\nПользователь: "+(currentUser.phone||currentUser.nick);
   console.log(text2);
-  alert("Переведите "+amt.toLocaleString('ru-RU')+" ₽ на карту "+CARD_VTB+". Когда перевод пройдёт, нажмите «Подтверждаю» — мы проверим и начислим баланс.");
-  await addBalance(amt, "Пополнение баланса (модерация)");
+  alert("Переведите "+amt.toLocaleString('ru-RU')+" ₽ на карту "+CARD_VTB+". После перевода мы проверим и начислим баланс.");
+  try{
+    await firestore.collection("topups").add({
+      uid: currentUser.uid,
+      client: currentUser.nick,
+      phone: currentUser.phone||"",
+      amount: amt,
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert("Заявка отправлена на проверку. Мы начислим баланс после подтверждения перевода.");
+  }catch(e){ alert("Ошибка: "+e.message); }
 }
 function getUsers(){ return {}; } // заменено Firestore — оставлено для совместимости
 function saveUsers(u){} // заменено Firestore
@@ -887,39 +997,51 @@ function buyGift(amount){
     html+='<p style="font-size:.9rem;color:var(--muted);margin-bottom:10px">У вас достаточно средств на балансе для оплаты этого сертификата.</p>';
     html+='<button class="btn" style="background:var(--gold)" onclick="confirmGift('+amount+')">Оплатить с баланса ('+amount.toLocaleString('ru-RU')+' ₽)</button>';
   } else {
-    html+='<p style="font-size:.9rem;color:var(--muted);margin-bottom:10px">Переведите '+amount.toLocaleString('ru-RU')+' ₽ на карту <b>'+CARD_VTB+'</b> ('+VTB_HOLDER+'). После перевода мы активируем сертификат.</p>';
-    html+='<button class="btn" style="background:var(--gold)" onclick="alert(\'Переведите '+amount+' ₽ на '+CARD_VTB+' и напишите нам — активируем сертификат.\')">Я перевёл — активировать</button>';
+    html+='<p style="font-size:.9rem;color:var(--muted);margin-bottom:10px">Переведите '+amount.toLocaleString('ru-RU')+' ₽ на карту <b>'+CARD_VTB+'</b> ('+VTB_HOLDER+'). После перевода нажмите кнопку — мы проверим и выдадим сертификат.</p>';
+    html+='<button class="btn" style="background:var(--gold)" onclick="requestGiftByCard('+amount+')">Я перевёл — отправить на проверку</button>';
   }
   html+='</div>';
   confirmBox.innerHTML=html;
   confirmBox.scrollIntoView({behavior:'smooth'});
 }
 async function confirmGift(amount){
+  if(!currentUser){ alert("Войдите в аккаунт."); return; }
   if(getBalance()<amount){ alert("Недостаточно средств."); return; }
-  if(!isUnlimited()){ await addBalance(-amount, "Покупка подарочного сертификата "+amount.toLocaleString('ru-RU')); }
-  const code="MEM-"+Math.floor(100000+Math.random()*900000);
   try{
-    if(userData && userData._ref){
-      const gifts = userData.gifts||[];
-      gifts.push({amount:amount, code:code});
-      await userData._ref.update({ gifts: gifts });
-      userData.gifts = gifts;
-    }
-  }catch(e){ console.error(e); }
-  // Показать сертификат-поздравление
-  document.getElementById("gift-confirm").innerHTML=
-    '<div class="certificate"><h3>ПОЗДРАВЛЯЕМ!</h3>'+
-    '<div class="cert-amount">'+amount.toLocaleString('ru-RU')+' ₽</div>'+
-    '<div>Подарочный сертификат от <b>'+CONTACTScurrent.shop+'</b></div>'+
-    '<div class="cert-code">'+code+'</div>'+
-    '<p>Желаем вам приятных покупок и только лучших моментов!<br>Пусть время идёт в вашу пользу. С наилучшими пожеланиями, команда Memento.</p></div>';
-  renderTopBalance(); renderProfile(); renderMyGifts();
+    await firestore.collection("giftRequests").add({
+      uid: currentUser.uid,
+      client: currentUser.nick,
+      amount: amount,
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById("gift-confirm").innerHTML=
+      '<div class="rev-item" style="background:#eaf5ea;border:1px solid #b7d6b7;padding:18px"><b>Заявка отправлена!</b><br>Сертификат на <b>'+amount.toLocaleString('ru-RU')+' ₽</b> будет выдан после подтверждения оплаты. Код сертификата появится в личном кабинете.</div>';
+  }catch(e){ alert("Ошибка: "+e.message); }
+  renderProfile(); renderMyGifts();
 }
 function renderMyGifts(){
   const box=document.getElementById("my-gifts");
   if(!currentUser){ box.innerHTML='<p style="color:var(--muted)">Войдите, чтобы видеть свои сертификаты.</p>'; return; }
   const gifts=(userData&&userData.gifts)||[];
-  box.innerHTML = gifts.length ? gifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· код '+g.code+'</span></div>').join('') : '<p style="color:var(--muted)">Вы ещё не приобретали сертификаты.</p>';
+  let html = gifts.length ? gifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· код '+g.code+'</span></div>').join('') : '<p style="color:var(--muted)">У вас пока нет сертификатов.</p>'+
+    '<p style="font-size:.85rem;color:var(--muted);margin-top:8px">Выданные сертификаты появятся здесь после подтверждения оплаты администратором.</p>';
+  box.innerHTML = html;
+}
+async function requestGiftByCard(amount){
+  if(!currentUser){ alert("Войдите в аккаунт."); return; }
+  try{
+    await firestore.collection("giftRequests").add({
+      uid: currentUser.uid,
+      client: currentUser.nick,
+      amount: amount,
+      viaCard: true,
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById("gift-confirm").innerHTML=
+      '<div class="rev-item" style="background:#eaf5ea;border:1px solid #b7d6b7;padding:18px"><b>Заявка отправлена!</b><br>Мы проверим перевод и выдадим сертификат на <b>'+amount.toLocaleString('ru-RU')+' ₽</b>. Код появится в личном кабинете.</div>';
+  }catch(e){ alert("Ошибка: "+e.message); }
 }
 
 /* ============ МОДАЛКА ТОВАРА ============ */
