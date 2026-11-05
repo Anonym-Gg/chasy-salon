@@ -726,17 +726,21 @@ function goCheckout(){
 function buildPayOptions(total){
   const hasBalance = getBalance()>=total;
   let html='<div style="margin:12px 0"><b>Способ оплаты:</b></div>';
-  html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="card" '+(hasBalance?'':'checked')+' style="accent-color:var(--gold)"> Перевод на карту ВТБ</label>';
-  if(hasBalance) html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="balance" checked style="accent-color:var(--gold)"> Оплатить балансом ('+total.toLocaleString('ru-RU')+' ₽)</label>';
-  html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="cert" style="accent-color:var(--gold)"> Подарочный сертификат</label>';
+  html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="card" '+(hasBalance?'':'checked')+' onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Перевод на карту ВТБ</label>';
+  if(hasBalance) html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="balance" checked onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Оплатить балансом ('+total.toLocaleString('ru-RU')+' ₽)</label>';
+  html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="cert" onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Подарочный сертификат</label>';
   html+='<div style="font-size:.8rem;color:var(--muted);margin-top:6px">'+CONTACTScurrent.shop+'<br>Карта: <b>'+CARD_VTB+'</b><br>Получатель: '+VTB_HOLDER+'</div>';
   html+='<div id="cert-block" style="display:none;margin-top:12px;background:var(--cream);border:1px solid var(--line);padding:12px">'+
     '<label style="font-size:.9rem">Введите код сертификата</label>'+
     '<input type="text" id="cert-code-input" placeholder="MEM-123456" style="width:100%;padding:10px;border:1px solid var(--line);font-family:inherit;font-size:1rem;margin-top:6px">'+
     '<button type="button" onclick="applyCert()" style="width:100%;background:var(--gold);color:#fff;border:none;padding:11px;cursor:pointer;font-family:inherit;font-size:.95rem;margin-top:8px">Применить сертификат</button>'+
     '<div id="cert-result" style="font-size:.9rem;margin-top:8px;color:var(--green)"></div></div>';
-  html+='<script>document.querySelectorAll(\'input[name=pay]\').forEach(function(r){r.addEventListener(\'change\',function(){ var v=document.querySelector(\'input[name=pay]:checked\'); document.getElementById(\'cert-block\').style.display = v&&v.value===\'cert\' ? \'block\' : \'none\' ; });});<\/script>';
   return html;
+}
+function toggleCertBlock(){
+  const v=document.querySelector('input[name=pay]:checked');
+  const block=document.getElementById("cert-block");
+  if(block){ block.style.display = v && v.value==='cert' ? 'block' : 'none'; }
 }
 let appliedCert = null; // { code, amount }
 async function applyCert(){
@@ -868,6 +872,7 @@ async function adminSetBalance(uid, delta, label){
   const data = doc.data();
   const cur = data.balance||0;
   const newBal = cur + delta;
+  if(newBal < 0){ throw new Error("Нельзя списать больше, чем есть на балансе"); }
   const history = data.history||[];
   history.unshift({ date:new Date().toLocaleString('ru-RU'), amount:delta, label:label });
   await ref.update({ balance:newBal, history:history });
