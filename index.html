@@ -731,24 +731,48 @@ function buildPayOptions(total){
   html+='<div style="font-size:.8rem;color:var(--muted);margin-top:6px">'+CONTACTScurrent.shop+'<br>Карта: <b>'+CARD_VTB+'</b><br>Получатель: '+VTB_HOLDER+'</div>';
   return html;
 }
-document.getElementById("checkout-form").addEventListener("submit", function(e){
+document.getElementById("checkout-form").addEventListener("submit", async function(e){
   e.preventDefault();
   const pay=document.querySelector('input[name=pay]:checked');
   const payMethod = pay?pay.value:'card';
   const name=document.getElementById("of-name").value;
   const phone=document.getElementById("of-phone").value;
+  const comment=document.getElementById("of-comment").value;
   let lines=[], total=0;
   Object.entries(cart).forEach(([n,x])=>{ lines.push(n+' × '+x.qty); total+=x.price*x.qty; });
   if(payMethod==='balance'){
     if(getBalance()<total){ alert("Недостаточно средств на балансе."); return; }
-    addBalance(-total, "Оплата заказа");
+    await addBalance(-total, "Оплата заказа");
   } else {
     const text2="ПЕРЕВОД НА КАРТУ\nКарта: "+CARD_VTB+"\nСумма: "+total.toLocaleString('ru-RU')+" ₽\nНазначение: заказ "+name;
     console.log(text2);
     alert("Совершите перевод "+total.toLocaleString('ru-RU')+" ₽ на карту "+CARD_VTB+". После перевода отправьте чек нам в личные сообщения — мы подтвердим заказ.");
   }
-  const text="НОВЫЙ ЗАКАЗ\nСалон: "+CONTACTScurrent.shop+"\nИмя: "+name+"\nТелефон: "+phone+"\nОплата: "+(payMethod==='balance'?'баланс':'карта ВТБ')+"\nТовары:\n"+lines.join("\n")+"\nИтого: "+total.toLocaleString('ru-RU')+" ₽";
-  console.log(text);
+  const order = {
+    uid: currentUser ? currentUser.uid : null,
+    client: name, phone: phone, comment: comment,
+    items: lines, total: total,
+    payMethod: payMethod,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  // 1) Сохраняем заказ в Firestore
+  try{
+    await firestore.collection("orders").add(order);
+  }catch(err){ console.error("save order:", err); }
+  // 2) Отправляем на почту через FormSubmit
+  try{
+    await fetch("https://formsubmit.co/ajax/hibih228@gmail.com", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Accept":"application/json" },
+      body: JSON.stringify({
+        _subject:"🕐 Новый заказ — Memento",
+        Имя: name, Телефон: phone, Комментарий: comment,
+        "Состав заказа": lines.join("; "),
+        Сумма: total.toLocaleString('ru-RU')+" ₽",
+        Оплата: payMethod==='balance' ? "Баланс" : "Карта ВТБ"
+      })
+    });
+  }catch(err){ console.error("email:", err); }
   document.getElementById("order-ok").style.display="block";
   if(payMethod!=='balance'){ document.getElementById("order-ok").innerHTML='<b>Заказ сформирован.</b><br>Совершите перевод на карту <b>'+CARD_VTB+'</b> на сумму <b>'+total.toLocaleString('ru-RU')+' ₽</b> и пришлите подтверждение. Мы свяжемся с вами.'; }
   document.getElementById("checkout-form").reset();
@@ -819,7 +843,27 @@ function renderProfile(){
     '</div>'+
     '<div class="section-title">История операций</div>'+
     (hist.length ? hist.map(h=>'<div class="history-item"><div class="h-date">'+h.date+'</div><span class="h-amount '+(h.amount>0?'plus':'minus')+'">'+(h.amount>0?'+':'−')+Math.abs(h.amount).toLocaleString('ru-RU')+' ₽</span> — '+esc(h.label)+'</div>').join('') : '<p style="color:var(--muted)">Операций пока нет.</p>')+
-    (myGifts.length ? '<div class="section-title">Мои сертификаты</div>'+myGifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· '+g.code+'</span></div>').join('') : '');
+    (myGifts.length ? '<div class="section-title">Мои сертификаты</div>'+myGifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· '+g.code+'</span></div>').join('') : '')+
+    (isAdmin() ? '<div class="section-title">Все заказы (админ)</div><div id="admin-orders">Загрузка...</div>' : '');
+  if(isAdmin()) loadAdminOrders();
+}
+function isAdmin(){
+  return currentUser && currentUser.phone === UNLIMITED_PHONE;
+}
+async function loadAdminOrders(){
+  try{
+    const snap = await firestore.collection("orders").orderBy("createdAt","desc").limit(50).get();
+    const box=document.getElementById("admin-orders");
+    if(!box) return;
+    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заказов пока нет.</p>'; return; }
+    box.innerHTML = snap.docs.map(function(d){
+      const o=d.data();
+      const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
+      return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+' / '+esc(o.phone||"")+'<br>'+
+        '<span style="color:var(--muted)">'+esc((o.items||[]).join("; "))+'</span><br>'+
+        '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · '+(o.payMethod==='balance'?'баланс':'карта ВТБ')+'</div>';
+    }).join('');
+  }catch(e){ console.error(e); const box=document.getElementById("admin-orders"); if(box) box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
 }
 function toggleOps(id){ document.getElementById('wallet-'+id).classList.toggle('show'); }
 async function startTopup(){
