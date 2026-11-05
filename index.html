@@ -6,6 +6,7 @@
 <title>Memento — Часы на любой вкус</title>
 <!-- Firebase SDK (CDN) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{
@@ -561,6 +562,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const firestore = firebase.firestore();
+const auth = firebase.auth();
 const UNLIMITED_PHONE = "+79277467217";
 
 let currentUser = null;
@@ -924,30 +926,43 @@ function renderContacts(){
   c.innerHTML='<h3>Контакты</h3><div class="item"><div class="lbl">Магазин</div>'+CONTACTScurrent.shop+'</div><div class="item"><div class="lbl">Телефон</div>'+CONTACTScurrent.phone+'</div><div class="item"><div class="lbl">E-mail</div>'+CONTACTScurrent.email+'</div><div class="item"><div class="lbl">Адрес</div>'+CONTACTScurrent.address+'</div><div class="item"><div class="lbl">Режим работы</div>'+CONTACTScurrent.hours+'</div>';
 }
 
-/* ============ АВТОРИЗАЦИЯ (Firestore) ============ */
+/* ============ АВТОРИЗАЦИЯ (Firebase Auth) ============ */
 function openAuth(e){ if(e)e.preventDefault(); document.getElementById("authwrap").classList.add("show"); setMsg("li-msg",""); setMsg("rg-msg",""); }
 function closeAuth(){ document.getElementById("authwrap").classList.remove("show"); }
 function authTab(t){ document.getElementById("tab-login").classList.toggle("on",t==="login"); document.getElementById("tab-reg").classList.toggle("on",t==="reg"); document.getElementById("auth-login").style.display=t==="login"?"":"none"; document.getElementById("auth-reg").style.display=t==="reg"?"":"none"; }
 function setMsg(id,txt){ const el=document.getElementById(id); el.textContent=txt; el.className="auth-msg"+(txt&&txt.startsWith("Ошибка")?" err":""); }
+
+// Нормализация телефона к формату +7XXXXXXXXXX
+function normPhone(p){
+  let s = String(p).replace(/[^\d+]/g,"");
+  if(s.startsWith("8")) s = "+7"+s.slice(1);
+  else if(s.startsWith("7")) s = "+"+s;
+  else if(!s.startsWith("+")) s = "+"+s;
+  return s;
+}
+
 async function doRegister(){
   const nick=document.getElementById("rg-nick").value.trim();
   const pass=document.getElementById("rg-pass").value;
-  const phone=document.getElementById("rg-phone").value.trim();
-  if(!nick||!pass||!phone){ setMsg("rg-msg","Ошибка: заполните все поля."); return; }
-  // привести номер к формату +7...
-  let normPhone = phone;
-  if(normPhone.startsWith("8")){ normPhone = "+7"+normPhone.slice(1); }
-  else if(normPhone.startsWith("7")){ normPhone = "+"+normPhone; }
-  else if(!normPhone.startsWith("+")){ normPhone = "+"+normPhone; }
+  const phone=normPhone(document.getElementById("rg-phone").value);
+  if(!nick||pass.length<6||!phone){ setMsg("rg-msg","Ошибка: ник, пароль (мин. 6 симв.) и номер обязательны."); return; }
   try{
-    const exists = await loadUserFromFirestore(normPhone);
-    if(exists){ setMsg("rg-msg","Ошибка: этот номер уже зарегистрирован."); return; }
-    const nickExists = await loadUserFromFirestore(nick);
-    if(nickExists){ setMsg("rg-msg","Ошибка: этот ник уже занят."); return; }
-    const ref = await createUserInFirestore(nick, normPhone, pass);
-    currentUser = { nick:nick, phone:normPhone };
-    userData = Object.assign({}, { nick, phone:normPhone, balance:0, history:[], gifts:[] }, { _ref: ref });
-    localStorage.setItem("chasy_salon_current_user", JSON.stringify({nick:nick, phone:normPhone}));
+    const email = nick.toLowerCase().replace(/[^a-z0-9_.@-]/g,"") + "@memento.shop";
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    // Проверим, нет ли пользователя с таким номером
+    const snap = await firestore.collection("users").where("phone","==",phone).get();
+    if(!snap.empty){
+      await auth.currentUser.delete();
+      setMsg("rg-msg","Ошибка: такой номер уже зарегистрирован.");
+      return;
+    }
+    await firestore.collection("users").doc(uid).set({
+      nick: nick, searchNick: nick.toLowerCase(), phone: phone,
+      balance: 0, history: [], gifts: [], createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    currentUser = { nick: nick, phone: phone, uid: uid };
+    userData = { nick: nick, phone: phone, balance:0, history:[], gifts:[], _ref: firestore.collection("users").doc(uid) };
     setMsg("rg-msg","Регистрация успешна! Вы вошли как "+nick+".");
     afterLogin(nick);
   }catch(e){ setMsg("rg-msg","Ошибка: "+e.message); }
@@ -957,15 +972,37 @@ async function doLogin(){
   const pass=document.getElementById("li-pass").value;
   if(!id||!pass){ setMsg("li-msg","Ошибка: введите логин и пароль."); return; }
   try{
-    const doc = await loadUserFromFirestore(id);
-    if(!doc){ setMsg("li-msg","Ошибка: пользователь не найден."); return; }
-    const data = doc.data();
-    if(data.password !== pass){ setMsg("li-msg","Ошибка: неверный пароль."); return; }
-    currentUser = { nick:data.nick, phone:data.phone };
-    userData = Object.assign({}, data, { _ref: doc.ref, _id: doc.id });
-    localStorage.setItem("chasy_salon_current_user", JSON.stringify({ nick:data.nick, phone:data.phone }));
-    setMsg("li-msg","Добро пожаловать, "+data.nick+"!");
-    afterLogin(data.nick);
+    // Найти пользователя по нику или номеру, получить его email
+    let email=null;
+    if(id.includes("@")){ email=id; }
+    else{
+      const isPhone = /[+0-9]/.test(id) && id.replace(/\D/g,"").length>=10;
+      let snap;
+      if(isPhone){
+        const ph=normPhone(id);
+        snap=await firestore.collection("users").where("phone","==",ph).get();
+      }else{
+        snap=await firestore.collection("users").where("searchNick","==",id.toLowerCase()).get();
+      }
+      if(snap.empty){ setMsg("li-msg","Ошибка: пользователь не найден."); return; }
+      const doc=snap.docs[0];
+      const data=doc.data();
+      // email = nick в нижнем регистре + @memento.shop
+      email = data.nick.toLowerCase().replace(/[^a-z0-9_.@-]/g,"") + "@memento.shop";
+    }
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    const doc = await firestore.collection("users").doc(uid).get();
+    if(!doc.exists){
+      // пользователь есть в auth, но нет в базе — создадим
+      const nickFromEmail = email.split("@")[0];
+      await firestore.collection("users").doc(uid).set({ nick:nickFromEmail, searchNick:nickFromEmail.toLowerCase(), phone:"", balance:0, history:[], gifts:[] });
+    }
+    const data = doc.data() || {};
+    currentUser = { nick: data.nick||email.split("@")[0], phone:data.phone||"", uid: uid };
+    userData = Object.assign({}, data, { _ref: firestore.collection("users").doc(uid) });
+    setMsg("li-msg","Добро пожаловать, "+currentUser.nick+"!");
+    afterLogin(currentUser.nick);
   }catch(e){ setMsg("li-msg","Ошибка: "+e.message); }
 }
 function afterLogin(nick){
@@ -982,16 +1019,36 @@ function updateTopRight(nick){
   if(loginLink){ loginLink.style.display=nick?"none":""; }
   if(badge){ badge.querySelector("span").textContent=nick?"Привет, "+nick:""; badge.classList.toggle("on",!!nick); }
 }
-function logoutUser(){ currentUser=null; userData=null; localStorage.removeItem("chasy_salon_current_user"); updateTopRight(null); renderTopBalance(); renderProfile(); alert("Вы вышли из аккаунта."); }
-async function restoreSession(){
-  try{
-    const s=localStorage.getItem("chasy_salon_current_user");
-    if(!s) return;
-    const saved=JSON.parse(s);
-    const doc=await loadUserFromFirestore(saved.phone||saved.nick);
-    if(doc){ currentUser=saved; userData=Object.assign({}, doc.data(), {_ref:doc.ref, _id:doc.id}); updateTopRight(saved.nick||saved.phone); renderTopBalance(); }
-  }catch(e){ console.error(e); }
+async function logoutUser(){
+  await auth.signOut();
+  currentUser=null; userData=null;
+  updateTopRight(null); renderTopBalance(); renderProfile();
+  alert("Вы вышли из аккаунта.");
 }
+// Восстановление сессии (Firebase Auth сам хранит токен)
+auth.onAuthStateChanged(async function(user){
+  if(user){
+    const uid=user.uid;
+    const docRef=firestore.collection("users").doc(uid);
+    const doc=await docRef.get();
+    let data={};
+    if(doc.exists){ data=doc.data(); }
+    else{
+      const nick = user.email ? user.email.split("@")[0] : "user"+uid.slice(0,4);
+      data={nick:nick, searchNick:nick.toLowerCase(), phone:"", balance:0, history:[], gifts:[]};
+      await docRef.set(data);
+    }
+    currentUser={ nick:data.nick, phone:data.phone||"", uid:uid };
+    userData=Object.assign({}, data, { _ref: docRef });
+    updateTopRight(data.nick);
+    renderTopBalance();
+    if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+    if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+  }else{
+    currentUser=null; userData=null;
+    updateTopRight(null);
+  }
+});
 
 /* ============ РЕДАКТОР ============ */
 document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="E"||e.key==="е"||e.key==="e")){ e.preventDefault(); if(localStorage.getItem(LS_PASS)==="1"){openEditor();}else{showPass();} } });
@@ -1044,7 +1101,6 @@ function edPublish(){
 }
 
 renderContacts(); render(); renderTopBalance();
-restoreSession();
 </script>
 </body>
 </html>
