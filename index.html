@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Часовой салон — Строгие мужские и красивые женские часы</title>
+<style>
+  :root{
+    --ink:#1c1c1c;
+    --gold:#a98d5f;
+    --gold-d:#8a6f45;
+    --cream:#f7f4ee;
+    --line:#e4ddcd;
+    --muted:#7a7265;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Times New Roman",Georgia,serif;
+    color:var(--ink);
+    background:#fff;
+    line-height:1.5;
+  }
+  .topbar{
+    background:var(--ink);color:#fff;
+    padding:14px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:10px;
+  }
+  .brand{font-size:1.15rem;letter-spacing:3px;text-transform:uppercase}
+  .brand span{color:var(--gold)}
+  .topbar a{color:var(--cream);text-decoration:none;font-size:.9rem}
+  .cart-btn{
+    background:var(--gold);color:#fff;border:none;
+    padding:9px 16px;border-radius:20px;cursor:pointer;
+    font-family:inherit;font-size:.9rem;letter-spacing:.5px;
+  }
+  .cart-btn b{color:#fff}
+  nav.cats{
+    background:var(--cream);border-bottom:1px solid var(--line);
+    display:flex;justify-content:center;flex-wrap:wrap;gap:8px;
+    padding:12px;
+  }
+  nav.cats button{
+    background:transparent;border:1px solid var(--line);
+    padding:8px 18px;border-radius:20px;cursor:pointer;
+    font-family:inherit;font-size:.95rem;color:var(--ink);
+  }
+  nav.cats button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .hero{
+    text-align:center;padding:56px 20px 48px;background:var(--cream);
+    border-bottom:1px solid var(--line);
+  }
+  .hero h1{font-size:2.1rem;letter-spacing:1px;font-weight:normal}
+  .hero h1 em{color:var(--gold-d);font-style:italic}
+  .hero p{color:var(--muted);margin-top:10px;max-width:600px;margin-left:auto;margin-right:auto}
+  main{max-width:1180px;margin:0 auto;padding:36px 20px 60px}
+  .section-title{
+    font-size:1.35rem;letter-spacing:2px;text-transform:uppercase;
+    margin:30px 0 20px;padding-bottom:10px;border-bottom:1px solid var(--line);
+  }
+  .section-title small{font-size:.9rem;color:var(--muted);margin-left:10px;letter-spacing:0;text-transform:none}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
+  .card{background:#fff;border:1px solid var(--line);padding:16px;transition:.2s}
+  .card:hover{box-shadow:0 8px 24px rgba(0,0,0,.08)}
+  .card .img{
+    background:var(--cream);height:220px;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:.85rem;overflow:hidden;margin-bottom:12px;
+  }
+  .card .img img{width:100%;height:100%;object-fit:cover}
+  .card h3{font-size:1.05rem;font-weight:normal;letter-spacing:.3px}
+  .card .desc{color:var(--muted);font-size:.85rem;margin-top:6px;min-height:38px}
+  .card .row{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+  .card .price{font-size:1.1rem;font-weight:bold}
+  .add{
+    background:var(--ink);color:#fff;border:none;padding:8px 14px;
+    border-radius:18px;cursor:pointer;font-family:inherit;font-size:.85rem;
+  }
+  .add:hover{background:var(--gold-d)}
+  .empty{color:var(--muted);padding:30px;text-align:center;display:none}
+  #cart-panel{
+    position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100vh;
+    background:#fff;box-shadow:-6px 0 30px rgba(0,0,0,.15);
+    transition:right .3s;z-index:50;display:flex;flex-direction:column;
+  }
+  #cart-panel.open{right:0}
+  #cart-panel header{
+    background:var(--ink);color:#fff;padding:18px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  #cart-panel header button{
+    background:none;border:none;color:#fff;font-size:1.6rem;line-height:1;cursor:pointer;
+  }
+  #cart-body{flex:1;overflow-y:auto;padding:18px}
+  .ci{display:flex;gap:12px;border-bottom:1px solid var(--line);padding:10px 0}
+  .ci .th{flex:1}
+  .ci .nm{font-weight:bold}
+  .ci .pr{color:var(--muted);font-size:.85rem}
+  .ci .qty{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .ci .qty button{width:24px;height:24px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .ci .rm{margin-left:auto;background:none;border:none;color:#b02323;cursor:pointer;font-size:1.1rem}
+  #cart-total{padding:16px 18px;border-top:1px solid var(--line)}
+  #cart-total .sum-row{display:flex;justify-content:space-between;font-size:1.05rem;margin-bottom:14px}
+  #cart-total button{
+    width:100%;background:var(--gold);color:#fff;border:none;padding:13px;
+    font-family:inherit;font-size:1rem;letter-spacing:1px;cursor:pointer;
+  }
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none}
+  .overlay.show{display:block}
+  #order-form{
+    position:fixed;top:0;right:-520px;width:500px;max-width:94vw;height:100vh;
+    background:#fff;box-shadow:-6px 0 30px rgba(0,0,0,.15);
+    transition:right .3s;z-index:60;overflow-y:auto;
+  }
+  #order-form.open{right:0}
+  #order-form header{background:var(--ink);color:#fff;padding:18px;display:flex;justify-content:space-between;align-items:center}
+  #order-form header button{background:none;border:none;color:#fff;font-size:1.6rem;line-height:1;cursor:pointer}
+  #order-form form{padding:20px}
+  #order-form label{display:block;margin:14px 0 4px;font-size:.9rem}
+  #order-form input,#order-form textarea{
+    width:100%;padding:11px;border:1px solid var(--line);
+    font-family:inherit;font-size:1rem;background:#fbfaf7;
+  }
+  #order-form textarea{min-height:90px;resize:vertical}
+  #order-form .summary{background:var(--cream);padding:12px;margin:18px 0;font-size:.9rem;border:1px solid var(--line)}
+  #order-form button[type=submit]{
+    width:100%;background:var(--ink);color:#fff;border:none;padding:14px;
+    font-family:inherit;font-size:1.05rem;letter-spacing:1px;cursor:pointer;margin-top:6px;
+  }
+  #order-form button[type=submit]:hover{background:var(--gold-d)}
+  .notice{background:#eaf5ea;border:1px solid #b7d6b7;padding:12px;margin-top:14px;color:#2c5a2c;font-size:.9rem}
+  .contact{
+    background:var(--cream);border:1px solid var(--line);
+    padding:28px;margin-top:30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;
+  }
+  .contact h3{grid-column:1/-1;letter-spacing:2px;text-transform:uppercase;font-size:1.1rem}
+  .contact .item{font-size:.95rem}
+  .contact .lbl{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:1px}
+  footer{background:var(--ink);color:var(--cream);text-align:center;padding:24px;font-size:.85rem}
+  .hint{font-size:.8rem;color:var(--muted);margin-top:40px;border-top:1px solid var(--line);padding-top:16px}
+
+  .edit-fab{
+    position:fixed;top:14px;right:14px;width:44px;height:44px;border-radius:50%;
+    background:var(--gold);color:#fff;border:none;font-size:1.5rem;line-height:1;
+    cursor:pointer;z-index:70;display:none;box-shadow:0 4px 12px rgba(0,0,0,.2);
+  }
+  .edit-fab.on{display:block}
+  #editor{
+    position:fixed;top:0;right:-620px;width:600px;max-width:95vw;height:100vh;
+    background:#fff;box-shadow:-6px 0 30px rgba(0,0,0,.2);
+    transition:right .3s;z-index:80;overflow-y:auto;
+  }
+  #editor.open{right:0}
+  #editor header{background:var(--ink);color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
+  #editor header h2{font-size:1.1rem;font-weight:normal;letter-spacing:1px}
+  #editor header button{background:none;border:none;color:#fff;font-size:1.6rem;line-height:1;cursor:pointer}
+  #editor .wrap{padding:20px}
+  .ed-contact div{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .ed-contact label{width:120px;color:var(--muted);font-size:.85rem}
+  .ed-contact input{flex:1;padding:8px;border:1px solid var(--line);font-family:inherit}
+  #editor .prod{border:1px solid var(--line);padding:14px;margin-bottom:14px;background:#fbfaf7}
+  #editor .prod input,#editor .prod textarea{width:100%;padding:8px;border:1px solid var(--line);font-family:inherit;margin-bottom:8px}
+  #editor textarea{min-height:50px;resize:vertical}
+  .pr-edit{display:flex;gap:8px}
+  .pr-edit input{flex:1}
+  .pr-edit input.prc{max-width:110px}
+  #editor .del{background:#b02323;color:#fff;border:none;padding:7px 12px;cursor:pointer;font-family:inherit}
+  .ed-actions{display:flex;gap:10px;margin-top:6px}
+  .ed-actions button{flex:1;padding:11px;border:none;cursor:pointer;font-family:inherit;font-size:.95rem}
+  .ed-add{background:var(--cream);border:1px dashed var(--gold)!important;color:var(--gold-d);padding:12px!important}
+  .ed-save{background:var(--ink);color:#fff}
+  .ed-reset{background:#e8e4da;color:var(--ink)}
+  .ed-locknote{font-size:.8rem;color:var(--muted);margin-top:14px}
+  .passscreen{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:90;display:none;align-items:center;justify-content:center}
+  .passscreen.show{display:flex}
+  .pass-box{background:#fff;padding:30px;width:320px;text-align:center}
+  .pass-box input{width:100%;padding:10px;border:1px solid var(--line);margin:14px 0;font-family:inherit;text-align:center}
+  .pass-box button{padding:10px 24px;background:var(--ink);color:#fff;border:none;cursor:pointer;font-family:inherit}
+  .pass-box .err{color:#b02323;font-size:.8rem;min-height:18px}
+
+  .authwrap{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:95;display:none;align-items:center;justify-content:center}
+  .authwrap.show{display:flex}
+  .auth-box{background:#fff;padding:28px;width:360px;max-width:92vw}
+  .auth-box h3{text-align:center;margin-bottom:16px;font-weight:normal;letter-spacing:1px}
+  .auth-box .tabs{display:flex;margin-bottom:18px;border-bottom:1px solid var(--line)}
+  .auth-box .tabs button{flex:1;background:none;border:none;padding:10px;cursor:pointer;font-family:inherit;font-size:.95rem;color:var(--muted);border-bottom:2px solid transparent}
+  .auth-box .tabs button.on{color:var(--ink);border-bottom-color:var(--gold);font-weight:bold}
+  .auth-box label{display:block;font-size:.85rem;color:var(--muted);margin:12px 0 4px}
+  .auth-box input{width:100%;padding:10px;border:1px solid var(--line);font-family:inherit;font-size:1rem;background:#fbfaf7}
+  .auth-box .submit{width:100%;background:var(--ink);color:#fff;border:none;padding:12px;font-family:inherit;font-size:1rem;cursor:pointer;margin-top:18px;letter-spacing:1px}
+  .auth-box .submit:hover{background:var(--gold-d)}
+  .auth-msg{font-size:.85rem;margin-top:12px;min-height:20px;color:#2c5a2c}
+  .auth-msg.err{color:#b02323}
+  .usrbadge{display:none;align-items:center;gap:8px;font-size:.9rem}
+  .usrbadge.on{display:flex}
+  @media(max-width:600px){
+    .hero h1{font-size:1.6rem}
+    .grid{grid-template-columns:1fr 1fr;gap:12px}
+    .card .img{height:160px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Часовой <span>Салон</span></div>
+  <div style="display:flex;gap:18px;align-items:center">
+    <a href="#" onclick="showContacts(event)">Контакты</a>
+    <a href="#" id="login-link" onclick="openAuth(event)">Вход</a>
+    <span class="usrbadge" id="usrbadge"><span></span><a href="#" onclick="logoutUser()">Выйти</a></span>
+    <a href="#catalog" onclick="filterCat(event,'all')">Каталог</a>
+    <button class="cart-btn" onclick="openCart()">Корзина <b id="cart-count">0</b></button>
+  </div>
+</div>
+
+<nav class="cats">
+  <button class="active" data-cat="all" onclick="filterCat(event,'all')">Все</button>
+  <button data-cat="men" onclick="filterCat(event,'men')">Мужские</button>
+  <button data-cat="women" onclick="filterCat(event,'women')">Женские</button>
+</nav>
+
+<div class="hero">
+  <h1>Строгие мужские и <em>красивые женские</em> часы</h1>
+  <p>Классические модели на каждый день и для особых случаев. Качественные механизмы, надёжные поставщики, доступные цены.</p>
+</div>
+
+<main>
+  <div class="section-title" id="catalog">Каталог</div>
+  <div class="grid" id="catalog-grid"></div>
+  <div class="empty" id="empty">В этой категории пока пусто. Загляните позже.</div>
+
+  <div class="section-title">Как заказать</div>
+  <p>Выберите модель, добавьте в корзину, оформите заказ — мы перезвоним, уточним детали и договоримся о доставке.</p>
+
+  <div class="contact" id="contact-block"></div>
+
+  <p class="hint">Это витрина-макет. Все данные (товары и контакты) вынесены в единый блок <i>ДАННЫЕ ДЛЯ РЕДАКТИРОВАНИЯ</i> в начале кода — меняйте там описания, цены, фото и контакты. Ваш аккаунт: DeepSeek. Фото добавляются путём замены строки photo: "..." на путь к вашей картинке.</p>
+</main>
+
+<footer>© 2026 Часовой Салон. Все права защищены.</footer>
+
+<div class="authwrap" id="authwrap">
+  <div class="auth-box">
+    <h3>Личный кабинет</h3>
+    <div class="tabs">
+      <button id="tab-login" class="on" onclick="authTab('login')">Вход</button>
+      <button id="tab-reg" onclick="authTab('reg')">Регистрация</button>
+    </div>
+    <div id="auth-login">
+      <label>Ник или номер</label>
+      <input type="text" id="li-id" placeholder="Логин">
+      <label>Пароль</label>
+      <input type="password" id="li-pass" placeholder="Пароль">
+      <button class="submit" onclick="doLogin()">Войти</button>
+      <div class="auth-msg" id="li-msg"></div>
+    </div>
+    <div id="auth-reg" style="display:none">
+      <label>Ник</label>
+      <input type="text" id="rg-nick" placeholder="Ваш ник">
+      <label>Пароль</label>
+      <input type="password" id="rg-pass" placeholder="Придумайте пароль">
+      <label>Номер телефона</label>
+      <input type="tel" id="rg-phone" placeholder="+7 ___ ___-__-__">
+      <button class="submit" onclick="doRegister()">Зарегистрироваться</button>
+      <div class="auth-msg" id="rg-msg"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closePanels()"></div>
+
+<button class="edit-fab" id="edit-fab" onclick="openEditor()" title="Редактировать каталог">⋯</button>
+
+<div class="passscreen" id="passscreen">
+  <div class="pass-box">
+    <h3>Доступ к редактору</h3>
+    <input type="password" id="pass-input" placeholder="Код доступа">
+    <div class="err" id="pass-err"></div>
+    <button onclick="tryPass()">Открыть</button>
+  </div>
+</div>
+
+<aside id="editor">
+  <header><h2>Редактор каталога</h2><button onclick="closeEditor()">×</button></header>
+  <div class="wrap">
+    <h3 style="margin-bottom:8px">Контакты</h3>
+    <div class="ed-contact">
+      <div><label>Магазин</label><input id="ec-shop"></div>
+      <div><label>Телефон</label><input id="ec-phone"></div>
+      <div><label>E-mail</label><input id="ec-email"></div>
+      <div><label>Адрес</label><input id="ec-address"></div>
+      <div><label>Режим работы</label><input id="ec-hours"></div>
+    </div>
+    <h3 style="margin:20px 0 8px">Товары</h3>
+    <div id="ed-products"></div>
+    <div class="ed-actions">
+      <button class="ed-add" onclick="edAdd()">+ Добавить товар</button>
+      <button class="ed-save" onclick="edSave()">Сохранить</button>
+      <button class="ed-publish" onclick="edPublish()" style="background:var(--gold);color:#fff">Показать всем</button>
+      <button class="ed-reset" onclick="edReset()">Сбросить</button>
+    </div>
+    <p class="ed-locknote">«Показать всем» — скачает новый index.html, где ваши изменения будут сразу включены в код. Загрузите его на хостинг — все посетители увидят обновлённый каталог.</p>
+  </div>
+</aside>
+
+<aside id="cart-panel">
+  <header><span>Корзина</span><button onclick="closePanels()">×</button></header>
+  <div id="cart-body"></div>
+  <div id="cart-total">
+    <div class="sum-row"><span>Итого:</span><span id="grand">0 ₽</span></div>
+    <button onclick="goCheckout()">Оформить заказ</button>
+  </div>
+</aside>
+
+<aside id="order-form">
+  <header><span>Оформление заказа</span><button onclick="closePanels()">×</button></header>
+  <form id="checkout-form" onsubmit="submitOrder(event)">
+    <div class="summary" id="checkout-summary"></div>
+    <label>Имя</label>
+    <input type="text" required placeholder="Как вас зовут">
+    <label>Телефон</label>
+    <input type="tel" required placeholder="+7 ___ ___-__-__">
+    <label>Комментарий к заказу</label>
+    <textarea placeholder="Модель, время доставки, вопросы"></textarea>
+    <button type="submit">Отправить заказ</button>
+    <div class="notice" id="order-ok" style="display:none">Спасибо! Заказ принят. Мы свяжемся с вами по указанному телефону.</div>
+  </form>
+</aside>
+
+<script id="seed" type="application/json">{"contacts":{"shop":"Часовой Салон","phone":"+7 (900) 000-00-00","email":"info@sharmtime.ru","address":"г. Москва, ул. Примерная, 12","hours":"Пн–Сб 10:00 – 20:00"},"products":[{"cat":"men","name":"Классика Строгая","price":1250,"image":"","desc":"Мужские кварцевые часы, стальной корпус, кожаный ремешок."},{"cat":"men","name":"Бизнес-Лайн","price":1400,"image":"","desc":"Строгий циферблат, хронограф, чёрное покрытие корпуса."},{"cat":"men","name":"Дейли","price":1100,"image":"","desc":"Лёгкие повседневные часы на каждый день, водозащита."},{"cat":"women","name":"Изящная","price":1300,"image":"","desc":"Тонкий корпус, золотистое покрытие, цепочка-браслет."},{"cat":"women","name":"Жемчужная","price":1450,"image":"","desc":"Женственные часы с декоративными элементами под жемчуг."},{"cat":"women","name":"Минимал","price":1200,"image":"","desc":"Аккуратный маленький циферблат, классический дизайн."}]}</script>
+
+<script>
+/* ============================================================
+    ДАННЫЕ ДЛЯ РЕДАКТИРОВАНИЯ — МЕНЯЙТЕ ТОЛЬКО ЗДЕСЬ
+   ------------------------------------------------------------
+   Добавьте товар: скопируйте блок { ... },  поставьте запятую.
+   Мужские: cat:"men",  женские: cat:"women".
+   image: URL или путь к фото. Если нет фото — будет заглушка.
+   ============================================================ */
+const CONTACTS = {
+  shop:  "Часовой Салон",
+  phone: "+7 (900) 000-00-00",
+  email: "info@sharmtime.ru",
+  address: "г. Москва, ул. Примерная, 12",
+  hours: "Пн–Сб 10:00 – 20:00"
+};
+
+const PRODUCTS = [
+  { cat:"men", name:"Классика Строгая", price:1250, image:"",
+    desc:"Мужские кварцевые часы, стальной корпус, кожаный ремешок." },
+  { cat:"men", name:"Бизнес-Лайн", price:1400, image:"",
+    desc:"Строгий циферблат, хронограф, чёрное покрытие корпуса." },
+  { cat:"men", name:"Дейли", price:1100, image:"",
+    desc:"Лёгкие повседневные часы на каждый день, водозащита." },
+  { cat:"women", name:"Изящная", price:1300, image:"",
+    desc:"Тонкий корпус, золотистое покрытие, цепочка-браслет." },
+  { cat:"women", name:"Жемчужная", price:1450, image:"",
+    desc:"Женственные часы с декоративными элементами под жемчуг." },
+  { cat:"women", name:"Минимал", price:1200, image:"",
+    desc:"Аккуратный маленький циферблат, классический дизайн." }
+];
+/* ================== КОНЕЦ БЛОКА ДАННЫХ ===================== */
+
+const LS_KEY = "chasy_salon_data_v1";
+const LS_PASS = "chasy_salon_edit_ok";
+const EDIT_PASS = "sharm2026";
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ const d = JSON.parse(raw); if(Array.isArray(d.products) && d.products.length>0) return d; }
+    const seed = document.getElementById("seed").textContent;
+    if(seed){ const s = JSON.parse(seed); if(s && Array.isArray(s.products)) return s; }
+  }catch(e){}
+  return null;
+}
+
+let storedData = loadData();
+let CONTACTScurrent = storedData ? Object.assign({}, storedData.contacts) : Object.assign({}, CONTACTS);
+let PRODUCTScurrent = storedData ? storedData.products.slice() : PRODUCTS.slice();
+
+function saveData(){
+  localStorage.setItem(LS_KEY, JSON.stringify({ contacts: CONTACTScurrent, products: PRODUCTScurrent }));
+}
+
+let cart = {};
+let currentCat = "all";
+
+function render(){
+  const grid = document.getElementById("catalog-grid");
+  const empty = document.getElementById("empty");
+  const list = PRODUCTScurrent.filter(p => currentCat==="all" || p.cat===currentCat);
+  grid.innerHTML = "";
+  empty.style.display = list.length ? "none" : "block";
+  list.forEach(p => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML =
+      '<div class="img">' + (p.image
+        ? '<img src="'+p.image+'" alt="'+p.name+'">'
+        : '<span>Фото модели</span>') +
+      '</div>' +
+      '<h3>'+p.name+'</h3>' +
+      '<div class="desc">'+p.desc+'</div>' +
+      '<div class="row"><span class="price">'+p.price.toLocaleString('ru-RU')+' ₽</span>' +
+      '<button class="add" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button></div>';
+    grid.appendChild(el);
+  });
+}
+
+function filterCat(e,cat){
+  e.preventDefault();
+  currentCat = cat;
+  document.querySelectorAll('nav.cats button').forEach(b=>b.classList.remove('active'));
+  document.querySelector('nav.cats button[data-cat="'+cat+'"]').classList.add('active');
+  render();
+}
+
+function addToCart(name,price){
+  if(!cart[name]) cart[name]={price,qty:0};
+  cart[name].qty++;
+  updateCart();
+  openCart();
+}
+
+function openCart(){ document.getElementById("cart-panel").classList.add("open"); overlayShow(); drawCart(); }
+function closePanels(){
+  document.querySelectorAll('#cart-panel,#order-form,#order-form.open').forEach(e=>e.classList.remove('open'));
+  overlayHide();
+  document.getElementById("order-ok").style.display="none";
+}
+function overlayShow(){ document.getElementById("overlay").classList.add("show"); }
+function overlayHide(){ document.getElementById("overlay").classList.remove("show"); }
+
+function updateCart(){
+  const c = Object.values(cart).reduce((s,x)=>s+x.qty,0);
+  document.getElementById("cart-count").textContent = c;
+}
+function drawCart(){
+  const body = document.getElementById("cart-body");
+  const names = Object.keys(cart);
+  if(!names.length){ body.innerHTML='<p style="color:#7a7265">Корзина пуста. Добавьте модели из каталога.</p>'; }
+  else{
+    body.innerHTML = names.map(n=>
+      '<div class="ci"><div class="th"><div class="nm">'+n+'</div>'+
+      '<div class="pr">'+cart[n].price.toLocaleString('ru-RU')+' ₽ / шт</div>'+
+      '<div class="qty"><button onclick="chg(\''+n+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+n+'\',1)">+</button></div></div>'+
+      '<button class="rm" onclick="chg(\''+n+'\',-999)">✕</button></div>'
+    ).join('');
+  }
+  let total=0;
+  Object.values(cart).forEach(x=>total+=x.price*x.qty);
+  document.getElementById("grand").textContent = total.toLocaleString('ru-RU')+' ₽';
+  updateCart();
+}
+function chg(name,d){
+  cart[name].qty+=d;
+  if(cart[name].qty<=0) delete cart[name];
+  drawCart();
+}
+function goCheckout(){
+  if(!Object.keys(cart).length){ alert("Корзина пуста."); return; }
+  let html='<b>Ваш заказ:</b><br>', total=0;
+  Object.entries(cart).forEach(([n,x])=>{ html+=n+' × '+x.qty+' — '+ (x.price*x.qty).toLocaleString('ru-RU')+' ₽<br>'; total+=x.price*x.qty; });
+  html+='<b>Итого: '+total.toLocaleString('ru-RU')+' ₽</b>';
+  document.getElementById("checkout-summary").innerHTML = html;
+  document.getElementById("order-form").classList.add("open");
+  overlayShow();
+}
+function submitOrder(e){
+  e.preventDefault();
+  const f = e.target;
+  const name = f.querySelector('input[type=text]').value;
+  const phone = f.querySelector('input[type=tel]').value;
+  let lines=[], total=0;
+  Object.entries(cart).forEach(([n,x])=>{ lines.push(n+' × '+x.qty); total+=x.price*x.qty; });
+  const text = "ЗАКАЗ ЧАСОВ\nСалон: "+CONTACTScurrent.shop+"\nИмя: "+name+"\nТелефон: "+phone+
+    "\nТовары:\n"+lines.join("\n")+"\nИтого: "+total.toLocaleString('ru-RU')+" ₽";
+  console.log(text);
+  document.getElementById("order-ok").style.display="block";
+  f.reset();
+  cart={}; updateCart(); drawCart();
+  setTimeout(function(){ document.getElementById("order-ok").style.display="none"; closePanels(); }, 4000);
+}
+function showContacts(e){ e.preventDefault(); document.getElementById("contact-block").scrollIntoView({behavior:'smooth'}); }
+function renderContacts(){
+  const c = document.getElementById("contact-block");
+  c.innerHTML =
+    '<h3>Контакты</h3>'+
+    '<div class="item"><div class="lbl">Магазин</div>'+CONTACTScurrent.shop+'</div>'+
+    '<div class="item"><div class="lbl">Телефон</div>'+CONTACTScurrent.phone+'</div>'+
+    '<div class="item"><div class="lbl">E-mail</div>'+CONTACTScurrent.email+'</div>'+
+    '<div class="item"><div class="lbl">Адрес</div>'+CONTACTScurrent.address+'</div>'+
+    '<div class="item"><div class="lbl">Режим работы</div>'+CONTACTScurrent.hours+'</div>';
+}
+renderContacts();
+render();
+
+/* ============ РЕДАКТОР (видим только на этом ПК) ============ */
+document.addEventListener("keydown", function(e){
+  if(e.ctrlKey && e.shiftKey && (e.key==="E"||e.key==="е"||e.key==="e")){
+    e.preventDefault();
+    if(localStorage.getItem(LS_PASS)==="1"){ openEditor(); }
+    else{ showPass(); }
+  }
+});
+
+function showPass(){ document.getElementById("passscreen").classList.add("show"); document.getElementById("pass-input").focus(); document.getElementById("pass-err").textContent=""; }
+function hidePass(){ document.getElementById("passscreen").classList.remove("show"); }
+function tryPass(){
+  const v = document.getElementById("pass-input").value;
+  if(v === EDIT_PASS){
+    localStorage.setItem(LS_PASS,"1");
+    document.getElementById("pass-input").value="";
+    hidePass(); openEditor();
+  } else {
+    document.getElementById("pass-err").textContent = "Неверный код доступа.";
+  }
+}
+function openEditor(){
+  document.getElementById("passscreen").classList.remove("show");
+  document.getElementById("edit-fab").classList.add("on");
+  fillEditor();
+  document.getElementById("editor").classList.add("open");
+}
+function closeEditor(){ document.getElementById("editor").classList.remove("open"); }
+
+function fillEditor(){
+  const c=CONTACTScurrent;
+  document.getElementById("ec-shop").value=c.shop;
+  document.getElementById("ec-phone").value=c.phone;
+  document.getElementById("ec-email").value=c.email;
+  document.getElementById("ec-address").value=c.address;
+  document.getElementById("ec-hours").value=c.hours;
+  drawEditorProducts();
+}
+function drawEditorProducts(){
+  const box=document.getElementById("ed-products");
+  box.innerHTML="";
+  PRODUCTScurrent.forEach(function(p,i){
+    const d=document.createElement("div");
+    d.className="prod";
+    d.innerHTML=
+      '<div class="pr-edit">'+
+        '<input data-idx="'+i+'" data-f="name" value="'+esc(p.name)+'" placeholder="Название">'+
+      '</div>'+
+      '<div class="pr-edit">'+
+        '<select data-idx="'+i+'" data-f="cat">'+
+          '<option value="men"'+(p.cat==="men"?" selected":"")+'>Мужские</option>'+
+          '<option value="women"'+(p.cat==="women"?" selected":"")+'>Женские</option>'+
+        '</select>'+
+        '<input class="prc" data-idx="'+i+'" data-f="price" type="number" value="'+p.price+'" placeholder="Цена ₽">'+
+      '</div>'+
+      '<div class="pr-edit">'+
+        '<input data-idx="'+i+'" data-f="image" value="'+esc(p.image)+'" placeholder="Фото (путь или ссылка)">'+
+      '</div>'+
+      '<textarea data-idx="'+i+'" data-f="desc" placeholder="Описание">'+esc(p.desc)+'</textarea>'+
+      '<button class="del" data-i="'+i+'">Удалить</button>';
+    box.appendChild(d);
+  });
+}
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+document.getElementById("ed-products").addEventListener("change", function(e){
+  const t=e.target, idx=t.getAttribute("data-idx"), f=t.getAttribute("data-f");
+  if(idx===null||f===null) return;
+  let val = f==="price" ? parseFloat(t.value)||0 : t.value;
+  PRODUCTScurrent[idx][f]=val;
+});
+document.getElementById("ed-products").addEventListener("input", function(e){
+  const t=e.target, idx=t.getAttribute("data-idx"), f=t.getAttribute("data-f");
+  if(idx===null||f===null) return;
+  let val = f==="price" ? parseFloat(t.value)||0 : t.value;
+  PRODUCTScurrent[idx][f]=val;
+});
+document.getElementById("ed-products").addEventListener("click", function(e){
+  if(e.target.classList.contains("del")){
+    const idx=parseInt(e.target.getAttribute("data-i"),10);
+    PRODUCTScurrent.splice(idx,1);
+    drawEditorProducts();
+  }
+});
+
+function edAdd(){
+  PRODUCTScurrent.push({cat:"men",name:"Новый товар",price:0,image:"",desc:""});
+  drawEditorProducts();
+}
+function edSave(){
+  CONTACTScurrent={
+    shop:document.getElementById("ec-shop").value,
+    phone:document.getElementById("ec-phone").value,
+    email:document.getElementById("ec-email").value,
+    address:document.getElementById("ec-address").value,
+    hours:document.getElementById("ec-hours").value
+  };
+  saveData();
+  render(); renderContacts();
+  alert("Сохранено. Каталог и контакты обновлены (на этом устройстве).");
+}
+function edReset(){
+  if(!confirm("Сбросить все правки и вернуть исходные данные из кода?")) return;
+  localStorage.removeItem(LS_KEY);
+  PRODUCTScurrent = PRODUCTS.slice();
+  CONTACTScurrent = Object.assign({}, CONTACTS);
+  render(); renderContacts();
+  fillEditor();
+}
+function edPublish(){
+  CONTACTScurrent={
+    shop:document.getElementById("ec-shop").value,
+    phone:document.getElementById("ec-phone").value,
+    email:document.getElementById("ec-email").value,
+    address:document.getElementById("ec-address").value,
+    hours:document.getElementById("ec-hours").value
+  };
+  const seed = document.getElementById("seed");
+  const json = JSON.stringify({ contacts: CONTACTScurrent, products: PRODUCTScurrent });
+  seed.textContent = json;
+  saveData();
+  const html = "<!DOCTYPE html>" + document.documentElement.outerHTML;
+  const blob = new Blob([html], { type:"text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  a.href = url;
+  a.download = "index.html";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  render(); renderContacts();
+  alert("Готово! Скачан новый index.html с включёнными изменениями. Загрузите его на хостинг — все посетители увидят обновлённый каталог.");
+}
+
+/* ============ РЕГИСТРАЦИЯ / ВХОД (локальная версия) ============ */
+const USERS_KEY = "chasy_salon_users";
+
+function openAuth(e){ e.preventDefault(); document.getElementById("authwrap").classList.add("show"); setMsg("li-msg",""); setMsg("rg-msg",""); }
+function closeAuth(){ document.getElementById("authwrap").classList.remove("show"); }
+function authTab(t){
+  document.getElementById("tab-login").classList.toggle("on", t==="login");
+  document.getElementById("tab-reg").classList.toggle("on", t==="reg");
+  document.getElementById("auth-login").style.display = t==="login" ? "" : "none";
+  document.getElementById("auth-reg").style.display = t==="reg" ? "" : "none";
+}
+function setMsg(id,txt){ const el=document.getElementById(id); el.textContent=txt; el.className="auth-msg"+(txt&&txt.startsWith("Ошибка")?" err":""); }
+
+function loadUsers(){
+  try{ const r=localStorage.getItem(USERS_KEY); return r?JSON.parse(r):{}; }catch(e){ return {}; }
+}
+function saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+
+function doRegister(){
+  const nick=document.getElementById("rg-nick").value.trim();
+  const pass=document.getElementById("rg-pass").value;
+  const phone=document.getElementById("rg-phone").value.trim();
+  if(!nick||!pass||!phone){ setMsg("rg-msg","Ошибка: заполните все поля."); return; }
+  const users=loadUsers();
+  if(users[nick]||users[phone]){ setMsg("rg-msg","Ошибка: такой ник или номер уже используется."); return; }
+  users[nick]={pass, phone};
+  users[phone]={pass, nick};
+  saveUsers(users);
+  currentUser=nick;
+  setMsg("rg-msg","Регистрация прошла успешно. Вы вошли как "+nick+".");
+  afterLogin(nick);
+}
+function doLogin(){
+  const id=document.getElementById("li-id").value.trim();
+  const pass=document.getElementById("li-pass").value;
+  const users=loadUsers();
+  const acc=users[id];
+  if(!acc||acc.pass!==pass){ setMsg("li-msg","Ошибка: неверный логин или пароль."); return; }
+  currentUser=acc.nick||id;
+  setMsg("li-msg","Добро пожаловать, "+currentUser+"!");
+  afterLogin(currentUser);
+}
+let currentUser=null;
+function afterLogin(nick){
+  document.getElementById("li-id").value="";
+  document.getElementById("li-pass").value="";
+  document.getElementById("rg-nick").value="";
+  document.getElementById("rg-pass").value="";
+  document.getElementById("rg-phone").value="";
+  setTimeout(function(){ closeAuth(); },1200);
+  updateTopRight(nick);
+}
+function updateTopRight(nick){
+  const badge=document.getElementById("usrbadge");
+  const loginLink=document.getElementById("login-link");
+  if(loginLink){ loginLink.style.display = nick ? "none" : ""; }
+  if(badge){
+    badge.querySelector("span").textContent = nick ? "Привет, "+nick : "";
+    badge.classList.toggle("on", !!nick);
+  }
+}
+function logoutUser(){
+  currentUser=null;
+  updateTopRight(null);
+  alert("Вы вышли из аккаунта.");
+}
+</script>
+</body>
+</html>
