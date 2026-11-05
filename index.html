@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Memento — Часы на любой вкус</title>
+<!-- Firebase SDK (CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --ink:#1c1c1c;
@@ -546,6 +549,52 @@ const LS_PASS = "chasy_salon_edit_ok";
 const USERS_KEY = "chasy_salon_users";
 const EDIT_PASS = "sharm2026";
 
+/* ============ FIREBASE ИНИЦИАЛИЗАЦИЯ ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCBWKXo92I_b4AuX-8vMPvYXXvuot4zz7M",
+  authDomain: "memento-salon.firebaseapp.com",
+  projectId: "memento-salon",
+  storageBucket: "memento-salon.firebasestorage.app",
+  messagingSenderId: "603314641443",
+  appId: "1:603314641443:web:d28da1aa20bb7e22192f96",
+  measurementId: "G-4N4H0862HG"
+};
+firebase.initializeApp(firebaseConfig);
+const firestore = firebase.firestore();
+const UNLIMITED_PHONE = "+79277467217";
+
+let currentUser = null;
+let userData = null; // { balance, history, gifts, nick }
+let fbReady = false;
+
+async function fbAuthSession(){
+  // Пустая заглушка-проверка: определим состояние через сессию localStorage,
+  // но все данные берём из Firestore при наличии подключения.
+  return new Promise(resolve=>setTimeout(resolve, 0));
+}
+
+async function loadUserFromFirestore(phoneOrNick){
+  try{
+    // Ищем документ пользователя по номеру или нику
+    const q = await firestore.collection("users")
+      .where("phone","==", phoneOrNick).get();
+    if(!q.empty){ return q.docs[0]; }
+    const q2 = await firestore.collection("users")
+      .where("nick","==", phoneOrNick).get();
+    if(!q2.empty){ return q2.docs[0]; }
+    return null;
+  }catch(e){ console.error("loadUserFromFirestore", e); return null; }
+}
+
+async function createUserInFirestore(nick, phone, password){
+  const ref = firestore.collection("users").doc();
+  const data = { nick, phone, password, balance:0, history:[], gifts:[], createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+  await ref.set(data);
+  return ref;
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
 function loadData(){
   try{
     const raw = localStorage.getItem(LS_KEY);
@@ -563,7 +612,6 @@ function saveData(){
 }
 
 let cart = {};
-let currentUser = localStorage.getItem("chasy_salon_current_user") || null;
 let catalogSel = { cats:[], colors:[], min:null, max:null };
 
 /* ============ РОУТЕР ПОД-СТРАНИЦ ============ */
@@ -706,43 +754,47 @@ document.getElementById("checkout-form").addEventListener("submit", function(e){
   setTimeout(function(){ document.getElementById("order-ok").style.display="none"; closePanels(); }, 5000);
 });
 
-/* ============ БАЛАНС / КОШЕЛЁК ============ */
-function getUsers(){ try{ const r=localStorage.getItem(USERS_KEY); return r?JSON.parse(r):{}; }catch(e){ return {}; } }
-function saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+/* ============ БАЛАНС / КОШЕЛЁК (Firestore) ============ */
+function ensureUserLoaded(){ return !!userData; }
+function isUnlimited(){
+  return currentUser && currentUser.phone === UNLIMITED_PHONE;
+}
 function getBalance(){
-  if(!currentUser) return 0;
-  const u=getUsers();
-  const acc=u[currentUser]||u['xxx-'+currentUser];
-  return acc? (acc.balance||0) : 0;
+  if(!userData) return 0;
+  if(isUnlimited()) return 999999;
+  return userData.balance||0;
 }
-function setBalanceStore(nick, balance, history){
-  const u=getUsers();
-  let key=nick;
-  // найти аккаунт по нику или номеру
-  if(u[nick]){ key=nick; }
-  else {
-    // ищем запись, где nick === nick
-    for(const k in u){ if(u[k].nick===nick){ key=k; break; } }
-  }
-  if(u[key]){ u[key].balance=balance; u[key].history=history||u[key].history||[]; saveUsers(u); }
+function userDocRef(){
+  // userData хранит ссылку на документ
+  return userData ? userData._ref : null;
 }
-function addBalance(amount, label){
+async function reloadUserData(){
   if(!currentUser) return;
-  const u=getUsers();
-  let key=null;
-  if(u[currentUser]) key=currentUser;
-  else { for(const k in u){ if(u[k].nick===currentUser){ key=k; break; } } }
-  if(!key) return;
-  const acc=u[key];
-  acc.balance=(acc.balance||0)+amount;
-  if(!acc.history) acc.history=[];
-  acc.history.unshift({ date:new Date().toLocaleString('ru-RU'), amount:amount, label:label });
-  saveUsers(u);
+  const doc=await loadUserFromFirestore(currentUser.phone || currentUser.nick);
+  if(doc){ userData = Object.assign({}, doc.data(), { _ref: doc.ref, _id: doc.id }); }
+  renderTopBalance();
+  if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+  if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+}
+async function addBalance(amount, label){
+  if(!currentUser||!userData) return;
+  if(isUnlimited()){ // для бесконечного аккаунта не списываем, но пишем историю
+    if(amount<0 && label.indexOf("Покупка")>-1){} // покупка сертификата не уменьшает баланс
+    return;
+  }
+  const cur = userData.balance||0;
+  const newBal = cur + amount;
+  const history = userData.history||[];
+  history.unshift({ date:new Date().toLocaleString('ru-RU'), amount:amount, label:label });
+  try{
+    await userData._ref.update({ balance:newBal, history: history });
+    userData.balance = newBal; userData.history = history;
+  }catch(e){ console.error(e); }
   renderTopBalance();
   if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
 }
 function renderTopBalance(){
-  document.getElementById("top-balance").textContent = getBalance().toLocaleString('ru-RU')+' ₽';
+  document.getElementById("top-balance").textContent = (getBalance()>=999999?'∞':getBalance().toLocaleString('ru-RU'))+' ₽';
 }
 function renderProfile(){
   const w=document.getElementById("profile-widget");
@@ -751,10 +803,10 @@ function renderProfile(){
     return;
   }
   const bal=getBalance();
-  const hist=getUsers()[currentUser]&&getUsers()[currentUser].history || [];
-  const myGifts=(getUsers()[currentUser]&&getUsers()[currentUser].gifts)||[];
+  const hist=(userData&&userData.history)||[];
+  const myGifts=(userData&&userData.gifts)||[];
   w.innerHTML=
-    '<div class="wallet-card"><div class="bal-label">Ваш баланс</div><div class="bal-amount">'+bal.toLocaleString('ru-RU')+' ₽</div>'+
+    '<div class="wallet-card"><div class="bal-label">Ваш баланс</div><div class="bal-amount">'+(bal>=999999?'∞':bal.toLocaleString('ru-RU'))+' ₽</div>'+
     '<div class="bal-actions"><button onclick="toggleOps(\'topup\')">+ Пополнить</button><button onclick="go(\'gifts\')">Купить сертификат</button></div></div>'+
     '<div class="wallet-ops" id="wallet-topup">'+
       '<h3 style="margin-bottom:8px;font-weight:normal">Пополнение баланса</h3>'+
@@ -768,15 +820,17 @@ function renderProfile(){
     (myGifts.length ? '<div class="section-title">Мои сертификаты</div>'+myGifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· '+g.code+'</span></div>').join('') : '');
 }
 function toggleOps(id){ document.getElementById('wallet-'+id).classList.toggle('show'); }
-function startTopup(){
+async function startTopup(){
   if(!currentUser){ alert("Войдите в аккаунт."); return; }
   const amt=parseFloat(document.getElementById("topup-amount").value);
   if(!amt||amt<100){ alert("Укажите сумму от 100 ₽."); return; }
-  const text2="ПОПОЛНЕНИЕ БАЛАНСА\nКарта: "+CARD_VTB+"\nСумма: "+amt.toLocaleString('ru-RU')+" ₽\nПользователь: "+currentUser;
+  const text2="ПОПОЛНЕНИЕ БАЛАНСА\nКарта: "+CARD_VTB+"\nСумма: "+amt.toLocaleString('ru-RU')+" ₽\nПользователь: "+(currentUser.phone||currentUser.nick);
   console.log(text2);
   alert("Переведите "+amt.toLocaleString('ru-RU')+" ₽ на карту "+CARD_VTB+". Когда перевод пройдёт, нажмите «Подтверждаю» — мы проверим и начислим баланс.");
-  addBalance(amt, "Пополнение баланса (модерация)");
+  await addBalance(amt, "Пополнение баланса (модерация)");
 }
+function getUsers(){ return {}; } // заменено Firestore — оставлено для совместимости
+function saveUsers(u){} // заменено Firestore
 
 /* ============ СЕРТИФИКАТЫ ============ */
 function buyGift(amount){
@@ -794,13 +848,18 @@ function buyGift(amount){
   confirmBox.innerHTML=html;
   confirmBox.scrollIntoView({behavior:'smooth'});
 }
-function confirmGift(amount){
+async function confirmGift(amount){
   if(getBalance()<amount){ alert("Недостаточно средств."); return; }
-  addBalance(-amount, "Покупка подарочного сертификата "+amount.toLocaleString('ru-RU'));
+  if(!isUnlimited()){ await addBalance(-amount, "Покупка подарочного сертификата "+amount.toLocaleString('ru-RU')); }
   const code="MEM-"+Math.floor(100000+Math.random()*900000);
-  const u=getUsers();
-  let key=currentUser;
-  if(u[key]){ if(!u[key].gifts) u[key].gifts=[]; u[key].gifts.push({amount:amount, code:code}); saveUsers(u); }
+  try{
+    if(userData && userData._ref){
+      const gifts = userData.gifts||[];
+      gifts.push({amount:amount, code:code});
+      await userData._ref.update({ gifts: gifts });
+      userData.gifts = gifts;
+    }
+  }catch(e){ console.error(e); }
   // Показать сертификат-поздравление
   document.getElementById("gift-confirm").innerHTML=
     '<div class="certificate"><h3>ПОЗДРАВЛЯЕМ!</h3>'+
@@ -813,7 +872,7 @@ function confirmGift(amount){
 function renderMyGifts(){
   const box=document.getElementById("my-gifts");
   if(!currentUser){ box.innerHTML='<p style="color:var(--muted)">Войдите, чтобы видеть свои сертификаты.</p>'; return; }
-  const gifts=(getUsers()[currentUser]&&getUsers()[currentUser].gifts)||[];
+  const gifts=(userData&&userData.gifts)||[];
   box.innerHTML = gifts.length ? gifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· код '+g.code+'</span></div>').join('') : '<p style="color:var(--muted)">Вы ещё не приобретали сертификаты.</p>';
 }
 
@@ -851,7 +910,8 @@ function addReviewPm(btn){
   if(!txt){ alert('Напишите текст отзыва.'); return; }
   const stars=parseInt(form.querySelector('.star-input').getAttribute('data-stars'))||5;
   const p=PRODUCTScurrent[curIdx];
-  if(p){ if(!p.reviews) p.reviews=[]; p.reviews.push({name:currentUser,stars:stars,text:txt}); render(); drawProductBody(); saveData(); }
+  const revName = currentUser.nick || currentUser.phone || currentUser;
+  if(p){ if(!p.reviews) p.reviews=[]; p.reviews.push({name:revName,stars:stars,text:txt}); render(); drawProductBody(); saveData(); }
 }
 
 /* ============ ОБЩЕЕ ============ */
@@ -864,49 +924,74 @@ function renderContacts(){
   c.innerHTML='<h3>Контакты</h3><div class="item"><div class="lbl">Магазин</div>'+CONTACTScurrent.shop+'</div><div class="item"><div class="lbl">Телефон</div>'+CONTACTScurrent.phone+'</div><div class="item"><div class="lbl">E-mail</div>'+CONTACTScurrent.email+'</div><div class="item"><div class="lbl">Адрес</div>'+CONTACTScurrent.address+'</div><div class="item"><div class="lbl">Режим работы</div>'+CONTACTScurrent.hours+'</div>';
 }
 
-/* ============ АВТОРИЗАЦИЯ ============ */
+/* ============ АВТОРИЗАЦИЯ (Firestore) ============ */
 function openAuth(e){ if(e)e.preventDefault(); document.getElementById("authwrap").classList.add("show"); setMsg("li-msg",""); setMsg("rg-msg",""); }
 function closeAuth(){ document.getElementById("authwrap").classList.remove("show"); }
 function authTab(t){ document.getElementById("tab-login").classList.toggle("on",t==="login"); document.getElementById("tab-reg").classList.toggle("on",t==="reg"); document.getElementById("auth-login").style.display=t==="login"?"":"none"; document.getElementById("auth-reg").style.display=t==="reg"?"":"none"; }
 function setMsg(id,txt){ const el=document.getElementById(id); el.textContent=txt; el.className="auth-msg"+(txt&&txt.startsWith("Ошибка")?" err":""); }
-function doRegister(){
+async function doRegister(){
   const nick=document.getElementById("rg-nick").value.trim();
   const pass=document.getElementById("rg-pass").value;
   const phone=document.getElementById("rg-phone").value.trim();
   if(!nick||!pass||!phone){ setMsg("rg-msg","Ошибка: заполните все поля."); return; }
-  const users=getUsers();
-  if(users[nick]||users[phone]){ setMsg("rg-msg","Ошибка: такой ник или номер уже используется."); return; }
-  users[nick]={pass,phone,nick,balance:0,history:[],gifts:[]};
-  users[phone]={pass,nick};
-  saveUsers(users);
-  currentUser=nick; localStorage.setItem("chasy_salon_current_user",nick);
-  setMsg("rg-msg","Регистрация успешна! Вы вошли как "+nick+".");
-  afterLogin(nick);
+  // привести номер к формату +7...
+  let normPhone = phone;
+  if(normPhone.startsWith("8")){ normPhone = "+7"+normPhone.slice(1); }
+  else if(normPhone.startsWith("7")){ normPhone = "+"+normPhone; }
+  else if(!normPhone.startsWith("+")){ normPhone = "+"+normPhone; }
+  try{
+    const exists = await loadUserFromFirestore(normPhone);
+    if(exists){ setMsg("rg-msg","Ошибка: этот номер уже зарегистрирован."); return; }
+    const nickExists = await loadUserFromFirestore(nick);
+    if(nickExists){ setMsg("rg-msg","Ошибка: этот ник уже занят."); return; }
+    const ref = await createUserInFirestore(nick, normPhone, pass);
+    currentUser = { nick:nick, phone:normPhone };
+    userData = Object.assign({}, { nick, phone:normPhone, balance:0, history:[], gifts:[] }, { _ref: ref });
+    localStorage.setItem("chasy_salon_current_user", JSON.stringify({nick:nick, phone:normPhone}));
+    setMsg("rg-msg","Регистрация успешна! Вы вошли как "+nick+".");
+    afterLogin(nick);
+  }catch(e){ setMsg("rg-msg","Ошибка: "+e.message); }
 }
-function doLogin(){
+async function doLogin(){
   const id=document.getElementById("li-id").value.trim();
   const pass=document.getElementById("li-pass").value;
-  const users=getUsers();
-  const acc=users[id];
-  if(!acc||acc.pass!==pass){ setMsg("li-msg","Ошибка: неверный логин или пароль."); return; }
-  currentUser=acc.nick||id; localStorage.setItem("chasy_salon_current_user",currentUser);
-  setMsg("li-msg","Добро пожаловать, "+currentUser+"!");
-  afterLogin(currentUser);
+  if(!id||!pass){ setMsg("li-msg","Ошибка: введите логин и пароль."); return; }
+  try{
+    const doc = await loadUserFromFirestore(id);
+    if(!doc){ setMsg("li-msg","Ошибка: пользователь не найден."); return; }
+    const data = doc.data();
+    if(data.password !== pass){ setMsg("li-msg","Ошибка: неверный пароль."); return; }
+    currentUser = { nick:data.nick, phone:data.phone };
+    userData = Object.assign({}, data, { _ref: doc.ref, _id: doc.id });
+    localStorage.setItem("chasy_salon_current_user", JSON.stringify({ nick:data.nick, phone:data.phone }));
+    setMsg("li-msg","Добро пожаловать, "+data.nick+"!");
+    afterLogin(data.nick);
+  }catch(e){ setMsg("li-msg","Ошибка: "+e.message); }
 }
 function afterLogin(nick){
   document.getElementById("li-id").value=""; document.getElementById("li-pass").value="";
   document.getElementById("rg-nick").value=""; document.getElementById("rg-pass").value=""; document.getElementById("rg-phone").value="";
-  setTimeout(function(){ closeAuth(); },800);
+  setTimeout(function(){ closeAuth(); },600);
   updateTopRight(nick);
   renderTopBalance();
   if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+  if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
 }
 function updateTopRight(nick){
   const badge=document.getElementById("usrbadge"), loginLink=document.getElementById("login-link");
   if(loginLink){ loginLink.style.display=nick?"none":""; }
   if(badge){ badge.querySelector("span").textContent=nick?"Привет, "+nick:""; badge.classList.toggle("on",!!nick); }
 }
-function logoutUser(){ currentUser=null; localStorage.removeItem("chasy_salon_current_user"); updateTopRight(null); renderTopBalance(); renderProfile(); alert("Вы вышли из аккаунта."); }
+function logoutUser(){ currentUser=null; userData=null; localStorage.removeItem("chasy_salon_current_user"); updateTopRight(null); renderTopBalance(); renderProfile(); alert("Вы вышли из аккаунта."); }
+async function restoreSession(){
+  try{
+    const s=localStorage.getItem("chasy_salon_current_user");
+    if(!s) return;
+    const saved=JSON.parse(s);
+    const doc=await loadUserFromFirestore(saved.phone||saved.nick);
+    if(doc){ currentUser=saved; userData=Object.assign({}, doc.data(), {_ref:doc.ref, _id:doc.id}); updateTopRight(saved.nick||saved.phone); renderTopBalance(); }
+  }catch(e){ console.error(e); }
+}
 
 /* ============ РЕДАКТОР ============ */
 document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="E"||e.key==="е"||e.key==="e")){ e.preventDefault(); if(localStorage.getItem(LS_PASS)==="1"){openEditor();}else{showPass();} } });
@@ -959,6 +1044,7 @@ function edPublish(){
 }
 
 renderContacts(); render(); renderTopBalance();
+restoreSession();
 </script>
 </body>
 </html>
