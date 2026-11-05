@@ -179,6 +179,13 @@
   /* Редактор */
   .edit-fab{position:fixed;top:14px;right:14px;width:44px;height:44px;border-radius:50%;background:var(--gold);color:#fff;border:none;font-size:1.5rem;line-height:1;cursor:pointer;z-index:80;display:none;box-shadow:0 4px 12px rgba(0,0,0,.2)}
   .edit-fab.on{display:block}
+  .fab-menu{
+    position:fixed;top:64px;right:14px;width:240px;background:#fff;border:1px solid var(--line);
+    box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:82;display:none;padding:6px;
+  }
+  .fab-menu.show{display:block}
+  .fab-menu button{display:block;width:100%;text-align:left;background:none;border:none;padding:11px 14px;cursor:pointer;font-family:inherit;font-size:.92rem;color:var(--ink)}
+  .fab-menu button:hover{background:var(--cream)}
   #editor{position:fixed;top:0;right:-640px;width:620px;max-width:95vw;height:100vh;background:#fff;box-shadow:-6px 0 30px rgba(0,0,0,.2);transition:right .3s;z-index:90;overflow-y:auto}
   #editor.open{right:0}
   #editor header{background:var(--ink);color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center}
@@ -471,11 +478,18 @@
 
 <div class="overlay" id="overlay" onclick="closePanels()"></div>
 
-<button class="edit-fab" id="edit-fab" onclick="openEditor()" title="Редактор">⋯</button>
+<button class="edit-fab" id="edit-fab" onclick="fabClick()" title="Настройки (только на этом ПК)">⋯</button>
+
+<div class="fab-menu" id="fab-menu">
+  <button onclick="fabAction('catalog')">✏️ Редактировать каталог</button>
+  <button onclick="fabAction('account')">👤 Редактировать анкету</button>
+  <button onclick="fabAction('changepass')">🔑 Сменить код доступа</button>
+  <button onclick="fabAction('close')">Закрыть</button>
+</div>
 
 <div class="passscreen" id="passscreen">
   <div class="pass-box">
-    <h3>Доступ к редактору</h3>
+    <h3 id="pass-title">Доступ к настройкам</h3>
     <input type="password" id="pass-input" placeholder="Код доступа">
     <div class="err" id="pass-err"></div>
     <button onclick="tryPass()">Открыть</button>
@@ -1425,13 +1439,110 @@ function showGiftCongrats(g){
   }catch(e){ console.error(e); }
 }
 
-/* ============ РЕДАКТОР ============ */
-document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="E"||e.key==="е"||e.key==="e")){ e.preventDefault(); if(localStorage.getItem(LS_PASS)==="1"){openEditor();}else{showPass();} } });
-function showPass(){ document.getElementById("passscreen").classList.add("show"); document.getElementById("pass-input").focus(); document.getElementById("pass-err").textContent=""; }
+/* ============ РЕДАКТОР / НАСТРОЙКИ (только на этом ПК) ============ */
+document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="E"||e.key==="е"||e.key==="e")){ e.preventDefault(); showFabMenu(); } });
+let fabPendingAction = null;
+function showFabMenu(){
+  if(localStorage.getItem(LS_PASS)==="1"){ document.getElementById("fab-menu").classList.add("show"); }
+  else{ showPass("Введите код доступа для настроек"); }
+}
+function fabClick(){
+  const menu=document.getElementById("fab-menu");
+  if(menu.classList.contains("show")){ menu.classList.remove("show"); return; }
+  showFabMenu();
+}
+function fabAction(action){
+  document.getElementById("fab-menu").classList.remove("show");
+  if(action==='close') return;
+  if(action==='catalog'){ openEditor(); return; }
+  if(action==='account'){ openAccountEditor(); return; }
+  if(action==='changepass'){ openChangePass(); return; }
+}
+function showPass(title){
+  document.getElementById("pass-title").textContent = title || "Доступ к настройкам";
+  document.getElementById("passscreen").classList.add("show");
+  document.getElementById("pass-input").value="";
+  document.getElementById("pass-err").textContent="";
+  document.getElementById("pass-input").focus();
+}
 function hidePass(){ document.getElementById("passscreen").classList.remove("show"); }
-function tryPass(){ const v=document.getElementById("pass-input").value; if(v===EDIT_PASS){ localStorage.setItem(LS_PASS,"1"); document.getElementById("pass-input").value=""; hidePass(); openEditor(); } else { document.getElementById("pass-err").textContent="Неверный код доступа."; } }
+function tryPass(){
+  const v=document.getElementById("pass-input").value;
+  const cur = window.__customPass || EDIT_PASS;
+  if(v===cur){
+    localStorage.setItem(LS_PASS,"1");
+    document.getElementById("pass-input").value="";
+    hidePass();
+    document.getElementById("edit-fab").classList.add("on");
+    document.getElementById("fab-menu").classList.add("show");
+  } else {
+    document.getElementById("pass-err").textContent="Неверный код доступа.";
+  }
+}
 function openEditor(){ document.getElementById("passscreen").classList.remove("show"); document.getElementById("edit-fab").classList.add("on"); fillEditor(); document.getElementById("editor").classList.add("open"); }
 function closeEditor(){ document.getElementById("editor").classList.remove("open"); }
+// Смена кода доступа
+function openChangePass(){
+  const box = document.getElementById("editor");
+  box.querySelector("header h2").textContent = "Смена кода доступа";
+  box.querySelector(".wrap").innerHTML =
+    '<h3 style="margin-bottom:8px">Новый код доступа</h3>'+
+    '<p style="font-size:.85rem;color:var(--muted);margin-bottom:10px">Код нужен, чтобы открывать меню настроек на этом ПК.</p>'+
+    '<div class="ed-contact"><div><label>Старый код</label><input id="old-pass" type="password" placeholder="Текущий код"></div></div>'+
+    '<div class="ed-contact"><div><label>Новый код</label><input id="new-pass" type="password" placeholder="Новый код"></div></div>'+
+    '<div class="ed-contact"><div><label>Повторите</label><input id="new-pass2" type="password" placeholder="Ещё раз"></div></div>'+
+    '<div class="ed-actions" style="margin-top:16px"><button class="ed-save" onclick="saveNewPass()">Сохранить</button><button class="ed-reset" onclick="closeEditor()">Отмена</button></div>'+
+    '<p class="ed-locknote" id="pass-change-result"></p>';
+  document.getElementById("editor").classList.add("open");
+}
+function saveNewPass(){
+  const old=document.getElementById("old-pass").value;
+  const n1=document.getElementById("new-pass").value;
+  const n2=document.getElementById("new-pass2").value;
+  const res=document.getElementById("pass-change-result");
+  if(old!==EDIT_PASS){ res.textContent="Старый код неверный."; res.style.color="#b02323"; return; }
+  if(n1.length<4){ res.textContent="Новый код минимум 4 символа."; res.style.color="#b02323"; return; }
+  if(n1!==n2){ res.textContent="Пароли не совпадают."; res.style.color="#b02323"; return; }
+  localStorage.setItem("chasy_edit_pass_custom", n1);
+  const script = document.querySelector('script:last-of-type');
+  // Переопределить EDIT_PASS нельзя, используем переменную с проверкой
+  window.__customPass = n1;
+  res.textContent="Код доступа изменён!";
+  res.style.color="var(--green)";
+  setTimeout(closeEditor, 1200);
+}
+function checkCustomPass(v){ return (window.__customPass || EDIT_PASS) === v; }
+// Редактирование анкеты (профиль пользователя)
+function openAccountEditor(){
+  if(!currentUser){ alert("Войдите в аккаунт."); return; }
+  const box=document.getElementById("editor");
+  box.querySelector("header h2").textContent="Редактировать анкету";
+  box.querySelector(".wrap").innerHTML=
+    '<h3 style="margin-bottom:8px">Анкета</h3>'+
+    '<div class="ed-contact"><div><label>Ник</label><input id="ae-nick" value="'+esc(currentUser.nick||"")+'"></div></div>'+
+    '<div class="ed-contact"><div><label>Телефон</label><input id="ae-phone" value="'+esc(currentUser.phone||"")+'"></div></div>'+
+    '<div class="ed-actions" style="margin-top:16px"><button class="ed-save" onclick="saveAccount()">Сохранить</button><button class="ed-reset" onclick="closeEditor()">Отмена</button></div>'+
+    '<p class="ed-locknote" id="ae-result"></p>';
+  document.getElementById("editor").classList.add("open");
+}
+async function saveAccount(){
+  if(!currentUser||!userData) return;
+  const nick=document.getElementById("ae-nick").value.trim();
+  const phone=normPhone(document.getElementById("ae-phone").value);
+  const res=document.getElementById("ae-result");
+  if(!nick){ res.textContent="Ник не может быть пустым."; res.style.color="#b02323"; return; }
+  try{
+    await userData._ref.update({ nick:nick, searchNick:nick.toLowerCase(), phone:phone });
+    // обновить names для входа по нику
+    await firestore.collection("names").doc(nick.toLowerCase()).set({ uid: currentUser.uid, phone: phone });
+    currentUser.nick=nick; currentUser.phone=phone;
+    res.textContent="Сохранено!";
+    res.style.color="var(--green)";
+    updateTopRight(nick);
+    renderTopBalance(); renderProfile();
+    setTimeout(closeEditor, 1200);
+  }catch(e){ res.textContent="Ошибка: "+e.message; res.style.color="#b02323"; }
+}
 function fillEditor(){ const c=CONTACTScurrent; document.getElementById("ec-shop").value=c.shop; document.getElementById("ec-phone").value=c.phone; document.getElementById("ec-email").value=c.email; document.getElementById("ec-address").value=c.address; document.getElementById("ec-hours").value=c.hours; drawEditorProducts(); }
 function specsToStr(specs){ if(!specs) return ""; return Object.keys(specs).map(function(k){return k+":"+specs[k];}).join("; "); }
 function strToSpecs(s){ const out={}; s.split(";").forEach(function(c){ const i=c.indexOf(":"); if(i>0){ out[c.slice(0,i).trim()]=c.slice(i+1).trim(); } }); return out; }
