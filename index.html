@@ -1455,7 +1455,7 @@ function showGiftCongrats(g){
 }
 
 /* ============ РЕДАКТОР / НАСТРОЙКИ (только на этом ПК) ============ */
-document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="E"||e.key==="е"||e.key==="e")){ e.preventDefault(); showFabMenu(); } });
+document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="L"||e.key==="л"||e.key==="l")){ e.preventDefault(); showFabMenu(); } });
 let fabPendingAction = null;
 function showFabMenu(){
   if(localStorage.getItem(LS_PASS)==="1"){ document.getElementById("fab-menu").classList.add("show"); }
