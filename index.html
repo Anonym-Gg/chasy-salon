@@ -1302,37 +1302,41 @@ auth.onAuthStateChanged(async function(user){
   if(user){
     const uid=user.uid;
     const docRef=firestore.collection("users").doc(uid);
-    // Подписка на изменения документа (баланс, сертификаты приходят автоматически)
+    // Сначала загружаем документ синхронно (жёстко), чтобы телефон/ник были сразу
+    try{
+      const doc=await docRef.get();
+      let data={};
+      if(doc.exists){ data=doc.data(); }
+      else{
+        const nick = user.email ? user.email.split("@")[0] : "user"+uid.slice(0,4);
+        data={ nick:nick, searchNick:nick.toLowerCase(), phone:"", balance:0, history:[], gifts:[] };
+        await docRef.set(data);
+      }
+      currentUser={ nick:data.nick, phone:data.phone||"", uid:uid };
+      userData=Object.assign({}, data, { _ref: docRef });
+      updateTopRight(data.nick);
+      renderTopBalance();
+      if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+      if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+    }catch(e){ console.error("load user doc:", e); }
+    // Затем подписка на живые изменения (баланс, сертификаты)
     if(window.__unsub){ try{ window.__unsub(); }catch(e){} }
     window.__unsub = docRef.onSnapshot(function(doc){
       if(!doc.exists) return;
-      const data = doc.data();
+      const data=doc.data();
       const prevGifts = userData ? (userData.gifts||[]).length : 0;
-      const prevBalance = userData ? (userData.balance||0) : null;
       userData = Object.assign({}, data, { _ref: docRef });
       if(currentUser){ currentUser.nick=data.nick; currentUser.phone=data.phone||""; }
-      const newGifts = (data.gifts||[]).length;
-      // Новый сертификат появился — показываем поздравление
-      if(newGifts>prevGifts && newGifts>0){
-        const latest = data.gifts[data.gifts.length-1];
+      const newGifts=(data.gifts||[]).length;
+      if(newGifts>prevGifts && newGifts>0 && prevGifts!==undefined){
+        const latest=data.gifts[data.gifts.length-1];
         showGiftCongrats(latest);
-      }
-      if(prevBalance!==null && (data.balance||0)!==prevBalance){
-        // баланс изменился — обновляем
       }
       updateTopRight(data.nick);
       renderTopBalance();
       if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
       if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
     });
-    // Первичная загрузка
-    try{
-      const doc=await docRef.get();
-      if(!doc.exists){
-        const nick = user.email ? user.email.split("@")[0] : "user"+uid.slice(0,4);
-        await docRef.set({ nick:nick, searchNick:nick.toLowerCase(), phone:"", balance:0, history:[], gifts:[] });
-      }
-    }catch(e){ console.error(e); }
   }else{
     currentUser=null; userData=null;
     if(window.__unsub){ try{ window.__unsub(); }catch(e){} window.__unsub=null; }
