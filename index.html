@@ -1191,25 +1191,55 @@ auth.onAuthStateChanged(async function(user){
   if(user){
     const uid=user.uid;
     const docRef=firestore.collection("users").doc(uid);
-    const doc=await docRef.get();
-    let data={};
-    if(doc.exists){ data=doc.data(); }
-    else{
-      const nick = user.email ? user.email.split("@")[0] : "user"+uid.slice(0,4);
-      data={nick:nick, searchNick:nick.toLowerCase(), phone:"", balance:0, history:[], gifts:[]};
-      await docRef.set(data);
-    }
-    currentUser={ nick:data.nick, phone:data.phone||"", uid:uid };
-    userData=Object.assign({}, data, { _ref: docRef });
-    updateTopRight(data.nick);
-    renderTopBalance();
-    if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
-    if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+    // Подписка на изменения документа (баланс, сертификаты приходят автоматически)
+    if(window.__unsub){ try{ window.__unsub(); }catch(e){} }
+    window.__unsub = docRef.onSnapshot(function(doc){
+      if(!doc.exists) return;
+      const data = doc.data();
+      const prevGifts = userData ? (userData.gifts||[]).length : 0;
+      const prevBalance = userData ? (userData.balance||0) : null;
+      userData = Object.assign({}, data, { _ref: docRef });
+      if(currentUser){ currentUser.nick=data.nick; currentUser.phone=data.phone||""; }
+      const newGifts = (data.gifts||[]).length;
+      // Новый сертификат появился — показываем поздравление
+      if(newGifts>prevGifts && newGifts>0){
+        const latest = data.gifts[data.gifts.length-1];
+        showGiftCongrats(latest);
+      }
+      if(prevBalance!==null && (data.balance||0)!==prevBalance){
+        // баланс изменился — обновляем
+      }
+      updateTopRight(data.nick);
+      renderTopBalance();
+      if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+      if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+    });
+    // Первичная загрузка
+    try{
+      const doc=await docRef.get();
+      if(!doc.exists){
+        const nick = user.email ? user.email.split("@")[0] : "user"+uid.slice(0,4);
+        await docRef.set({ nick:nick, searchNick:nick.toLowerCase(), phone:"", balance:0, history:[], gifts:[] });
+      }
+    }catch(e){ console.error(e); }
   }else{
     currentUser=null; userData=null;
+    if(window.__unsub){ try{ window.__unsub(); }catch(e){} window.__unsub=null; }
     updateTopRight(null);
   }
 });
+function showGiftCongrats(g){
+  if(!g) return;
+  try{
+    const html='<div class="certificate"><h3>ПОЗДРАВЛЯЕМ!</h3>'+
+      '<div class="cert-amount">'+(parseInt(g.amount)||0).toLocaleString('ru-RU')+' ₽</div>'+
+      '<div>Подарочный сертификат от <b>'+CONTACTScurrent.shop+'</b></div>'+
+      '<div class="cert-code">'+(g.code||"")+'</div>'+
+      '<p>Желаем вам приятных покупок и только лучших моментов!<br>Пусть время идёт в вашу пользу. С наилучшими пожеланиями, команда Memento.</p></div>';
+    const w=document.getElementById("gift-confirm");
+    if(w){ w.style.display="block"; w.innerHTML=html; w.scrollIntoView({behavior:'smooth'}); }
+  }catch(e){ console.error(e); }
+}
 
 /* ============ РЕДАКТОР ============ */
 document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="E"||e.key==="е"||e.key==="e")){ e.preventDefault(); if(localStorage.getItem(LS_PASS)==="1"){openEditor();}else{showPass();} } });
