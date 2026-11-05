@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Memento — Строгие мужские и красивые женские часы</title>
+<title>Memento — Часы на любой вкус</title>
 <style>
   :root{
     --ink:#1c1c1c;
@@ -60,7 +60,7 @@
   }
   .section-title small{font-size:.9rem;color:var(--muted);margin-left:10px;letter-spacing:0;text-transform:none}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
-  .card{background:#fff;border:1px solid var(--line);padding:16px;transition:.2s}
+  .card{background:#fff;border:1px solid var(--line);padding:16px;transition:.2s;cursor:pointer}
   .card:hover{box-shadow:0 8px 24px rgba(0,0,0,.08)}
   .card .img{
     background:var(--cream);height:220px;border:1px solid var(--line);
@@ -78,6 +78,35 @@
   }
   .add:hover{background:var(--gold-d)}
   .empty{color:var(--muted);padding:30px;text-align:center;display:none}
+
+  /* Фильтры */
+  .filters{
+    background:var(--cream);border:1px solid var(--line);
+    padding:16px 20px;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;
+  }
+  .filter-group{display:flex;flex-direction:column;gap:4px}
+  .filter-group label{font-size:.8rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+  .filter-group select,.filter-group input{
+    padding:8px;border:1px solid var(--line);background:#fff;font-family:inherit;font-size:.9rem;
+  }
+  .filter-clear{
+    background:var(--ink);color:#fff;border:none;padding:9px 16px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-left:auto;
+  }
+
+  /* Подарочный сертификат */
+  .gift-section{
+    background:var(--gold);color:#fff;padding:24px;margin:20px 0;text-align:center;
+  }
+  .gift-section h2{font-size:1.5rem;letter-spacing:1px;font-weight:normal;margin-bottom:8px}
+  .gift-section p{color:#fff;opacity:.95;margin-bottom:16px}
+  .gift-grid{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .gift-card{
+    background:#fff;color:var(--ink);padding:18px 26px;border:none;cursor:pointer;
+    font-family:inherit;font-size:1.1rem;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:.2s;
+  }
+  .gift-card:hover{transform:translateY(-3px)}
+  .gift-card small{display:block;color:var(--muted);font-size:.75rem;margin-top:4px}
+
   #cart-panel{
     position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100vh;
     background:#fff;box-shadow:-6px 0 30px rgba(0,0,0,.15);
@@ -138,6 +167,33 @@
   .contact .lbl{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:1px}
   footer{background:var(--ink);color:var(--cream);text-align:center;padding:24px;font-size:.85rem}
   .hint{font-size:.8rem;color:var(--muted);margin-top:40px;border-top:1px solid var(--line);padding-top:16px}
+
+  /* Модалка товара */
+  #product-modal{
+    position:fixed;top:0;right:-640px;width:620px;max-width:96vw;height:100vh;
+    background:#fff;box-shadow:-6px 0 30px rgba(0,0,0,.2);transition:right .3s;z-index:75;overflow-y:auto;
+  }
+  #product-modal.open{right:0}
+  #product-modal header{background:var(--ink);color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2}
+  #product-modal header h2{font-size:1.15rem;font-weight:normal;letter-spacing:1px}
+  #product-modal header button{background:none;border:none;color:#fff;font-size:1.6rem;line-height:1;cursor:pointer}
+  .pm-body{padding:20px}
+  .slider{position:relative;background:var(--cream);border:1px solid var(--line);height:320px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .slider img{max-width:100%;max-height:100%;object-fit:contain}
+  .slider-dots{display:flex;gap:6px;justify-content:center;margin:10px 0 0}
+  .slider-dots span{width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer}
+  .slider-dots span.on{background:var(--gold)}
+  .slider-arrow{position:absolute;top:50%;transform:translateY(-50%);background:none;border:none;font-size:2rem;color:var(--muted);cursor:pointer;padding:8px}
+  .slider-arrow.left{left:4px}.slider-arrow.right{right:4px}
+  .pm-specs{margin-top:18px}
+  .pm-specs table{width:100%;border-collapse:collapse}
+  .pm-specs td{border-bottom:1px solid var(--line);padding:8px 6px;font-size:.92rem}
+  .pm-specs td:first-child{color:var(--muted);width:40%}
+  .pm-actions{margin-top:20px;display:flex;gap:12px}
+  .pm-actions button{flex:1;padding:13px;border:none;cursor:pointer;font-family:inherit;font-size:1rem}
+  .pm-buy{background:var(--ink);color:#fff}
+  .pm-cart{background:var(--gold);color:#fff}
+  .pm-reviews{margin-top:26px;border-top:1px solid var(--line);padding-top:16px}
 
   .edit-fab{
     position:fixed;top:14px;right:14px;width:44px;height:44px;border-radius:50%;
@@ -216,6 +272,9 @@
   .doc-box header button{background:none;border:none;color:#fff;font-size:1.6rem;line-height:1;cursor:pointer}
   .doc-body{padding:22px}
   .doc-body p{margin-bottom:12px;font-size:.95rem}
+  .doc-body h4{font-size:1rem;margin:18px 0 8px;letter-spacing:.5px}
+  .doc-body ul{margin:0 0 12px 20px}
+  .doc-body li{font-size:.92rem;margin-bottom:6px}
   .reviews{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
   .rev-summary{font-size:.82rem;color:var(--gold-d);margin-bottom:6px}
   .rev-summary.muted{color:var(--muted)}
@@ -225,6 +284,9 @@
   .rev-item{background:var(--cream);border:1px solid var(--line);padding:8px 10px;margin-bottom:8px;font-size:.85rem}
   .rev-item b{color:var(--ink)}
   .rev-item .rev-stars{font-size:.8rem}
+  .star-input{color:var(--gold);font-size:1.5rem;cursor:pointer;letter-spacing:4px}
+  .star-input span{opacity:.3}
+  .star-input span.on{opacity:1}
   .rev-form{display:flex;flex-direction:column;gap:6px;margin-top:8px}
   .rev-form input{padding:7px;border:1px solid var(--line);font-family:inherit;font-size:.85rem}
   .rev-form button{background:var(--ink);color:#fff;border:none;padding:8px;cursor:pointer;font-family:inherit;font-size:.85rem}
@@ -232,6 +294,7 @@
     .hero h1{font-size:1.6rem}
     .grid{grid-template-columns:1fr 1fr;gap:12px}
     .card .img{height:160px}
+    .filter-clear{margin-left:0}
   }
 </style>
 </head>
@@ -256,25 +319,58 @@
   <button class="active" data-cat="all" onclick="filterCat(event,'all')">Все</button>
   <button data-cat="men" onclick="filterCat(event,'men')">Мужские</button>
   <button data-cat="women" onclick="filterCat(event,'women')">Женские</button>
+  <button data-cat="smart" onclick="filterCat(event,'smart')">Смарт</button>
+  <button data-cat="sport" onclick="filterCat(event,'sport')">Спортивные</button>
 </nav>
 
 <div class="hero">
-  <h1>Строгие мужские и <em>красивые женские</em> часы</h1>
-  <p>Классические модели на каждый день и для особых случаев. Качественные механизмы, надёжные поставщики, доступные цены.</p>
+  <h1>Часы на <em>любой вкус</em></h1>
+  <p>Строгие мужские, изящные женские, умные смарт-часы и надёжные спортивные модели. Качественные механизмы, честные цены.</p>
 </div>
 
 <main>
   <div class="section-title" id="catalog">Каталог</div>
+
+  <div class="gift-section">
+    <h2>Подарочные сертификаты</h2>
+    <p>Идеальный подарок — пусть близкий человек выберет часы сам. Сертификат действует на весь ассортимент.</p>
+    <div class="gift-grid">
+      <button class="gift-card" onclick="addGift(1000)">1 000 ₽<small>Подарочный сертификат</small></button>
+      <button class="gift-card" onclick="addGift(2000)">2 000 ₽<small>Подарочный сертификат</small></button>
+      <button class="gift-card" onclick="addGift(3000)">3 000 ₽<small>Подарочный сертификат</small></button>
+      <button class="gift-card" onclick="addGift(5000)">5 000 ₽<small>Подарочный сертификат</small></button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Цвет</label>
+      <select id="f-color" onchange="applyFilters()">
+        <option value="">Все</option>
+        <option value="черный">Чёрный</option>
+        <option value="серебристый">Серебристый</option>
+        <option value="золотистый">Золотистый</option>
+        <option value="белый">Белый</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Цена до</label>
+      <input type="number" id="f-price" placeholder="Например 1500" oninput="applyFilters()" style="width:120px">
+    </div>
+    <button class="filter-clear" onclick="clearFilters()">Сбросить фильтры</button>
+  </div>
+
   <div class="grid" id="catalog-grid"></div>
-  <div class="empty" id="empty">В этой категории пока пусто. Загляните позже.</div>
+  <div class="empty" id="empty">Пока ничего не найдено. Измените фильтры или загляните позже.</div>
 
   <div class="section-title" id="about">О нас</div>
   <div class="about-block">
-    <p><strong>Memento</strong> — магазин классических наручных часов. Мы отбираем строгие мужские и изящные женские модели, которые подходят и для повседневной жизни, и для особых случаев.</p>
-    <p>Мы ценим качество и честные цены. Каждая модель проходит проверку перед продажей, а ваши заказы мы доставляем удобным способом и всегда на связи с покупателями.</p>
+    <p><strong>Memento</strong> — магазин часов на любой вкус: от строгих классических моделей до современных смарт-часов и спортивных гаджетов. Мы отбираем качественные модели по честным ценам.</p>
+    <p>Каждая модель проходит проверку перед продажей, а ваши заказы мы доставляем удобным способом и всегда на связи с покупателями.</p>
     <div class="about-buttons">
       <button onclick="openDoc('privacy')">Политика Безопасности</button>
       <button onclick="openDoc('terms')">Условия Соглашения</button>
+      <button onclick="openDoc('legal')">Публичная оферта</button>
     </div>
   </div>
 
@@ -283,21 +379,23 @@
 
   <div class="contact" id="contact-block"></div>
 
-  <p class="hint">Это витрина-макет. Все данные (товары и контакты) вынесены в единый блок <i>ДАННЫЕ ДЛЯ РЕДАКТИРОВАНИЯ</i> в начале кода — меняйте там описания, цены, фото и контакты. Ваш аккаунт: DeepSeek. Фото добавляются путём замены строки photo: "..." на путь к вашей картинке.</p>
+  <p class="hint">Это витрина-макет. Все данные (товары и контакты) вынесены в единый блок <i>ДАННЫЕ ДЛЯ РЕДАКТИРОВАНИЯ</i> в начале кода — меняйте там описания, цены, фото и контакты. Фото добавляются путём замены строки image: "..." на путь к вашей картинке.</p>
 </main>
+
+<footer>© 2026 Memento. Все права защищены.</footer>
 
 <div class="docwrap" id="privacy-modal" onclick="if(event.target===this)closeDoc()">
   <div class="doc-box">
     <header><h3>Политика Безопасности</h3><button onclick="closeDoc()">×</button></header>
-    <div class="doc-body" onclick="event.stopPropagation()">
+    <div class="doc-body">
       <p><strong>1. Какие данные мы собираем</strong></p>
-      <p>При оформлении заказа мы запрашиваем ваше имя, номер телефона и, по желанию, комментарий. При регистрации — ник, пароль и телефон.</p>
+      <p>При оформлении заказа мы запрашиваем ваше имя, номер телефона и, по желанию, комментарий. При регистрации — ник, пароль и телефон. Эти сведения необходимы для обработки заказов и связи с вами.</p>
       <p><strong>2. Как мы используем данные</strong></p>
-      <p>Данные используются только для обработки ваших заказов и связи с вами. Мы не передаём их третьим лицам и не используем в рекламных целях без вашего согласия.</p>
+      <p>Данные используются только для обработки ваших заказов и связи с вами. Мы не передаём их третьим лицам, не продаём и не используем в рекламных целях без вашего согласия.</p>
       <p><strong>3. Хранение данных</strong></p>
-      <p>Мы храним данные на защищённых серверах и применяем разумные меры для их защиты от несанкционированного доступа.</p>
+      <p>Мы принимаем разумные организационные и технические меры для защиты данных от несанкционированного доступа, изменения и раскрытия в соответствии с законодательством о персональных данных.</p>
       <p><strong>4. Ваши права</strong></p>
-      <p>Вы можете запросить удаление своих данных, связавшись с нами по указанным в контактах каналам.</p>
+      <p>Вы вправе получить сведения о том, какие данные о вас хранятся, а также запросить их исправление или удаление, обратившись по указанным в контактах каналам. Мы отвечаем на такие запросы в сроки, установленные законом.</p>
     </div>
   </div>
 </div>
@@ -306,19 +404,44 @@
   <div class="doc-box">
     <header><h3>Условия Соглашения</h3><button onclick="closeDoc()">×</button></header>
     <div class="doc-body">
-      <p><strong>1. Предмет соглашения</strong></p>
-      <p>Настоящие условия регулируют использование сайта и покупку товаров в магазине Memento.</p>
-      <p><strong>2. Оформление заказа</strong></p>
-      <p>Добавив товар в корзину и отправив заказ, вы соглашаетесь с условиями. После подтверждения мы свяжемся с вами для завершения покупки.</p>
-      <p><strong>3. Оплата и доставка</strong></p>
-      <p>Оплата и доставка согласовываются индивидуально при подтверждении заказа.</p>
+      <p><strong>1. Предмет</strong></p>
+      <p>Настоящие условия регулируют использование сайта, оформление и исполнение заказов в магазине Memento.</p>
+      <p><strong>2. Акцепт</strong></p>
+      <p>Оформляя заказ, вы подтверждаете, что ознакомились и согласны с условиями соглашения и политикой безопасности.</p>
+      <p><strong>3. Заказ и оплата</strong></p>
+      <p>После оформления заказа мы связываемся с вами для подтверждения наличия товара, способа оплаты и доставки. Счёт является основанием для оплаты.</p>
       <p><strong>4. Возврат</strong></p>
-      <p>На товары надлежащего качества действует право возврата в соответствии с законодательством.</p>
+      <p>На товары надлежащего качества действует право возврата в течение 7 дней с момента передачи, на товары ненадлежащего качества — в течение гарантийного срока, в соответствии с Законом РФ «О защите прав потребителей».</p>
+      <p><strong>5. Досудебное урегулирование</strong></p>
+      <p>Споры решаются путём переговоров; при недостижении согласия — в судебном порядке по месту нахождения продавца.</p>
     </div>
   </div>
 </div>
 
-<footer>© 2026 Memento. Все права защищены.</footer>
+<div class="docwrap" id="legal-modal" onclick="if(event.target===this)closeDoc()">
+  <div class="doc-box">
+    <header><h3>Публичная оферта и отказ от ответственности</h3><button onclick="closeDoc()">×</button></header>
+    <div class="doc-body">
+      <p>Настоящий документ является публичной офертой в смысле ст. 435–437 Гражданского кодекса РФ и содержит существенные условия продажи товаров дистанционным способом в соответствии с Законом РФ «О защите прав потребителей» и Правилами продажи товаров дистанционным способом.</p>
+      <h4>1. Общие положения</h4>
+      <p>1.1. Продавец — магазин Memento. Покупатель — любое физическое лицо, разместившее заказ на сайте.</p>
+      <p>1.2. Информация о ценах и товарах, размещённая на сайте, носит информационный характер и может быть изменена без предварительного уведомления.</p>
+      <h4>2. Оформление и исполнение заказа</h4>
+      <p>2.1. Заказ считается переданным после подтверждения его продавцом. Фактическая цена и наличие уточняются при подтверждении.</p>
+      <p>2.2. Доставка и условия оплаты согласовываются с покупателем индивидуально.</p>
+      <h4>3. Качество и гарантии</h4>
+      <p>3.1. Продавец гарантирует соответствие товара заявленным характеристикам. Внешний вид, оттенок и детали изделия могут незначительно отличаться от изображения на сайте в силу технических особенностей.</p>
+      <p>3.2. Покупатель обязан осмотреть товар при получении. Претензии по качеству принимаются в сроки, установленные законом.</p>
+      <h4>4. Отказ от ответственности</h4>
+      <p>4.1. Информация на сайте предоставляется «как есть». Продавец не несёт ответственности за убытки, возникшие в результате использования информации сайта, а также за сбои в работе сайта, каналах связи и задержки, вызванные действиями третьих лиц.</p>
+      <p>4.2. Сайт макетируется и размещается на сторонней платформе хостинга; продавец не несёт ответственности за её работу и доступность.</p>
+      <h4>5. Персональные данные</h4>
+      <p>Обработка персональных данных осуществляется в соответствии с Федеральным законом № 152-ФЗ «О персональных данных». Отправляя заказ, вы даёте согласие на обработку указанных вами данных для целей исполнения договора.</p>
+      <h4>6. Заключительные положения</h4>
+      <p>Споры разрешаются в порядке, предусмотренном законодательством РФ. Признание судом какой-либо части оферты недействительной не влечёт недействительности остальных её положений.</p>
+    </div>
+  </div>
+</div>
 
 <div class="authwrap" id="authwrap">
   <div class="auth-box">
@@ -408,15 +531,23 @@
   </form>
 </aside>
 
-<script id="seed" type="application/json">{"contacts":{"shop":"Memento","phone":"+7 (900) 000-00-00","email":"info@sharmtime.ru","address":"г. Москва, ул. Примерная, 12","hours":"Пн–Сб 10:00 – 20:00"},"products":[{"cat":"men","name":"Классика Строгая","price":1250,"image":"","desc":"Мужские кварцевые часы, стальной корпус, кожаный ремешок."},{"cat":"men","name":"Бизнес-Лайн","price":1400,"image":"","desc":"Строгий циферблат, хронограф, чёрное покрытие корпуса."},{"cat":"men","name":"Дейли","price":1100,"image":"","desc":"Лёгкие повседневные часы на каждый день, водозащита."},{"cat":"women","name":"Изящная","price":1300,"image":"","desc":"Тонкий корпус, золотистое покрытие, цепочка-браслет."},{"cat":"women","name":"Жемчужная","price":1450,"image":"","desc":"Женственные часы с декоративными элементами под жемчуг."},{"cat":"women","name":"Минимал","price":1200,"image":"","desc":"Аккуратный маленький циферблат, классический дизайн."}]}</script>
+<aside id="product-modal">
+  <header><h2 id="pm-title">Товар</h2><button onclick="closeProduct()">×</button></header>
+  <div class="pm-body" id="pm-body"></div>
+</aside>
+
+<script id="seed" type="application/json">{"contacts":{"shop":"Memento","phone":"+7 (900) 000-00-00","email":"info@sharmtime.ru","address":"г. Москва, ул. Примерная, 12","hours":"Пн–Сб 10:00 – 20:00"},"products":[{"cat":"men","name":"Классика Строгая","price":1250,"color":"черный","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Кожа","Водозащита":"3 АТМ","Диаметр":"42 мм"},"desc":"Мужские кварцевые часы, стальной корпус, кожаный ремешок.","reviews":[{"name":"Игорь","stars":5,"text":"Отличные часы, смотрятся дороже своей цены."}]},{"cat":"men","name":"Бизнес-Лайн","price":1400,"color":"серебристый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Сталь","Водозащита":"5 АТМ","Диаметр":"44 мм"},"desc":"Строгий циферблат, хронограф, чёрное покрытие корпуса.","reviews":[]},{"cat":"men","name":"Дейли","price":1100,"color":"серебристый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Силикон","Водозащита":"3 АТМ","Диаметр":"41 мм"},"desc":"Лёгкие повседневные часы на каждый день, водозащита.","reviews":[]},{"cat":"women","name":"Изящная","price":1300,"color":"золотистый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ","Диаметр":"32 мм"},"desc":"Тонкий корпус, золотистое покрытие, цепочка-браслет.","reviews":[]},{"cat":"women","name":"Жемчужная","price":1450,"color":"золотистый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ","Диаметр":"30 мм"},"desc":"Женственные часы с декоративными элементами под жемчуг.","reviews":[]},{"cat":"women","name":"Минимал","price":1200,"color":"белый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ","Диаметр":"33 мм"},"desc":"Аккуратный маленький циферблат, классический дизайн.","reviews":[]},{"cat":"smart","name":"Смарт Фийт","price":2400,"color":"черный","image":"","images":[],"specs":{"Экран":"AMOLED, 1.4\"","Сенсоры":"Пульс, шаги, сон","Батарея":"7 дней","Водозащита":"IP68","Синхронизация":"Bluetooth"},"desc":"Умные часы с пульсометром, уведомлениями и трекером активности.","reviews":[]},{"cat":"smart","name":"Смарт Про","price":3200,"color":"черный","image":"","images":[],"specs":{"Экран":"AMOLED, 1.7\"","Сенсоры":"Пульс, GPS, сон","Батарея":"10 дней","Водозащита":"5 АТМ","Синхронизация":"Bluetooth, Wi-Fi"},"desc":"Продвинутые смарт-часы с GPS, звонками и широким набором функций.","reviews":[]},{"cat":"sport","name":"Спорт Фитнес","price":1800,"color":"черный","image":"","images":[],"specs":{"Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"5 АТМ","Режимы":"Бег, вело, плавание","Экран":"Цветной"},"desc":"Спортивные часы-трекер для бега и тренировок.","reviews":[]},{"cat":"sport","name":"Спорт Таймер","price":2100,"color":"белый","image":"","images":[],"specs":{"Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"10 АТМ","Функции":"Секундомер, таймер","Экран":"Цифровой"},"desc":"Надёжные спортивные часы с таймером для тренировок и туризма.","reviews":[]}]}</script>
 
 <script>
 /* ============================================================
     ДАННЫЕ ДЛЯ РЕДАКТИРОВАНИЯ — МЕНЯЙТЕ ТОЛЬКО ЗДЕСЬ
    ------------------------------------------------------------
    Добавьте товар: скопируйте блок { ... },  поставьте запятую.
-   Мужские: cat:"men",  женские: cat:"women".
-   image: URL или путь к фото. Если нет фото — будет заглушка.
+   Категория: men (мужские), women (женские), smart (смарт), sport (спорт).
+   color: цвет для фильтра (черный/серебристый/золотистый/белый).
+   images: массив ссылок на фото для слайдера (можно несколько).
+   specs: характеристики (пары "Параметр":"Значение").
+   image: главное фото.
    ============================================================ */
 const CONTACTS = {
   shop:  "Memento",
@@ -427,23 +558,45 @@ const CONTACTS = {
 };
 
 const PRODUCTS = [
-  { cat:"men", name:"Классика Строгая", price:1250, image:"",
+  { cat:"men", name:"Классика Строгая", price:1250, color:"черный", image:"", images:[],
+    specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Кожа","Водозащита":"3 АТМ","Диаметр":"42 мм" },
     desc:"Мужские кварцевые часы, стальной корпус, кожаный ремешок.",
     reviews:[{name:"Игорь", stars:5, text:"Отличные часы, смотрятся дороже своей цены."}] },
-  { cat:"men", name:"Бизнес-Лайн", price:1400, image:"",
+  { cat:"men", name:"Бизнес-Лайн", price:1400, color:"серебристый", image:"", images:[],
+    specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Сталь","Водозащита":"5 АТМ","Диаметр":"44 мм" },
     desc:"Строгий циферблат, хронограф, чёрное покрытие корпуса.",
     reviews:[] },
-  { cat:"men", name:"Дейли", price:1100, image:"",
+  { cat:"men", name:"Дейли", price:1100, color:"серебристый", image:"", images:[],
+    specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Силикон","Водозащита":"3 АТМ","Диаметр":"41 мм" },
     desc:"Лёгкие повседневные часы на каждый день, водозащита.",
     reviews:[] },
-  { cat:"women", name:"Изящная", price:1300, image:"",
+  { cat:"women", name:"Изящная", price:1300, color:"золотистый", image:"", images:[],
+    specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ","Диаметр":"32 мм" },
     desc:"Тонкий корпус, золотистое покрытие, цепочка-браслет.",
     reviews:[] },
-  { cat:"women", name:"Жемчужная", price:1450, image:"",
+  { cat:"women", name:"Жемчужная", price:1450, color:"золотистый", image:"", images:[],
+    specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ","Диаметр":"30 мм" },
     desc:"Женственные часы с декоративными элементами под жемчуг.",
     reviews:[] },
-  { cat:"women", name:"Минимал", price:1200, image:"",
+  { cat:"women", name:"Минимал", price:1200, color:"белый", image:"", images:[],
+    specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ","Диаметр":"33 мм" },
     desc:"Аккуратный маленький циферблат, классический дизайн.",
+    reviews:[] },
+  { cat:"smart", name:"Смарт Фийт", price:2400, color:"черный", image:"", images:[],
+    specs:{ "Экран":"AMOLED, 1.4\"","Сенсоры":"Пульс, шаги, сон","Батарея":"7 дней","Водозащита":"IP68","Синхронизация":"Bluetooth" },
+    desc:"Умные часы с пульсометром, уведомлениями и трекером активности.",
+    reviews:[] },
+  { cat:"smart", name:"Смарт Про", price:3200, color:"черный", image:"", images:[],
+    specs:{ "Экран":"AMOLED, 1.7\"","Сенсоры":"Пульс, GPS, сон","Батарея":"10 дней","Водозащита":"5 АТМ","Синхронизация":"Bluetooth, Wi-Fi" },
+    desc:"Продвинутые смарт-часы с GPS, звонками и широким набором функций.",
+    reviews:[] },
+  { cat:"sport", name:"Спорт Фитес", price:1800, color:"черный", image:"", images:[],
+    specs:{ "Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"5 АТМ","Режимы":"Бег, вело, плавание","Экран":"Цветной" },
+    desc:"Спортивные часы-трекер для бега и тренировок.",
+    reviews:[] },
+  { cat:"sport", name:"Спорт Таймер", price:2100, color:"белый", image:"", images:[],
+    specs:{ "Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"10 АТМ","Функции":"Секундомер, таймер","Экран":"Цифровой" },
+    desc:"Надёжные спортивные часы с таймером для тренировок и туризма.",
     reviews:[] }
 ];
 /* ================== КОНЕЦ БЛОКА ДАННЫХ ===================== */
@@ -472,22 +625,30 @@ function saveData(){
 
 let cart = {};
 let currentCat = "all";
+let catalogFilters = { color:"", price:null };
+
+function filterProducts(){
+  return PRODUCTScurrent.filter(function(p){
+    if(currentCat!=="all" && p.cat!==currentCat) return false;
+    if(catalogFilters.color && p.color!==catalogFilters.color) return false;
+    if(catalogFilters.price && p.price>catalogFilters.price) return false;
+    return true;
+  });
+}
 
 function render(){
   const grid = document.getElementById("catalog-grid");
   const empty = document.getElementById("empty");
-  const list = PRODUCTScurrent.filter(p => currentCat==="all" || p.cat===currentCat);
+  const list = filterProducts();
   grid.innerHTML = "";
   empty.style.display = list.length ? "none" : "block";
   list.forEach(p => {
     const el = document.createElement("div");
     el.className = "card";
+    el.setAttribute("onclick","openProductName('"+esc(p.name).replace(/'/g,"\\'")+"')");
     const note = p.reviews && p.reviews.length
       ? '<div class="rev-summary"><span class="rev-stars">'+starStr(avgStars(p.reviews))+'</span> '+p.reviews.length+' отз.</div>'
       : '<div class="rev-summary muted">Пока нет отзывов</div>';
-    const revList = p.reviews && p.reviews.length
-      ? p.reviews.map(rev => '<div class="rev-item"><b>'+esc(rev.name)+'</b> '+starStr(rev.stars)+'<div>'+esc(rev.text)+'</div></div>').join('')
-      : '';
     el.innerHTML =
       '<div class="img">' + (p.image
         ? '<img src="'+p.image+'" alt="'+p.name+'">'
@@ -495,14 +656,9 @@ function render(){
       '</div>' +
       '<h3>'+p.name+'</h3>' +
       '<div class="desc">'+p.desc+'</div>' +
-      '<div class="row"><span class="price">'+p.price.toLocaleString('ru-RU')+' ₽</span>' +
-      '<button class="add" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button></div>' +
-      '<div class="reviews">'+note+
-        '<button class="rev-btn" onclick="openReviews(\''+esc(p.name)+'\')">Отзывы</button>'+
-        '<div class="rev-list hidden" style="display:none">'+revList+
-          '<div class="rev-form"><input class="rf-name" placeholder="Ваше имя"><input class="rf-text" placeholder="Ваш отзыв"><button onclick="addReview(this,\''+esc(p.name)+'\')">Оставить</button></div>'+
-        '</div>'+
-      '</div>';
+      '<div class="row" onclick="event.stopPropagation()"><span class="price">'+p.price.toLocaleString('ru-RU')+' ₽</span>' +
+      '<button class="add" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button></div>'+
+      note;
     grid.appendChild(el);
   });
 }
@@ -512,25 +668,6 @@ function starStr(v){
   for(var i=1;i<=5;i++){ s += i<=Math.round(v) ? '★' : '☆'; }
   return s;
 }
-function openReviews(name){
-  var card = Array.prototype.slice.call(document.querySelectorAll('.card'))
-    .find(function(c){ return c.querySelector('h3').textContent==name; });
-  var list = card.querySelector('.rev-list');
-  list.style.display = list.style.display==='none' ? 'block' : 'none';
-}
-function addReview(btn,name){
-  var card = btn.closest('.card');
-  var rfName = card.querySelector('.rf-name').value.trim();
-  var rfText = card.querySelector('.rf-text').value.trim();
-  if(!rfText){ alert('Напишите текст отзыва.'); return; }
-  var p = PRODUCTScurrent.find(function(x){ return x.name==name; });
-  if(p){
-    if(!p.reviews) p.reviews=[];
-    p.reviews.push({ name: rfName||'Аноним', stars:5, text: rfText });
-    render();
-    saveData();
-  }
-}
 
 function filterCat(e,cat){
   e.preventDefault();
@@ -538,6 +675,23 @@ function filterCat(e,cat){
   document.querySelectorAll('nav.cats button').forEach(b=>b.classList.remove('active'));
   document.querySelector('nav.cats button[data-cat="'+cat+'"]').classList.add('active');
   render();
+}
+function applyFilters(){
+  catalogFilters.color = document.getElementById("f-color").value;
+  var pr = parseFloat(document.getElementById("f-price").value);
+  catalogFilters.price = isNaN(pr) ? null : pr;
+  render();
+}
+function clearFilters(){
+  document.getElementById("f-color").value="";
+  document.getElementById("f-price").value="";
+  catalogFilters={color:"",price:null};
+  render();
+}
+
+function addGift(amount){
+  var key = "Подарочный сертификат "+amount.toLocaleString('ru-RU')+" ₽";
+  addToCart(key, amount);
 }
 
 function addToCart(name,price){
@@ -549,7 +703,7 @@ function addToCart(name,price){
 
 function openCart(){ document.getElementById("cart-panel").classList.add("open"); overlayShow(); drawCart(); }
 function closePanels(){
-  document.querySelectorAll('#cart-panel,#order-form,#order-form.open').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('#cart-panel,#order-form,#product-modal').forEach(e=>e.classList.remove('open'));
   overlayHide();
   document.getElementById("order-ok").style.display="none";
 }
@@ -629,6 +783,88 @@ function renderContacts(){
 renderContacts();
 render();
 
+/* ============ МОДАЛКА ТОВАРА ============ */
+let curIdx = null;
+let curImg = 0;
+function openProductName(name){
+  const idx = PRODUCTScurrent.findIndex(function(x){ return x.name===name; });
+  if(idx>=0) openProduct(idx);
+}
+function openProduct(idx){
+  curIdx = idx;
+  curImg = 0;
+  const p = PRODUCTScurrent[idx];
+  if(!p) return;
+  document.getElementById("pm-title").textContent = p.name;
+  drawProductBody();
+  document.getElementById("product-modal").classList.add("open");
+  overlayShow();
+}
+function closeProduct(){
+  document.getElementById("product-modal").classList.remove("open");
+  overlayHide();
+}
+function drawProductBody(){
+  const p = PRODUCTScurrent[curIdx];
+  if(!p) return;
+  const imgs = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+  let body = '<div class="slider">';
+  if(imgs.length>1) body += '<button class="slider-arrow left" onclick="prevImg()">‹</button>';
+  body += imgs.length ? '<img id="pm-img" src="'+imgs[Math.min(curImg,imgs.length-1)]+'">' : '<span>Фото модели</span>';
+  if(imgs.length>1) body += '<button class="slider-arrow right" onclick="nextImg()">›</button>';
+  body += '</div>';
+  if(imgs.length>1){
+    body += '<div class="slider-dots">'+imgs.map(function(_,i){ return '<span class="'+(i===curImg?'on':'')+'" onclick="jumpImg('+i+')"></span>'; }).join('')+'</div>';
+  }
+  body += '<div class="pm-specs"><h3 style="font-weight:normal;margin-bottom:8px">Характеристики</h3><table>';
+  Object.keys(p.specs||{}).forEach(function(k){ body += '<tr><td>'+k+'</td><td>'+p.specs[k]+'</td></tr>'; });
+  body += '</table></div>';
+  body += '<div class="pm-actions">'+
+    '<button class="pm-cart" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button>'+
+    '<button class="pm-buy" onclick="goCheckout()">Купить</button></div>';
+  // Отзывы
+  const reviews = p.reviews || [];
+  body += '<div class="pm-reviews"><h3 style="font-weight:normal;margin-bottom:8px">Отзывы ('+reviews.length+')</h3>';
+  if(reviews.length){
+    body += reviews.map(rev => '<div class="rev-item"><b>'+esc(rev.name)+'</b> <span class="rev-stars">'+starStr(rev.stars)+'</span><div>'+esc(rev.text)+'</div></div>').join('');
+  } else {
+    body += '<p style="color:var(--muted);font-size:.9rem">Пока нет отзывов. Будьте первым!</p>';
+  }
+  body += '<div class="rev-form" style="margin-top:12px">'+
+    '<div class="star-input" data-stars="5">'+[1,2,3,4,5].map(function(i){ return '<span data-s="'+i+'" class="on">★</span>'; }).join('')+'</div>'+
+    '<input class="rf-text" placeholder="Ваш отзыв">'+
+    '<button onclick="addReviewPm(this)">Оставить отзыв</button>'+
+    '</div></div>';
+  document.getElementById("pm-body").innerHTML = body;
+  // подписать звёзды
+  document.getElementById("pm-body").querySelector(".star-input").addEventListener("click", function(ev){
+    var s = ev.target.getAttribute("data-s");
+    if(!s) return;
+    this.setAttribute("data-stars", s);
+    Array.prototype.slice.call(this.children).forEach(function(c){ c.classList.toggle("on", parseInt(c.getAttribute("data-s"))<=s); });
+  });
+}
+function prevImg(){ curImg = Math.max(0, curImg-1); drawProductBody(); }
+function nextImg(){
+  const p = PRODUCTScurrent[curIdx];
+  const n = (p.images&&p.images.length)?p.images.length:(p.image?1:0);
+  curImg = Math.min(n-1, curImg+1); drawProductBody();
+}
+function jumpImg(i){ curImg=i; drawProductBody(); }
+function addReviewPm(btn){
+  if(!currentUser){ alert("Войдите в аккаунт, чтобы оставить отзыв."); return; }
+  const form = btn.closest('.rev-form');
+  const txt = form.querySelector('.rf-text').value.trim();
+  if(!txt){ alert('Напишите текст отзыва.'); return; }
+  const stars = parseInt(form.querySelector('.star-input').getAttribute('data-stars'))||5;
+  const p = PRODUCTScurrent[curIdx];
+  if(p){
+    if(!p.reviews) p.reviews=[];
+    p.reviews.push({ name: currentUser, stars: stars, text: txt });
+    render(); drawProductBody(); saveData();
+  }
+}
+
 /* ============ РЕДАКТОР (видим только на этом ПК) ============ */
 document.addEventListener("keydown", function(e){
   if(e.ctrlKey && e.shiftKey && (e.key==="E"||e.key==="е"||e.key==="e")){
@@ -681,31 +917,50 @@ function drawEditorProducts(){
         '<select data-idx="'+i+'" data-f="cat">'+
           '<option value="men"'+(p.cat==="men"?" selected":"")+'>Мужские</option>'+
           '<option value="women"'+(p.cat==="women"?" selected":"")+'>Женские</option>'+
+          '<option value="smart"'+(p.cat==="smart"?" selected":"")+'>Смарт</option>'+
+          '<option value="sport"'+(p.cat==="sport"?" selected":"")+'>Спортивные</option>'+
         '</select>'+
         '<input class="prc" data-idx="'+i+'" data-f="price" type="number" value="'+p.price+'" placeholder="Цена ₽">'+
       '</div>'+
       '<div class="pr-edit">'+
-        '<input data-idx="'+i+'" data-f="image" value="'+esc(p.image)+'" placeholder="Фото (путь или ссылка)">'+
+        '<input data-idx="'+i+'" data-f="color" value="'+esc(p.color||'')+'" placeholder="Цвет">'+
+      '</div>'+
+      '<div class="pr-edit">'+
+        '<input data-idx="'+i+'" data-f="image" value="'+esc(p.image)+'" placeholder="Главное фото">'+
+      '</div>'+
+      '<div class="pr-edit">'+
+        '<input data-idx="'+i+'" data-f="images" value="'+esc((p.images||[]).join(','))+'" placeholder="Фото для слайдера (через запятую)">'+
       '</div>'+
       '<textarea data-idx="'+i+'" data-f="desc" placeholder="Описание">'+esc(p.desc)+'</textarea>'+
+      '<textarea data-idx="'+i+'" data-f="specs" placeholder="Характеристики (Параметр:Значение; Параметр2:Значение2)">'+esc(specsToStr(p.specs))+'</textarea>'+
       '<button class="del" data-i="'+i+'">Удалить</button>';
     box.appendChild(d);
   });
 }
+function specsToStr(specs){
+  if(!specs) return "";
+  return Object.keys(specs).map(function(k){ return k+":"+specs[k]; }).join("; ");
+}
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-document.getElementById("ed-products").addEventListener("change", function(e){
+document.getElementById("ed-products").addEventListener("change", handleEd);
+document.getElementById("ed-products").addEventListener("input", handleEd);
+function handleEd(e){
   const t=e.target, idx=t.getAttribute("data-idx"), f=t.getAttribute("data-f");
   if(idx===null||f===null) return;
   let val = f==="price" ? parseFloat(t.value)||0 : t.value;
+  if(f==="images"){ val = t.value.split(",").map(function(s){return s.trim();}).filter(Boolean); }
+  if(f==="specs"){ val = strToSpecs(t.value); }
   PRODUCTScurrent[idx][f]=val;
-});
-document.getElementById("ed-products").addEventListener("input", function(e){
-  const t=e.target, idx=t.getAttribute("data-idx"), f=t.getAttribute("data-f");
-  if(idx===null||f===null) return;
-  let val = f==="price" ? parseFloat(t.value)||0 : t.value;
-  PRODUCTScurrent[idx][f]=val;
-});
+}
+function strToSpecs(s){
+  const out={};
+  s.split(";").forEach(function(chunk){
+    const i = chunk.indexOf(":");
+    if(i>0){ out[chunk.slice(0,i).trim()] = chunk.slice(i+1).trim(); }
+  });
+  return out;
+}
 document.getElementById("ed-products").addEventListener("click", function(e){
   if(e.target.classList.contains("del")){
     const idx=parseInt(e.target.getAttribute("data-i"),10);
@@ -715,7 +970,7 @@ document.getElementById("ed-products").addEventListener("click", function(e){
 });
 
 function edAdd(){
-  PRODUCTScurrent.push({cat:"men",name:"Новый товар",price:0,image:"",desc:""});
+  PRODUCTScurrent.push({cat:"men",name:"Новый товар",price:0,color:"",image:"",images:[],specs:{},desc:"",reviews:[]});
   drawEditorProducts();
 }
 function edSave(){
