@@ -683,6 +683,17 @@ function renderAdminPage(){
   const body=document.getElementById("admin-page-body");
   if(!isAdmin()){ body.innerHTML='<p style="color:#b02323">Доступ запрещён.</p>'; return; }
   body.innerHTML=
+    '<div style="background:var(--cream);border:1px solid var(--line);padding:18px;margin-bottom:20px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'+
+        '<b style="font-size:1.05rem">Настройки</b>'+
+        '<button class="edit-fab" style="display:inline-block;position:relative;top:0;right:0;width:auto;height:auto;padding:9px 16px;border-radius:20px;font-size:1.1rem" onclick="fabClick()">⋯</button>'+
+      '</div>'+
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">'+
+        '<button style="background:var(--ink);color:#fff;border:none;padding:10px 16px;cursor:pointer;font-family:inherit;font-size:.9rem" onclick="openEditor()">✏️ Редактировать каталог</button>'+
+        '<button style="background:var(--ink);color:#fff;border:none;padding:10px 16px;cursor:pointer;font-family:inherit;font-size:.9rem" onclick="openAccountEditor()">👤 Моя анкета</button>'+
+        '<button style="background:var(--ink);color:#fff;border:none;padding:10px 16px;cursor:pointer;font-family:inherit;font-size:.9rem" onclick="openChangePass()">🔑 Сменить код доступа</button>'+
+      '</div>'+
+    '</div>'+
     '<div class="section-title" style="margin-top:0">Заявки на пополнение</div><div id="admin-topups">Загрузка...</div>'+
     '<div class="section-title">Заказы</div><div id="admin-orders">Загрузка...</div>'+
     '<div class="section-title">Заявки на сертификаты</div><div id="admin-gifts">Загрузка...</div>'+
