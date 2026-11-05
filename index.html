@@ -693,7 +693,7 @@ function avgStars(r){ return r.reduce(function(s,x){return s+(x.stars||0);},0)/r
 function starStr(v){ var s=''; for(var i=1;i<=5;i++){ s+=i<=Math.round(v)?'★':'☆'; } return s; }
 
 /* ============ КОРЗИНА ============ */
-function addToCart(name,price){ if(!cart[name]) cart[name]={price,qty:0}; cart[name].qty++; updateCart(); openCart(); }
+function addToCart(name,price){ if(!cart[name]) cart[name]={price,qty:0}; cart[name].qty++; updateCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); openCart(); }
 function openCart(){ document.getElementById("cart-panel").classList.add("open"); overlayShow(); drawCart(); document.querySelector('#cart-panel header span').textContent='Корзина'; }
 function closePanels(){
   document.querySelectorAll('#cart-panel,#order-form,#product-modal').forEach(e=>e.classList.remove('open'));
@@ -742,7 +742,7 @@ function drawCart(){
   document.getElementById("grand").textContent=total.toLocaleString('ru-RU')+' ₽';
   updateCart();
 }
-function chg(name,d){ cart[name].qty+=d; if(cart[name].qty<=0) delete cart[name]; drawCart(); }
+function chg(name,d){ cart[name].qty+=d; if(cart[name].qty<=0) delete cart[name]; drawCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); }
 
 /* ============ ОФОРМЛЕНИЕ ============ */
 function goCheckout(){
