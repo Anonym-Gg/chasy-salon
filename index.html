@@ -474,7 +474,7 @@
 
 <div class="overlay show" id="overlay" onclick="closePanels()"></div>
 
-<button class="edit-fab on" id="edit-fab" onclick="fabClick()" title="Настройки (только на этом ПК)">⋯</button>
+<button class="edit-fab" id="edit-fab" onclick="fabClick()" title="Настройки (только владелец)">⋯</button>
 
 <div class="fab-menu" id="fab-menu">
   <button onclick="fabAction('catalog')">✏️ Редактировать каталог</button>
@@ -541,7 +541,7 @@
 </aside>
 
 <aside id="product-modal" class="open">
-  <header><h2 id="pm-title">Классика Строгая</h2><button onclick="closeProduct()">×</button></header>
+  <header><h2 id="pm-title">Классика Строгая</h2><button onclick="closeProduct()" style="font-size:1rem;padding:8px 14px;border:1px solid rgba(255,255,255,.4);border-radius:6px">← Назад</button></header>
   <div class="pm-body" id="pm-body"><div class="slider"><img id="pm-img" src="https://sun9-66.vkuserphoto.ru/s/v1/ig2/f1STkLcqIBGBJcMGDe4olG7qagW3BYVToFIsPUcQaPZZ24oNTvcjipQzNRRAo7cZENXek3g03MKAryPjDLDv1ZQ_.jpg?quality=95&amp;as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1024x1024&amp;from=bu&amp;cs=1024x0"></div><div class="pm-specs"><h3 style="font-weight:normal;margin-bottom:8px">Характеристики</h3><table><tbody><tr><td>Бренд</td><td>«Vey crown»</td></tr><tr><td>Модель / Артикул</td><td>055</td></tr><tr><td>Пол</td><td>Мужские</td></tr><tr><td>Стиль</td><td>Модный / современный</td></tr><tr><td>Тип движения</td><td>Механические</td></tr><tr><td>Производитель механизма</td><td>Другое</td></tr><tr><td>Страна производства механизма</td><td>Китай</td></tr><tr><td>Тип стекла</td><td>Минеральное закалённое стекло</td></tr><tr><td>Тип циферблата</td><td>Стрелочный (аналоговый)</td></tr><tr><td>Форма циферблата</td><td>Круглая</td></tr><tr><td>Диаметр корпуса</td><td>42 миллиметра</td></tr><tr><td>Толщина корпуса</td><td>8 миллиметров </td></tr><tr><td>Материал корпуса</td><td>Нержавеющая сталь</td></tr><tr><td>Материал браслета</td><td>Нержавеющая сталь</td></tr><tr><td>Тип застёжки</td><td>Одинарная складная пряжка</td></tr><tr><td>Материал застёжки</td><td>Нержавеющая сталь</td></tr><tr><td>Коронка</td><td>Обычная</td></tr><tr><td>Задняя крышка</td><td>Обычная (цельная)</td></tr><tr><td>Особенности</td><td>Светящиеся стрелки/метки, двойной календарь (число + день недели)</td></tr><tr><td>Водонепроницаемость</td><td>Нет</td></tr><tr><td>Нанесение логотипа на циферблат</td><td>Нет</td></tr><tr><td>Импортируемый товар</td><td>Нет</td></tr><tr><td>Таможенное оформление</td><td>Не требуется</td></tr><tr><td>Патентование источника происхождения</td><td>Не требуется</td></tr><tr><td>Спецпоставка для трансграничного экспорта</td><td>Нет</td></tr><tr><td>Регион происхождения</td><td>Гуандун</td></tr><tr><td>Упаковка</td><td>Другое</td></tr><tr><td>Сервис / гарантия</td><td>Гарантийная мастерская</td></tr><tr><td>Год выпуска / сезон</td><td>Другое</td></tr></tbody></table></div><div class="pm-actions"><button class="pm-cart" onclick="addToCart('Классика Строгая',1250)">В корзину</button><button class="pm-buy" onclick="goCheckout()">Купить</button></div><div class="pm-reviews"><h3 style="font-weight:normal;margin-bottom:8px">Отзывы (1)</h3><div class="rev-item"><b>Игорь</b> <span class="rev-stars">★★★★★</span><div>Отличные часы, смотрятся дороже своей цены.</div></div><div class="rev-form" style="margin-top:12px"><div class="star-input" data-stars="5"><span data-s="1" class="on">★</span><span data-s="2" class="on">★</span><span data-s="3" class="on">★</span><span data-s="4" class="on">★</span><span data-s="5" class="on">★</span></div><input class="rf-text" placeholder="Ваш отзыв"><button onclick="addReviewPm(this)">Оставить отзыв</button></div></div></div>
 </aside>
 
@@ -674,6 +674,8 @@ function go(page){
 function updateAdminNav(){
   const btn=document.getElementById("nav-admin-btn");
   if(btn){ btn.style.display = isAdmin() ? "" : "none"; }
+  const fab=document.getElementById("edit-fab");
+  if(fab){ fab.classList.toggle("on", !!isOwner()); }
 }
 function renderAdminPage(){
   const body=document.getElementById("admin-page-body");
@@ -941,6 +943,7 @@ function isUnlimited(){
   return currentUser && currentUser.phone === UNLIMITED_PHONE;
 }
 function isAdmin(){ return isUnlimited(); }
+function isOwner(){ return !!(currentUser && (currentUser.phone === UNLIMITED_PHONE || currentUser.phone === "89277467217")); }
 function getBalance(){
   if(!userData) return 0;
   if(isUnlimited()) return 999999;
@@ -1465,10 +1468,11 @@ function showGiftCongrats(g){
 document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="L"||e.key==="л"||e.key==="l")){ e.preventDefault(); showFabMenu(); } });
 let fabPendingAction = null;
 function showFabMenu(){
-  if(localStorage.getItem(LS_PASS)==="1"){ document.getElementById("fab-menu").classList.add("show"); }
-  else{ showPass("Введите код доступа для настроек"); }
+  if(!isOwner()){ return; }
+  document.getElementById("fab-menu").classList.add("show");
 }
 function fabClick(){
+  if(!isOwner()){ return; }
   const menu=document.getElementById("fab-menu");
   if(menu.classList.contains("show")){ menu.classList.remove("show"); return; }
   showFabMenu();
@@ -1489,17 +1493,10 @@ function showPass(title){
 }
 function hidePass(){ document.getElementById("passscreen").classList.remove("show"); }
 function tryPass(){
-  const v=document.getElementById("pass-input").value;
-  const cur = window.__customPass || EDIT_PASS;
-  if(v===cur){
-    localStorage.setItem(LS_PASS,"1");
-    document.getElementById("pass-input").value="";
-    hidePass();
-    document.getElementById("edit-fab").classList.add("on");
-    document.getElementById("fab-menu").classList.add("show");
-  } else {
-    document.getElementById("pass-err").textContent="Неверный код доступа.";
-  }
+  if(!isOwner()){ return; }
+  document.getElementById("edit-fab").classList.add("on");
+  hidePass();
+  document.getElementById("fab-menu").classList.add("show");
 }
 function openEditor(){ document.getElementById("passscreen").classList.remove("show"); document.getElementById("edit-fab").classList.add("on"); fillEditor(); document.getElementById("editor").classList.add("open"); }
 function closeEditor(){ document.getElementById("editor").classList.remove("open"); }
