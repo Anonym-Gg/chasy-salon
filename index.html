@@ -994,29 +994,7 @@ function addRecent(name){
   if(r.length>10) r.length=10;
   localStorage.setItem(RECENT_KEY, JSON.stringify(r));
 }
-function buyOneClick(name, price){
-  var p = PRODUCTScurrent.find(function(x){ return x.name===name; });
-  var name2 = prompt("Купить в 1 клик: "+name+" ("+price.toLocaleString('ru-RU')+" ₽)\nВведите ваше имя:");
-  if(name2===null) return;
-  var phone2 = prompt("Введите номер телефона:");
-  if(phone2===null) return;
-  try{
-    firestore.collection("orders").add({
-      uid: currentUser ? currentUser.uid : null,
-      client: name2.trim()||"Без имени",
-      phone: (phone2||"").trim(),
-      comment: "Купить в 1 клик",
-      items: [name],
-      total: price,
-      payMethod: "card",
-      status: "new",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(function(){
-      var box=document.getElementById("order-ok");
-      if(box){ box.style.display="block"; box.innerHTML="<b>Заявка принята!</b><br>Мы перезвоним вам в ближайшее время для подтверждения заказа."; }
-    }).catch(function(e){ showToast("Ошибка: "+e.message); });
-  }catch(e){ showToast("Ошибка: "+e.message); }
-}
+
 
 /* ============ КОРЗИНА ============ */
 function addToCart(name,price){ if(!cart[name]) cart[name]={price,qty:0}; cart[name].qty++; saveCart(); updateCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); openCart(); }
