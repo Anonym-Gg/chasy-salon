@@ -399,7 +399,16 @@
         <div class="f-count" id="f-count">Найдено: 10</div>
       </aside>
       <div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+          <input type="text" id="search-input" placeholder="🔍 Поиск по названию..." oninput="applyFilters()" style="flex:1;min-width:180px;padding:10px;border:1px solid var(--line);font-family:inherit;font-size:.95rem;background:#fff">
+          <select id="sort-select" onchange="applyFilters()" style="padding:10px;border:1px solid var(--line);font-family:inherit;font-size:.9rem;background:#fff">
+            <option value="">По умолчанию</option>
+            <option value="price_asc">Цена: по возрастанию</option>
+            <option value="price_desc">Цена: по убыванию</option>
+          </select>
+        </div>
         <div class="section-title">Каталог<span id="cat-extra"></span></div>
+        <div id="recent-box" style="display:none"></div>
         <div class="grid" id="catalog-grid"><div class="card" data-idx="0" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><img src="https://sun9-66.vkuserphoto.ru/s/v1/ig2/f1STkLcqIBGBJcMGDe4olG7qagW3BYVToFIsPUcQaPZZ24oNTvcjipQzNRRAo7cZENXek3g03MKAryPjDLDv1ZQ_.jpg?quality=95&amp;as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1024x1024&amp;from=bu&amp;cs=1024x0" alt="Unranion Emmanuel"></div><span class="badge-cat">Мужские</span><h3>Unranion Emmanuel</h3><div class="desc"></div><div class="row" onclick="event.stopPropagation()"><span class="price">1&nbsp;250 ₽</span><button class="add" onclick="addToCart('Unranion Emmanuel',1250)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px"><span class="rev-stars">★★★★★</span> 1 отз.</div></div><div class="card" data-idx="1" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><img src="https://sun9-38.vkuserphoto.ru/s/v1/ig2/Hki7ne4L5fW5GMcJGBMvbY0KzzVR_t8olZEPgN2FQ_OdiZGM7tMFVptFXN9xjsT0V8Zc9rO6tMMMj3xA05BTM6k9.jpg?quality=95&amp;as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280,1440x1440,1777x1777&amp;from=bu&amp;cs=1777x0" alt="Unranion Emmanuel"></div><span class="badge-cat">Мужские</span><h3>Unranion Emmanuel</h3><div class="desc">Строгий циферблат, хронограф, чёрное покрытие корпуса.</div><div class="row" onclick="event.stopPropagation()"><span class="price">1&nbsp;250 ₽</span><button class="add" onclick="addToCart('Unranion Emmanuel',1250)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px">нет отзывов</div></div><div class="card" data-idx="2" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><img src="https://sun9-52.vkuserphoto.ru/s/v1/ig2/4KJr_E3G07uaorQZuQt3ECdERni5jkb7kEuoffUomnVCj5VQPv40VM7lRQ56Y3SmaeCYnHYvqvNxMVJJMaR_lxCz.jpg?quality=95&amp;as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1024x1024&amp;from=bu&amp;cs=1024x0" alt="Unranion Emmanuel"></div><span class="badge-cat">Мужские</span><h3>Unranion Emmanuel</h3><div class="desc">Лёгкие повседневные часы на каждый день.</div><div class="row" onclick="event.stopPropagation()"><span class="price">1&nbsp;250 ₽</span><button class="add" onclick="addToCart('Unranion Emmanuel',1250)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px">нет отзывов</div></div><div class="card" data-idx="3" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><span>Фото модели</span></div><span class="badge-cat">Женские</span><h3>Изящная</h3><div class="desc">Тонкий корпус, золотистое покрытие, цепочка-браслет.</div><div class="row" onclick="event.stopPropagation()"><span class="price">1&nbsp;300 ₽</span><button class="add" onclick="addToCart('Изящная',1300)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px">нет отзывов</div></div><div class="card" data-idx="4" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><span>Фото модели</span></div><span class="badge-cat">Женские</span><h3>Жемчужная</h3><div class="desc">Женственные часы с декоративными элементами под жемчуг.</div><div class="row" onclick="event.stopPropagation()"><span class="price">1&nbsp;450 ₽</span><button class="add" onclick="addToCart('Жемчужная',1450)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px">нет отзывов</div></div><div class="card" data-idx="5" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><span>Фото модели</span></div><span class="badge-cat">Женские</span><h3>Минимал</h3><div class="desc">Аккуратный маленький циферблат, классический дизайн.</div><div class="row" onclick="event.stopPropagation()"><span class="price">1&nbsp;200 ₽</span><button class="add" onclick="addToCart('Минимал',1200)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px">нет отзывов</div></div><div class="card" data-idx="6" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><span>Фото модели</span></div><span class="badge-cat">Смарт</span><h3>Смарт Фийт</h3><div class="desc">Умные часы с пульсометром и уведомлениями.</div><div class="row" onclick="event.stopPropagation()"><span class="price">2&nbsp;400 ₽</span><button class="add" onclick="addToCart('Смарт Фийт',2400)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px">нет отзывов</div></div><div class="card" data-idx="7" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><span>Фото модели</span></div><span class="badge-cat">Смарт</span><h3>Смарт Про</h3><div class="desc">Продвинутые смарт-часы с GPS и звонками.</div><div class="row" onclick="event.stopPropagation()"><span class="price">3&nbsp;200 ₽</span><button class="add" onclick="addToCart('Смарт Про',3200)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px">нет отзывов</div></div><div class="card" data-idx="8" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><span>Фото модели</span></div><span class="badge-cat">Спортивные</span><h3>Спорт Фитес</h3><div class="desc">Спортивные часы-трекер для тренировок.</div><div class="row" onclick="event.stopPropagation()"><span class="price">1&nbsp;800 ₽</span><button class="add" onclick="addToCart('Спорт Фитес',1800)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px">нет отзывов</div></div><div class="card" data-idx="9" onclick="openProductByIdx(this.getAttribute('data-idx'))"><div class="img"><span>Фото модели</span></div><span class="badge-cat">Спортивные</span><h3>Спорт Таймер</h3><div class="desc">Надёжные спортивные часы с таймером.</div><div class="row" onclick="event.stopPropagation()"><span class="price">2&nbsp;100 ₽</span><button class="add" onclick="addToCart('Спорт Таймер',2100)">В корзину</button></div><div style="font-size:.78rem;color:var(--muted);margin-top:6px">нет отзывов</div></div></div>
         <div class="empty" id="empty" style="display: none;">По выбранным фильтрам ничего не найдено.</div>
       </div>
@@ -797,8 +806,13 @@ function saveData(){
   localStorage.setItem(LS_KEY, JSON.stringify({ contacts: CONTACTScurrent, products: PRODUCTScurrent }));
 }
 
-let cart = {};
+let cart = loadCart();
 let catalogSel = { cats:[], colors:[], min:null, max:null };
+const CART_KEY = "chasy_cart_v1";
+function saveCart(){ try{ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }catch(e){} }
+function loadCart(){
+  try{ const r=localStorage.getItem(CART_KEY); return r?JSON.parse(r):{}; }catch(e){ return {}; }
+}
 
 /* ============ РОУТЕР ПОД-СТРАНИЦ ============ */
 function go(page){
@@ -852,13 +866,19 @@ function setHero(on){
 
 /* ============ КАТАЛОГ ============ */
 function filterProducts(){
-  return PRODUCTScurrent.filter(function(p){
+  var q = (document.getElementById("search-input") ? document.getElementById("search-input").value : "").trim().toLowerCase();
+  var sort = document.getElementById("sort-select") ? document.getElementById("sort-select").value : "";
+  var out = PRODUCTScurrent.filter(function(p){
     if(catalogSel.cats.length && catalogSel.cats.indexOf(p.cat)===-1) return false;
     if(catalogSel.colors.length && catalogSel.colors.indexOf(p.color)===-1) return false;
     if(catalogSel.min!==null && p.price<catalogSel.min) return false;
     if(catalogSel.max!==null && p.price>catalogSel.max) return false;
+    if(q && (p.name||"").toLowerCase().indexOf(q)===-1) return false;
     return true;
   });
+  if(sort==="price_asc"){ out.sort(function(a,b){ return a.price-b.price; }); }
+  else if(sort==="price_desc"){ out.sort(function(a,b){ return b.price-a.price; }); }
+  return out;
 }
 const CAT_NAME = { men:"Мужские", women:"Женские", smart:"Смарт", sport:"Спортивные" };
 function render(){
@@ -868,6 +888,23 @@ function render(){
   grid.innerHTML = "";
   empty.style.display = list.length ? "none" : "block";
   document.getElementById("f-count").textContent = "Найдено: "+list.length;
+  // Недавно просмотренные (только на основном каталоге, без активных фильтров)
+  var recentBox = document.getElementById("recent-box");
+  if(recentBox){
+    var cleaning = !catalogSel.cats.length && !catalogSel.colors.length && catalogSel.min===null && catalogSel.max===null
+      && (document.getElementById("search-input") ? document.getElementById("search-input").value==="" : true)
+      && (document.getElementById("sort-select") ? document.getElementById("sort-select").value==="" : true);
+    if(cleaning){
+      var recents=getRecent().map(function(n){ return PRODUCTScurrent.find(function(x){ return x.name===n; }); }).filter(Boolean);
+      if(recents.length){
+        recentBox.style.display="block";
+        recentBox.innerHTML='<div class="section-title" style="margin:8px 0 14px">Вы недавно смотрели</div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">'+
+          recents.slice(0,6).map(function(p){
+            return '<div class="card" onclick="openProductByIdx('+PRODUCTScurrent.indexOf(p)+')" style="cursor:pointer"><div class="img" style="height:120px">'+(p.image?'<img src="'+p.image+'" alt="">':'<span>Фото</span>')+'</div><h3 style="font-size:.85rem">'+esc(p.name)+'</h3><div class="price" style="font-size:.9rem">'+p.price.toLocaleString('ru-RU')+' ₽</div></div>';
+          }).join('')+'</div>';
+      } else { recentBox.style.display="none"; }
+    } else { recentBox.style.display="none"; }
+  }
   list.forEach(p => {
     const el = document.createElement("div");
     el.className = "card";
@@ -875,11 +912,14 @@ function render(){
     el.setAttribute("onclick","openProductByIdx(this.getAttribute('data-idx'))");
     const note = p.reviews && p.reviews.length ? '<span class="rev-stars">'+starStr(avgStars(p.reviews))+'</span> '+p.reviews.length+' отз.' : 'нет отзывов';
     el.innerHTML =
-      '<div class="img">' + (p.image ? '<img src="'+p.image+'" alt="'+p.name+'">' : '<span>Фото модели</span>') + '</div>' +
+      '<div class="img" style="position:relative">' + (p.image ? '<img src="'+p.image+'" alt="'+p.name+'">' : '<span>Фото модели</span>') +
+      '<button onclick="event.stopPropagation();toggleFav(\''+esc(p.name).replace(/'/g,"\\'")+'\',this)" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)" class="fav-btn">'+(isFav(p.name)?'❤️':'🤍')+'</button>'+
+      (p.oldPrice && p.oldPrice>p.price ? '<span style="position:absolute;top:8px;left:8px;background:#b02323;color:#fff;font-size:.7rem;padding:3px 7px;border-radius:4px">СКИДКА '+(Math.round((1-p.price/p.oldPrice)*100))+'%</span>' : '')+
+      '</div>' +
       '<span class="badge-cat">'+(CAT_NAME[p.cat]||p.cat)+'</span>'+
       '<h3>'+p.name+'</h3>' +
       '<div class="desc">'+p.desc+'</div>' +
-      '<div class="row" onclick="event.stopPropagation()"><span class="price">'+p.price.toLocaleString('ru-RU')+' ₽</span>' +
+      '<div class="row" onclick="event.stopPropagation()">'+(p.oldPrice && p.oldPrice>p.price ? '<span style="text-decoration:line-through;color:var(--muted);font-size:.85rem;margin-right:6px">'+p.oldPrice.toLocaleString('ru-RU')+'</span>':'')+'<span class="price">'+p.price.toLocaleString('ru-RU')+' ₽</span>' +
       '<button class="add" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button></div>'+
       '<div style="font-size:.78rem;color:var(--muted);margin-top:6px">'+note+'</div>';
     grid.appendChild(el);
@@ -898,14 +938,60 @@ function clearFilters(){
   document.querySelectorAll('.f-cat,.f-color').forEach(c=>c.checked=false);
   document.getElementById("f-price-min").value="";
   document.getElementById("f-price-max").value="";
+  if(document.getElementById("search-input")) document.getElementById("search-input").value="";
+  if(document.getElementById("sort-select")) document.getElementById("sort-select").value="";
   catalogSel={cats:[],colors:[],min:null,max:null};
   render();
 }
 function avgStars(r){ return r.reduce(function(s,x){return s+(x.stars||0);},0)/r.length; }
 function starStr(v){ var s=''; for(var i=1;i<=5;i++){ s+=i<=Math.round(v)?'★':'☆'; } return s; }
 
+/* ============ ИЗБРАННОЕ + НЕДАВНО ПРОСМОТРЕННЫЕ ============ */
+const FAV_KEY = "chasy_favs_v1";
+function getFavs(){ try{ return JSON.parse(localStorage.getItem(FAV_KEY)||"[]"); }catch(e){ return []; } }
+function saveFavs(f){ localStorage.setItem(FAV_KEY, JSON.stringify(f)); }
+function isFav(name){ return getFavs().indexOf(name)!==-1; }
+function toggleFav(name, btn){
+  var f=getFavs();
+  var i=f.indexOf(name);
+  if(i===-1) f.push(name); else f.splice(i,1);
+  saveFavs(f);
+  if(btn){ btn.textContent = isFav(name)?'❤️':'🤍'; }
+}
+const RECENT_KEY = "chasy_recent_v1";
+function getRecent(){ try{ return JSON.parse(localStorage.getItem(RECENT_KEY)||"[]"); }catch(e){ return []; } }
+function addRecent(name){
+  var r=getRecent().filter(function(x){ return x!==name; });
+  r.unshift(name);
+  if(r.length>10) r.length=10;
+  localStorage.setItem(RECENT_KEY, JSON.stringify(r));
+}
+function buyOneClick(name, price){
+  var p = PRODUCTScurrent.find(function(x){ return x.name===name; });
+  var name2 = prompt("Купить в 1 клик: "+name+" ("+price.toLocaleString('ru-RU')+" ₽)\nВведите ваше имя:");
+  if(name2===null) return;
+  var phone2 = prompt("Введите номер телефона:");
+  if(phone2===null) return;
+  try{
+    firestore.collection("orders").add({
+      uid: currentUser ? currentUser.uid : null,
+      client: name2.trim()||"Без имени",
+      phone: (phone2||"").trim(),
+      comment: "Купить в 1 клик",
+      items: [name],
+      total: price,
+      payMethod: "card",
+      status: "new",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(){
+      var box=document.getElementById("order-ok");
+      if(box){ box.style.display="block"; box.innerHTML="<b>Заявка принята!</b><br>Мы перезвоним вам в ближайшее время для подтверждения заказа."; }
+    }).catch(function(e){ alert("Ошибка: "+e.message); });
+  }catch(e){ alert("Ошибка: "+e.message); }
+}
+
 /* ============ КОРЗИНА ============ */
-function addToCart(name,price){ if(!cart[name]) cart[name]={price,qty:0}; cart[name].qty++; updateCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); openCart(); }
+function addToCart(name,price){ if(!cart[name]) cart[name]={price,qty:0}; cart[name].qty++; saveCart(); updateCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); openCart(); }
 function openCart(){ document.getElementById("cart-panel").classList.add("open"); overlayShow(); drawCart(); document.querySelector('#cart-panel header span').textContent='Корзина'; }
 function closePanels(){
   document.querySelectorAll('#cart-panel,#order-form,#product-modal').forEach(e=>e.classList.remove('open'));
@@ -954,7 +1040,7 @@ function drawCart(){
   document.getElementById("grand").textContent=total.toLocaleString('ru-RU')+' ₽';
   updateCart();
 }
-function chg(name,d){ cart[name].qty+=d; if(cart[name].qty<=0) delete cart[name]; drawCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); }
+function chg(name,d){ cart[name].qty+=d; if(cart[name].qty<=0) delete cart[name]; saveCart(); drawCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); }
 
 /* ============ ОФОРМЛЕНИЕ ============ */
 function goCheckout(){
@@ -1029,6 +1115,7 @@ document.getElementById("checkout-form").addEventListener("submit", async functi
     items: lines, total: total,
     payMethod: payMethod,
     cert: certUsed,
+    status: "new",
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
   // 1) Сохраняем заказ в Firestore
@@ -1080,7 +1167,7 @@ document.getElementById("checkout-form").addEventListener("submit", async functi
   }
   document.getElementById("checkout-form").reset();
   appliedCert = null;
-  cart={}; updateCart(); drawCart(); renderTopBalance(); renderProfile();
+  cart={}; saveCart(); updateCart(); drawCart(); renderTopBalance(); renderProfile();
   setTimeout(function(){ document.getElementById("order-ok").style.display="none"; closePanels(); }, 7000);
 });
 
@@ -1198,13 +1285,22 @@ async function loadMyOrders(){
     box.innerHTML = snap.docs.map(function(d){
       const o=d.data();
       const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
-      const state = o.status==='approved' ? '<span style="color:var(--green)">выполнен</span>' : '<span style="color:#b02323">'+esc(o.status||"новый")+'</span>';
+      const state = orderStatusHtml(o.status||"new");
       const payLabel = o.payMethod==='balance' ? 'баланс' : (o.payMethod==='cert' ? 'сертификат' : 'карта ВТБ');
       return '<div class="rev-item"><b>'+date+'</b> — '+state+'<br>'+
         '<span style="color:var(--muted)">'+esc((o.items||[]).join("; "))+'</span><br>'+
         '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · оплата: '+payLabel+'</div>';
     }).join('');
   }catch(e){ console.error(e); box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
+}
+function orderStatusHtml(st){
+  switch(st){
+    case "confirmed": return '<span style="color:var(--gold-d)">✔ Подтверждён</span>';
+    case "shipped": return '<span style="color:#2a6fb0">📦 Отправлен</span>';
+    case "delivered": return '<span style="color:var(--green)">✅ Доставлен</span>';
+    case "approved": return '<span style="color:var(--green)">✅ Выполнен</span>';
+    default: return '<span style="color:#b02323">⏳ Принят</span>';
+  }
 }
 async function loadAdminTopups(){
   try{
@@ -1241,38 +1337,44 @@ async function loadAdminOrders(){
     box.innerHTML = snap.docs.map(function(d){
       const o=d.data();
       const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
-      const state = o.status==='approved' ? '<span style="color:var(--green)">выполнен</span>' : '<span style="color:#b02323">'+esc(o.status||"новый")+'</span>';
-      const btn = (o.status!=='approved' && o.payMethod==='balance' && o.uid)
-        ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:6px" onclick="approveOrderBalance(\''+d.id+'\',\''+o.uid+'\','+parseInt(o.total||0)+',\''+esc(o.client||"").replace(/'/g,"")+'\')">Списать с баланса и выполнить</button>'
-        : (o.status!=='approved' && o.payMethod==='card') ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:6px" onclick="approveOrderCard(\''+d.id+'\')">Отметить выполненным</button>' : '';
+      const st = o.status||"new";
+      const state = orderStatusHtml(st);
+      const balBtn = (st==='new' && o.payMethod==='balance' && o.uid)
+        ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.8rem;margin-top:6px" onclick="confirmOrderBalance(\''+d.id+'\',\''+o.uid+'\','+parseInt(o.total||0)+',\''+esc(o.client||"").replace(/'/g,"")+'\')">Подтвердить + списать баланс</button>'
+        : '';
+      const stBtns = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'+
+        (st==='new' ? '<button style="background:var(--gold-d);color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'confirmed\')">Подтвердить</button>' : '')+
+        (st==='confirmed' ? '<button style="background:#2a6fb0;color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'shipped\')">Отправить</button>' : '')+
+        (st==='shipped' ? '<button style="background:var(--green);color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'delivered\')">Доставлен</button>' : '')+
+        (st==='delivered'||st==='approved' ? '' : '<button style="background:#b02323;color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'cancelled\')">Отменить</button>')+
+      '</div>';
       return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+' / '+esc(o.phone||"")+'<br>'+
         '<span style="color:var(--muted)">'+esc((o.items||[]).join("; "))+'</span><br>'+
-        '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · '+(o.payMethod==='balance'?'баланс':'карта ВТБ')+' · '+state+'<br>'+btn+'</div>';
+        '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · '+(o.payMethod==='balance'?'баланс':'карта ВТБ')+' · '+state+'<br>'+balBtn+stBtns+'</div>';
     }).join('');
   }catch(e){ console.error(e); const box=document.getElementById("admin-orders"); if(box) box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
 }
-async function approveOrderBalance(docId, uid, total, client){
+async function setOrderStatus(docId, status){
   if(!isAdmin()) return;
-  if(!confirm("Списать "+total.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и выполнить заказ?")) return;
+  try{
+    if(status==='cancelled'){ if(!confirm("Отменить заказ?")) return; }
+    await firestore.collection("orders").doc(docId).update({ status: status, statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    if(status==='delivered'||status==='approved') await sendOrderEmail(docId);
+    loadAdminOrders();
+  }catch(e){ alert("Ошибка: "+e.message); }
+}
+async function confirmOrderBalance(docId, uid, total, client){
+  if(!isAdmin()) return;
+  if(!confirm("Списать "+total.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и подтвердить заказ?")) return;
   try{
     await adminSetBalance(uid, -total, "Оплата заказа");
-    await firestore.collection("orders").doc(docId).update({ status:"approved", approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await firestore.collection("orders").doc(docId).update({ status:"approved", statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     await sendOrderEmail(docId);
-    alert("Заказ выполнен, баланс списан.");
+    alert("Заказ подтверждён, баланс списан.");
     loadAdminOrders();
   }catch(e){ alert("Ошибка: "+e.message); }
 }
-async function approveOrderCard(docId){
-  if(!isAdmin()) return;
-  if(!confirm("Отметить заказ выполненным?")) return;
-  try{
-    await firestore.collection("orders").doc(docId).update({ status:"approved", approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    await sendOrderEmail(docId);
-    alert("Заказ выполнен.");
-    loadAdminOrders();
-  }catch(e){ alert("Ошибка: "+e.message); }
-}
-// Отправка письма о выполненном заказе
+// Отправка письма о заказе
 async function sendOrderEmail(docId){
   try{
     const doc = await firestore.collection("orders").doc(docId).get();
@@ -1415,7 +1517,7 @@ let curIdx=null, curImg=0;
 function openProductIdx(idxInList){ if(idxInList<0||idxInList>=PRODUCTScurrent.length) return; openProduct(idxInList); }
 function openProductByIdx(idxInList){ if(idxInList<0||idxInList>=PRODUCTScurrent.length) return; openProduct(idxInList); }
 function openProductByTitle(el){ if(!el) return; const h=el.querySelector('h3'); if(!h) return; const name=h.textContent; const idx=PRODUCTScurrent.findIndex(x=>x.name===name); if(idx>=0) openProduct(idx); }
-function openProduct(idx){ curIdx=idx; curImg=0; const p=PRODUCTScurrent[idx]; if(!p) return; document.getElementById("pm-title").textContent=p.name; drawProductBody(); document.getElementById("product-modal").classList.add("open"); overlayShow(); }
+function openProduct(idx){ curIdx=idx; curImg=0; const p=PRODUCTScurrent[idx]; if(!p) return; if(p.name) addRecent(p.name); document.getElementById("pm-title").textContent=p.name; drawProductBody(); document.getElementById("product-modal").classList.add("open"); overlayShow(); }
 function closeProduct(){ document.getElementById("product-modal").classList.remove("open"); overlayHide(); }
 function drawProductBody(){
   const p=PRODUCTScurrent[curIdx]; if(!p) return;
@@ -1431,7 +1533,20 @@ function drawProductBody(){
   SPEC_FIELDS.forEach(function(k){ const v=getSpecs(p)[k]; if(v!==undefined && v!==""){ body+='<tr><td>'+k+'</td><td>'+esc(v)+'</td></tr>'; hasSpec=true; } });
   if(!hasSpec) body+='<tr><td colspan="2" style="color:var(--muted)">Характеристики пока не заполнены.</td></tr>';
   body+='</table></div>';
-  body+='<div class="pm-actions"><button class="pm-cart" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button><button class="pm-buy" onclick="goCheckout()">Купить</button></div>';
+  // Цена со скидкой (если oldPrice задан)
+  var priceRow = p.oldPrice && p.oldPrice>p.price
+    ? '<span style="text-decoration:line-through;color:var(--muted);margin-right:8px">'+p.oldPrice.toLocaleString('ru-RU')+' ₽</span><b style="color:#b02323">'+p.price.toLocaleString('ru-RU')+' ₽</b>'
+    : '<b>'+p.price.toLocaleString('ru-RU')+' ₽</b>';
+  body+='<div style="margin-top:16px;font-size:1.2rem">'+priceRow+'</div>';
+  body+='<div class="pm-actions"><button class="pm-cart" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button><button class="pm-buy" style="background:var(--ink)" onclick="buyOneClick(\''+esc(p.name).replace(/'/g,"\\'")+'\','+p.price+')">Купить в 1 клик</button></div>';
+  // С этим покупают (рекомендации: те же характеристики бренда/стиля или той же категории)
+  var sameCat = PRODUCTScurrent.filter(function(x){ return x!==p && x.cat===p.cat; }).slice(0,3);
+  if(sameCat.length){
+    body+='<div class="pm-reviews" style="margin-top:20px"><h3 style="font-weight:normal;margin-bottom:8px">С этим покупают</h3><div style="display:flex;gap:8px;overflow-x:auto">'+
+      sameCat.map(function(x){
+        return '<div style="flex:0 0 120px;cursor:pointer;border:1px solid var(--line);padding:6px" onclick="openProductByIdx('+PRODUCTScurrent.indexOf(x)+')"><div class="img" style="height:90px;background:var(--cream)">'+(x.image?'<img src="'+x.image+'" alt="" style="width:100%;height:100%;object-fit:cover">':'<span>Фото</span>')+'</div><div style="font-size:.75rem;margin-top:4px">'+esc(x.name)+'</div><div style="font-size:.8rem;font-weight:bold">'+x.price.toLocaleString('ru-RU')+' ₽</div></div>';
+      }).join('')+'</div></div>';
+  }
   const reviews=p.reviews||[];
   body+='<div class="pm-reviews"><h3 style="font-weight:normal;margin-bottom:8px">Отзывы ('+reviews.length+')</h3>';
   body+= reviews.length ? reviews.map(rev=>'<div class="rev-item"><b>'+esc(rev.name)+'</b> <span class="rev-stars">'+starStr(rev.stars)+'</span><div>'+esc(rev.text)+'</div></div>').join('') : '<p style="color:var(--muted);font-size:.9rem">Пока нет отзывов.</p>';
@@ -1772,6 +1887,17 @@ function edPublish(){
 }
 
 renderContacts(); render(); renderTopBalance();
+// Открытие товара по ссылке вида #/product/0
+function handleHash(){
+  var h=location.hash || "";
+  var m=h.match(/^#\/product\/(\d+)/);
+  if(m){
+    go('catalog');
+    setTimeout(function(){ var idx=parseInt(m[1],10); if(idx>=0 && idx<PRODUCTScurrent.length) openProduct(idx); }, 150);
+  }
+}
+window.addEventListener("hashchange", handleHash);
+handleHash();
 
 /* ============ ЧАТ ПОДДЕРЖКИ ============ */
 let chatConv = null;
