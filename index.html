@@ -723,7 +723,7 @@ function render(){
   list.forEach(p => {
     const el = document.createElement("div");
     el.className = "card";
-    el.setAttribute("onclick","openProductName('"+esc(p.name).replace(/'/g,"\\'")+"')");
+    el.setAttribute("onclick","openProductIdx(PRODUCTScurrent.indexOf(p))");
     const note = p.reviews && p.reviews.length ? '<span class="rev-stars">'+starStr(avgStars(p.reviews))+'</span> '+p.reviews.length+' отз.' : 'нет отзывов';
     el.innerHTML =
       '<div class="img">' + (p.image ? '<img src="'+p.image+'" alt="'+p.name+'">' : '<span>Фото модели</span>') + '</div>' +
@@ -1259,7 +1259,7 @@ async function requestGiftByCard(amount){
 
 /* ============ МОДАЛКА ТОВАРА ============ */
 let curIdx=null, curImg=0;
-function openProductName(name){ const idx=PRODUCTScurrent.findIndex(x=>x.name===name); if(idx>=0) openProduct(idx); }
+function openProductIdx(idxInList){ if(idxInList<0||idxInList>=PRODUCTScurrent.length) return; openProduct(idxInList); }
 function openProduct(idx){ curIdx=idx; curImg=0; const p=PRODUCTScurrent[idx]; if(!p) return; document.getElementById("pm-title").textContent=p.name; drawProductBody(); document.getElementById("product-modal").classList.add("open"); overlayShow(); }
 function closeProduct(){ document.getElementById("product-modal").classList.remove("open"); overlayHide(); }
 function drawProductBody(){
