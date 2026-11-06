@@ -698,6 +698,7 @@ const firebaseConfig = {
   measurementId: "G-4N4H0862HG"
 };
 firebase.initializeApp(firebaseConfig);
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
 const firestore = firebase.firestore();
 const auth = firebase.auth();
 const UNLIMITED_PHONE = "+79277467217";
@@ -771,9 +772,9 @@ function go(page){
 }
 function updateAdminNav(){
   const btn=document.getElementById("nav-admin-btn");
-  if(btn){ btn.style.display = isAdmin() ? "" : "none"; }
+  if(btn){ btn.style.display = (isAdmin() && __ownerAuthOk) ? "" : "none"; }
   const fab=document.getElementById("edit-fab");
-  if(fab){ fab.classList.toggle("on", !!isOwner()); }
+  if(fab){ fab.classList.toggle("on", !!(isOwner() && __ownerAuthOk)); }
 }
 function renderAdminPage(){
   const body=document.getElementById("admin-page-body");
@@ -1042,6 +1043,9 @@ function isUnlimited(){
   return currentUser && currentUser.phone === UNLIMITED_PHONE;
 }
 function isAdmin(){ return isUnlimited(); }
+let __ownerAuthOk = false;
+function requireOwnerFresh(){ return __ownerAuthOk; }
+function ownerGate(fn){ return function(){ if(!isOwner()){ alert("Доступ только для владельца."); return; } return fn.apply(this,arguments); }; }
 function isOwner(){ return !!(currentUser && (currentUser.phone === UNLIMITED_PHONE || currentUser.phone === "89277467217")); }
 function getBalance(){
   if(!userData) return 0;
@@ -1546,6 +1550,25 @@ auth.onAuthStateChanged(async function(user){
       if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
       if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
     });
+    // 🔐 Владелец: при каждой загрузке страницы требуется повторно ввести пароль аккаунта
+    __ownerAuthOk = false;
+    updateAdminNav();
+    if(isOwner()){
+      var unsubAuth = null;
+      var doOwnerCheck = async function(){
+        var pwd = prompt("Введите пароль аккаунта для доступа к настройкам владельца:");
+        if(pwd===null){ alert("Доступ к настройкам заблокирован до следующего входа."); return; }
+        try{
+          var email = user.email;
+          var cred = await auth.signInWithEmailAndPassword(email, pwd);
+          if(cred.user && cred.user.uid === user.uid){
+            __ownerAuthOk = true;
+            updateAdminNav();
+          } else { alert("Неверный пароль."); }
+        }catch(e){ alert("Неверный пароль: "+e.message); }
+      };
+      doOwnerCheck();
+    }
   }else{
     currentUser=null; userData=null;
     if(window.__unsub){ try{ window.__unsub(); }catch(e){} window.__unsub=null; }
