@@ -346,33 +346,11 @@
   .conv-title{font-size:.9rem;padding:8px 14px;background:var(--cream);color:var(--muted)}
 
 
-  /* Тосты */
-  #toast-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:auto;max-width:92vw}
+  #toast-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:210;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:auto;max-width:92vw}
   .toast{background:#1c1c1c;color:#fff;padding:12px 18px;border-radius:10px;font-size:.9rem;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:92vw;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:auto}
   .toast.show{opacity:1;transform:translateY(0)}
   .toast.err{background:#b02323}
   .toast.ok{background:#2c5a2c}
-  /* Модалка 1 клик */
-  #oneclick-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190;display:none;align-items:center;justify-content:center}
-  #oneclick-modal.show{display:flex}
-  .oc-box{background:#fff;width:380px;max-width:92vw;padding:24px;border-radius:12px}
-  .oc-box h3{font-weight:normal;letter-spacing:.5px;margin-bottom:6px}
-  .oc-box .oc-tip{color:var(--muted);font-size:.85rem;margin-bottom:14px}
-  .oc-box label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
-  .oc-box input{width:100%;padding:11px;border:1px solid var(--line);font-family:inherit;font-size:1rem;background:#fbfaf7;border-radius:6px}
-  .oc-box .oc-actions{display:flex;gap:10px;margin-top:18px}
-  .oc-box .oc-actions button{flex:1;padding:12px;border:none;cursor:pointer;font-family:inherit;font-size:1rem;border-radius:6px}
-  .oc-send{background:var(--gold);color:#fff}
-  .oc-cancel{background:#e8e4da;color:var(--ink)}
-  /* Подтверждение (вместо confirm) */
-  #confirm-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:195;display:none;align-items:center;justify-content:center}
-  #confirm-modal.show{display:flex}
-  .cf-box{background:#fff;width:360px;max-width:90vw;padding:24px;border-radius:12px;text-align:center}
-  .cf-box p{font-size:.95rem;margin-bottom:18px}
-  .cf-box .cf-actions{display:flex;gap:10px}
-  .cf-box .cf-actions button{flex:1;padding:11px;border:none;cursor:pointer;font-family:inherit;font-size:.95rem;border-radius:6px}
-  .cf-ok{background:#b02323;color:#fff}
-  .cf-no{background:#e8e4da;color:var(--ink)}
 
 </style>
 </head>
@@ -633,6 +611,18 @@
 </div>
 
 
+<button class="chat-bubble" id="chat-bubble" onclick="toggleChat()" title="Поддержка">💬</button>
+<aside id="support-chat">
+  <header><h3>Поддержка Memento</h3><button onclick="toggleChat()">×</button></header>
+  <div style="background:var(--cream);padding:8px 16px;font-size:.78rem;color:var(--muted);border-bottom:1px solid var(--line)">*Поддержка отвечает в течение 20-30 минут или ранее. В случае повышенной нагрузки ответ может прийти в течение 8 часов.</div>
+  <div id="chat-body">
+    <div id="chat-messages"></div>
+  </div>
+  <div class="chat-input">
+    <input id="chat-text" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">➤</button>
+  </div>
+</aside>
 
 <div id="toast-wrap"></div>
 <div id="oneclick-modal"><div class="oc-box">
@@ -650,23 +640,10 @@
 <div id="confirm-modal"><div class="cf-box">
   <p id="cf-text">Вы уверены?</p>
   <div class="cf-actions">
-    <button class="cf-no" id="cf-no" onclick="confirmResolve(false)">Нет</button>
-    <button class="cf-ok" id="cf-ok" onclick="confirmResolve(true)">Да</button>
+    <button class="cf-no" onclick="confirmResolve(false)">Нет</button>
+    <button class="cf-ok" onclick="confirmResolve(true)">Да</button>
   </div>
 </div></div>
-
-<button class="chat-bubble" id="chat-bubble" onclick="toggleChat()" title="Поддержка">💬</button>
-<aside id="support-chat">
-  <header><h3>Поддержка Memento</h3><button onclick="toggleChat()">×</button></header>
-  <div style="background:var(--cream);padding:8px 16px;font-size:.78rem;color:var(--muted);border-bottom:1px solid var(--line)">*Поддержка отвечает в течение 20-30 минут или ранее. В случае повышенной нагрузки ответ может прийти в течение 8 часов.</div>
-  <div id="chat-body">
-    <div id="chat-messages"></div>
-  </div>
-  <div class="chat-input">
-    <input id="chat-text" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter')sendChat()">
-    <button onclick="sendChat()">➤</button>
-  </div>
-</aside>
 
 <div class="overlay" id="overlay" onclick="closePanels()"></div>
 
@@ -1018,14 +995,1034 @@ function addRecent(name){
   localStorage.setItem(RECENT_KEY, JSON.stringify(r));
 }
 function buyOneClick(name, price){
-  var p=PRODUCTScurrent.find(function(x){ return x.name===name; });
-  __ocProduct = { name:name, price:price };
-  if(!currentUser){ showToast("Войдите в аккаунт, чтобы оформить заказ в 1 клик","err"); openAuth({preventDefault:function(){}}); return; }
-  document.getElementById("oc-title").textContent="Купить в 1 клик: "+name+" ("+price.toLocaleString('ru-RU')+" ₽)";
-  document.getElementById("oc-name").value="";
-  document.getElementById("oc-phone").value="";
-  document.getElementById("oneclick-modal").classList.add("show");
+  var p = PRODUCTScurrent.find(function(x){ return x.name===name; });
+  var name2 = prompt("Купить в 1 клик: "+name+" ("+price.toLocaleString('ru-RU')+" ₽)\nВведите ваше имя:");
+  if(name2===null) return;
+  var phone2 = prompt("Введите номер телефона:");
+  if(phone2===null) return;
+  try{
+    firestore.collection("orders").add({
+      uid: currentUser ? currentUser.uid : null,
+      client: name2.trim()||"Без имени",
+      phone: (phone2||"").trim(),
+      comment: "Купить в 1 клик",
+      items: [name],
+      total: price,
+      payMethod: "card",
+      status: "new",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(){
+      var box=document.getElementById("order-ok");
+      if(box){ box.style.display="block"; box.innerHTML="<b>Заявка принята!</b><br>Мы перезвоним вам в ближайшее время для подтверждения заказа."; }
+    }).catch(function(e){ showToast("Ошибка: "+e.message); });
+  }catch(e){ showToast("Ошибка: "+e.message); }
 }
+
+/* ============ КОРЗИНА ============ */
+function addToCart(name,price){ if(!cart[name]) cart[name]={price,qty:0}; cart[name].qty++; saveCart(); updateCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); openCart(); }
+function openCart(){ document.getElementById("cart-panel").classList.add("open"); overlayShow(); drawCart(); document.querySelector('#cart-panel header span').textContent='Корзина'; }
+function closePanels(){
+  document.querySelectorAll('#cart-panel,#order-form,#product-modal').forEach(e=>e.classList.remove('open'));
+  overlayHide();
+  document.getElementById("order-ok").style.display="none";
+}
+function overlayShow(){ document.getElementById("overlay").classList.add("show"); }
+function overlayHide(){ document.getElementById("overlay").classList.remove("show"); }
+function updateCart(){
+  const c=Object.values(cart).reduce((s,x)=>s+x.qty,0);
+  document.getElementById("cart-count").textContent=c;
+  const navEl=document.getElementById("nav-cart-count");
+  if(navEl){ navEl.textContent = c ? "("+c+")" : ""; }
+  renderTopBalance();
+}
+function plural(n, one, few, many){
+  n = Math.abs(n) % 100;
+  const n1 = n % 10;
+  if(n>10 && n<20) return many;
+  if(n1>1 && n1<5) return few;
+  if(n1===1) return one;
+  return many;
+}
+function renderCartPage(){
+  const body=document.getElementById("cart-page-body");
+  const countEl=document.getElementById("cart-page-count");
+  const names=Object.keys(cart);
+  if(countEl){ countEl.textContent = names.length ? " · "+plural(names.length, "позиция","позиции","позиций") : ""; }
+  if(!names.length){
+    body.innerHTML='<div style="background:var(--cream);border:1px solid var(--line);padding:40px;text-align:center"><p style="color:var(--muted);margin-bottom:16px">Корзина пуста.</p><button style="background:var(--ink);color:#fff;border:none;padding:12px 24px;cursor:pointer;font-family:inherit;font-size:1rem" onclick="go(\'catalog\')">Перейти в каталог</button></div>';
+    return;
+  }
+  let html=names.map(n=>'<div class="ci" style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:10px"><div class="th"><div class="nm">'+n+'</div><div class="pr">'+cart[n].price.toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+n+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+n+'\',1)">+</button></div></div><button class="rm" onclick="chg(\''+n+'\',-999)">✕</button></div>').join('');
+  let total=0; Object.values(cart).forEach(x=>total+=x.price*x.qty);
+  html+='<div id="cart-total" style="background:var(--cream);border:1px solid var(--line);padding:18px;margin-top:14px"><div class="sum-row"><span>Итого:</span><span id="grand2" style="font-size:1.3rem;font-weight:bold">'+total.toLocaleString('ru-RU')+' ₽</span></div><button onclick="goCheckout()" style="width:100%;background:var(--gold);color:#fff;border:none;padding:14px;font-family:inherit;font-size:1.1rem;letter-spacing:1px;cursor:pointer">Оформить заказ</button></div>';
+  body.innerHTML=html;
+}
+function drawCart(){
+  const body=document.getElementById("cart-body");
+  const names=Object.keys(cart);
+  if(!names.length){ body.innerHTML='<p style="color:#7a7265">Корзина пуста.</p>'; }
+  else{
+    body.innerHTML=names.map(n=>'<div class="ci"><div class="th"><div class="nm">'+n+'</div><div class="pr">'+cart[n].price.toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+n+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+n+'\',1)">+</button></div></div><button class="rm" onclick="chg(\''+n+'\',-999)">✕</button></div>').join('');
+  }
+  let total=0; Object.values(cart).forEach(x=>total+=x.price*x.qty);
+  document.getElementById("grand").textContent=total.toLocaleString('ru-RU')+' ₽';
+  updateCart();
+}
+function chg(name,d){ cart[name].qty+=d; if(cart[name].qty<=0) delete cart[name]; saveCart(); drawCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); }
+
+/* ============ ОФОРМЛЕНИЕ ============ */
+function goCheckout(){
+  if(!Object.keys(cart).length){ showToast("Корзина пуста."); return; }
+  let html='<b>Ваш заказ:</b><br>', total=0;
+  Object.entries(cart).forEach(([n,x])=>{ html+=n+' × '+x.qty+' — '+(x.price*x.qty).toLocaleString('ru-RU')+' ₽<br>'; total+=x.price*x.qty; });
+  html+='<b>Итого: '+total.toLocaleString('ru-RU')+' ₽</b>';
+  document.getElementById("checkout-summary").innerHTML=html;
+  document.getElementById("pay-options").innerHTML = buildPayOptions(total);
+  document.getElementById("order-form").classList.add("open");
+  overlayShow();
+}
+function buildPayOptions(total){
+  const hasBalance = getBalance()>=total;
+  let html='<div style="margin:12px 0"><b>Способ оплаты:</b></div>';
+  html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="card" '+(hasBalance?'':'checked')+' onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Перевод на карту ВТБ</label>';
+  if(hasBalance) html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="balance" checked onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Оплатить балансом ('+total.toLocaleString('ru-RU')+' ₽)</label>';
+  html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="cert" onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Подарочный сертификат</label>';
+  html+='<div style="font-size:.8rem;color:var(--muted);margin-top:6px">'+CONTACTScurrent.shop+'<br>Карта: <b>'+CARD_VTB+'</b><br>Получатель: '+VTB_HOLDER+'</div>';
+  html+='<div id="cert-block" style="display:block;margin-top:14px;background:var(--cream);border:1px solid var(--line);padding:12px">'+
+    '<label style="font-size:.9rem"><b>Подарочный сертификат</b> — введите код</label>'+
+    '<input type="text" id="cert-code-input" placeholder="MEM-123456" style="width:100%;padding:10px;border:1px solid var(--line);font-family:inherit;font-size:1rem;margin-top:6px">'+
+    '<button type="button" onclick="applyCert()" style="width:100%;background:var(--gold);color:#fff;border:none;padding:11px;cursor:pointer;font-family:inherit;font-size:.95rem;margin-top:8px">Применить сертификат</button>'+
+    '<div id="cert-result" style="font-size:.9rem;margin-top:8px;color:var(--green)"></div></div>';
+  return html;
+}
+function toggleCertBlock(){
+  const v=document.querySelector('input[name=pay]:checked');
+  const block=document.getElementById("cert-block");
+  if(block){ block.style.display = v && v.value==='cert' ? 'block' : 'block'; }
+}
+let appliedCert = null; // { code, amount }
+async function applyCert(){
+  const code = document.getElementById("cert-code-input").value.trim();
+  const result = document.getElementById("cert-result");
+  if(!code){ result.style.color="#b02323"; result.textContent="Введите код."; return; }
+  try{
+    const snap = await firestore.collection("certificates").doc(code).get();
+    if(!snap.exists){ result.style.color="#b02323"; result.textContent="Сертификат не найден."; appliedCert=null; return; }
+    const c = snap.data();
+    if(c.status === "used"){ result.style.color="#b02323"; result.textContent="Этот сертификат уже использован."; appliedCert=null; return; }
+    if(c.status === "pending"){ result.style.color="#b02323"; result.textContent="Сертификат ещё не активирован."; appliedCert=null; return; }
+    appliedCert = { code: code, amount: c.amount||0 };
+    result.style.color="var(--green)";
+    result.textContent = "Сертификат на "+appliedCert.amount.toLocaleString('ru-RU')+" ₽ применён. Остаток после заказа вернётся на баланс.";
+  }catch(e){ result.style.color="#b02323"; result.textContent="Ошибка: "+e.message; appliedCert=null; }
+}
+document.getElementById("checkout-form").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const pay=document.querySelector('input[name=pay]:checked');
+  const payMethod = pay?pay.value:'card';
+  const name=document.getElementById("of-name").value;
+  const phone=document.getElementById("of-phone").value;
+  const comment=document.getElementById("of-comment").value;
+  let lines=[], total=0;
+  Object.entries(cart).forEach(([n,x])=>{ lines.push(n+' × '+x.qty); total+=x.price*x.qty; });
+  if(payMethod==='balance'){
+    if(getBalance()<total){ showToast("Недостаточно средств на балансе."); return; }
+    // Баланс не списывается клиентом — спишет админ при подтверждении заказа (Вариант B)
+  } else if(payMethod==='cert'){
+    if(!appliedCert){ showToast("Сначала примените сертификат."); return; }
+    if(appliedCert.amount < total){ showToast("Номинала сертификата недостаточно для этого заказа ("+appliedCert.amount.toLocaleString('ru-RU')+" ₽ < "+total.toLocaleString('ru-RU')+" ₽)."); return; }
+  } else {
+    const text2="ПЕРЕВОД НА КАРТУ\nКарта: "+CARD_VTB+"\nСумма: "+total.toLocaleString('ru-RU')+" ₽\nНазначение: заказ "+name;
+    console.log(text2);
+    showToast("Совершите перевод "+total.toLocaleString('ru-RU')+" ₽ на карту "+CARD_VTB+". После перевода отправьте чек нам в личные сообщения — мы подтвердим заказ.");
+  }
+  const certUsed = (payMethod==='cert') ? { code: appliedCert.code, amount: appliedCert.amount, remainder: appliedCert.amount-total } : null;
+  const order = {
+    uid: currentUser ? currentUser.uid : null,
+    client: name, phone: phone, comment: comment,
+    items: lines, total: total,
+    payMethod: payMethod,
+    cert: certUsed,
+    status: "new",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  // 1) Сохраняем заказ в Firestore
+  try{
+    await firestore.collection("orders").add(order);
+  }catch(err){ console.error("save order:", err); }
+  // Если сертификат — погашаем сразу и создаём запрос на зачисление остатка на баланс
+  if(certUsed){
+    try{
+      await firestore.collection("certificates").doc(certUsed.code).update({ status:"used", usedBy: currentUser?currentUser.uid:null, usedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }catch(e){ console.error("cert used:", e); }
+    if(certUsed.remainder > 0){
+      try{
+        await firestore.collection("topups").add({
+          uid: currentUser ? currentUser.uid : null,
+          client: (currentUser&&currentUser.nick)||name,
+          phone: (currentUser&&currentUser.phone)||phone,
+          amount: certUsed.remainder,
+          reason: "Остаток с сертификата "+certUsed.code,
+          fromCert: certUsed.code,
+          status: "pending",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }catch(e){ console.error("remainder:", e); }
+    }
+  }
+  // 2) Отправляем на почту через FormSubmit
+  try{
+    await fetch("https://formsubmit.co/ajax/hibih228@gmail.com", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Accept":"application/json" },
+      body: JSON.stringify({
+        _subject:"🕐 Новый заказ — Memento",
+        Имя: name, Телефон: phone, Комментарий: comment,
+        "Состав заказа": lines.join("; "),
+        Сумма: total.toLocaleString('ru-RU')+" ₽",
+        Оплата: payMethod==='balance' ? "Баланс" : (payMethod==='cert' ? "Сертификат "+certUsed.code : "Карта ВТБ")
+      })
+    });
+  }catch(err){ console.error("email:", err); }
+  document.getElementById("order-ok").style.display="block";
+  if(payMethod==='cert'){
+    document.getElementById("order-ok").innerHTML='<b>Заказ оформлен по сертификату '+certUsed.code+'!</b><br>'+
+      (certUsed.remainder>0 ? 'Остаток <b>'+certUsed.remainder.toLocaleString('ru-RU')+' ₽</b> будет зачислен на ваш баланс после подтверждения.' : 'Сертификат полностью покрыл заказ. Спасибо!');
+  } else if(payMethod==='balance'){
+    document.getElementById("order-ok").innerHTML='<b>Заказ оформлен.</b><br>Оплата с баланса будет списана после подтверждения. Мы свяжемся с вами.';
+  } else {
+    document.getElementById("order-ok").innerHTML='<b>Заказ сформирован.</b><br>Совершите перевод на карту <b>'+CARD_VTB+'</b> на сумму <b>'+total.toLocaleString('ru-RU')+' ₽</b> и пришлите подтверждение. Мы свяжемся с вами.';
+  }
+  document.getElementById("checkout-form").reset();
+  appliedCert = null;
+  cart={}; saveCart(); updateCart(); drawCart(); renderTopBalance(); renderProfile();
+  setTimeout(function(){ document.getElementById("order-ok").style.display="none"; closePanels(); }, 7000);
+});
+
+/* ============ БАЛАНС / КОШЕЛЁК (Вариант B: только админ меняет баланс) ============ */
+function ensureUserLoaded(){ return !!userData; }
+function isUnlimited(){
+  return currentUser && currentUser.phone === UNLIMITED_PHONE;
+}
+function isAdmin(){ return isUnlimited(); }
+let __ownerAuthOk = false;
+function requireOwnerFresh(){ return __ownerAuthOk; }
+function ownerGate(fn){ return function(){ if(!isOwner()){ showToast("Доступ только для владельца."); return; } return fn.apply(this,arguments); }; }
+function isOwner(){ return !!(currentUser && (currentUser.phone === UNLIMITED_PHONE || currentUser.phone === "89277467217")); }
+function getBalance(){
+  if(!userData) return 0;
+  if(isUnlimited()) return 999999;
+  return userData.balance||0;
+}
+function userDocRef(){
+  return userData ? userData._ref : null;
+}
+async function reloadUserData(){
+  if(!currentUser) return;
+  const doc = await firestore.collection("users").doc(currentUser.uid).get();
+  if(doc.exists){
+    userData = Object.assign({}, doc.data(), { _ref: doc.ref, _id: doc.id });
+  }
+  renderTopBalance();
+  if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+  if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+}
+// Админская функция: начислить/списать баланс пользователю напрямую (вызывается только из админ-панели)
+async function adminSetBalance(uid, delta, label){
+  const ref = firestore.collection("users").doc(uid);
+  const doc = await ref.get();
+  if(!doc.exists) return false;
+  const data = doc.data();
+  const cur = data.balance||0;
+  const isUnl = (data.phone === UNLIMITED_PHONE);
+  const newBal = cur + delta;
+  // Бесконечный аккаунт не списываем реально (баланс остаётся), остальным — нельзя в минус
+  if(isUnl && delta<0){ return true; }
+  if(newBal < 0){ throw new Error("Нельзя списать больше, чем есть на балансе"); }
+  const history = data.history||[];
+  history.unshift({ date:new Date().toLocaleString('ru-RU'), amount:delta, label:label });
+  await ref.update({ balance:newBal, history:history });
+  return true;
+}
+function renderTopBalance(){
+  document.getElementById("top-balance").textContent = (getBalance()>=999999?'∞':getBalance().toLocaleString('ru-RU'))+' ₽';
+}
+function renderProfile(){
+  const w=document.getElementById("profile-widget");
+  if(!currentUser){
+    w.innerHTML='<div style="background:var(--cream);border:1px solid var(--line);padding:30px;text-align:center"><p style="margin-bottom:14px">Войдите, чтобы увидеть баланс и сертификаты.</p><button style="background:var(--ink);color:#fff;border:none;padding:12px 24px;cursor:pointer;font-family:inherit;font-size:1rem" onclick="openAuth(event)">Войти / Зарегистрироваться</button></div>';
+    return;
+  }
+  const bal=getBalance();
+  const hist=(userData&&userData.history)||[];
+  const myGifts=(userData&&userData.gifts)||[];
+  w.innerHTML=
+    '<div class="wallet-card"><div class="bal-label">Ваш баланс</div><div class="bal-amount">'+(bal>=999999?'∞':bal.toLocaleString('ru-RU'))+' ₽</div>'+
+    '<div class="bal-actions"><button onclick="toggleOps(\'topup\')">+ Пополнить</button><button onclick="go(\'gifts\')">Купить сертификат</button></div></div>'+
+    '<div class="wallet-ops" id="wallet-topup">'+
+      '<h3 style="margin-bottom:8px;font-weight:normal">Пополнение баланса</h3>'+
+      '<p style="font-size:.9rem;color:var(--muted);margin-bottom:8px">Переведите нужную сумму на карту <b>'+CARD_VTB+'</b> (получатель '+VTB_HOLDER+') и нажмите «Я перевёл». После проверки перевода мы начислим баланс.</p>'+
+      '<label>Сумма (₽)</label><input type="number" id="topup-amount" min="100" placeholder="Например 1000">'+
+      '<button class="btn" onclick="startTopup()" style="margin-top:10px;background:var(--gold)">Я перевёл — отправить на проверку</button>'+
+      '<div style="font-size:.78rem;color:var(--muted);margin-top:10px">⚠️ Мы не сохраняем данные вашей карты. Перевод идёт напрямую между картами. Зачисление — после подтверждения.</div>'+
+    '</div>'+
+    '<div class="section-title">История операций</div>'+
+    (hist.length ? hist.map(h=>'<div class="history-item"><div class="h-date">'+h.date+'</div><span class="h-amount '+(h.amount>0?'plus':'minus')+'">'+(h.amount>0?'+':'−')+Math.abs(h.amount).toLocaleString('ru-RU')+' ₽</span> — '+esc(h.label)+'</div>').join('') : '<p style="color:var(--muted)">Операций пока нет.</p>')+
+    (myGifts.length ? '<div class="section-title">Мои сертификаты</div>'+myGifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· '+g.code+'</span></div>').join('') : '')+
+    '<div class="section-title">Мои заказы</div><div id="my-orders">Загрузка...</div>'+
+    (isAdmin() ? '<div style="background:var(--cream);border:1px solid var(--line);padding:16px;margin-top:14px"><b>Администратор</b> — все заявки, заказы и сертификаты можно посмотреть в разделе <a onclick="go(\'admin\')" style="color:var(--gold-d);cursor:pointer;text-decoration:underline">«Админ-панель»</a>.</div>' : '');
+  if(currentUser) loadMyOrders();
+  if(isAdmin()){ loadAdminTopups(); loadAdminOrders(); loadAdminGiftRequests(); }
+}
+async function syncNicks(){
+  if(!isAdmin()) return;
+  const res=document.getElementById("sync-result");
+  res.textContent="Синхронизация...";
+  try{
+    const snap=await firestore.collection("users").get();
+    let count=0, skipped=0;
+    for(const doc of snap.docs){
+      const data=doc.data();
+      if(!data.nick) continue;
+      const key=data.nick.toLowerCase();
+      const ref=firestore.collection("names").doc(key);
+      const existing=await ref.get();
+      if(!existing.exists){
+        await ref.set({ uid: doc.id, phone: data.phone||"" });
+        count++;
+      } else {
+        // проверим, совпадает ли uid
+        if(existing.data().uid !== doc.id){
+          // перезаписать, т.к. мог быть старый uid
+          await ref.set({ uid: doc.id, phone: data.phone||"" });
+          count++;
+        } else { skipped++; }
+      }
+    }
+    res.textContent="Готово! Добавлено записей: "+count+". Уже были: "+skipped+".";
+  }catch(e){ res.textContent="Ошибка: "+e.message; }
+}
+async function loadMyOrders(){
+  const box=document.getElementById("my-orders");
+  if(!box||!currentUser) return;
+  try{
+    const snap = await firestore.collection("orders")
+      .where("uid","==",currentUser.uid)
+      .orderBy("createdAt","desc").limit(20).get();
+    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">У вас пока нет заказов.</p>'; return; }
+    box.innerHTML = snap.docs.map(function(d){
+      const o=d.data();
+      const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
+      const state = orderStatusHtml(o.status||"new");
+      const payLabel = o.payMethod==='balance' ? 'баланс' : (o.payMethod==='cert' ? 'сертификат' : 'карта ВТБ');
+      return '<div class="rev-item"><b>'+date+'</b> — '+state+'<br>'+
+        '<span style="color:var(--muted)">'+esc((o.items||[]).join("; "))+'</span><br>'+
+        '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · оплата: '+payLabel+'</div>';
+    }).join('');
+  }catch(e){ console.error(e); box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
+}
+function orderStatusHtml(st){
+  switch(st){
+    case "confirmed": return '<span style="color:var(--gold-d)">✔ Подтверждён</span>';
+    case "shipped": return '<span style="color:#2a6fb0">📦 Отправлен</span>';
+    case "delivered": return '<span style="color:var(--green)">✅ Доставлен</span>';
+    case "approved": return '<span style="color:var(--green)">✅ Выполнен</span>';
+    default: return '<span style="color:#b02323">⏳ Принят</span>';
+  }
+}
+async function loadAdminTopups(){
+  try{
+    const snap = await firestore.collection("topups").orderBy("createdAt","desc").limit(30).get();
+    const box=document.getElementById("admin-topups");
+    if(!box) return;
+    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заявок нет.</p>'; return; }
+    box.innerHTML = snap.docs.map(function(d){
+      const o=d.data();
+      const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
+      const state = o.status==='approved' ? '<span style="color:var(--green)">одобрено</span>' : '<span style="color:#b02323">ожидает</span>';
+      return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+' / '+esc(o.phone||"")+'<br>'+
+        'Сумма: <b>'+parseInt(o.amount||0).toLocaleString('ru-RU')+' ₽</b> · '+state+'<br>'+
+        (o.status!=='approved' ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:6px" onclick="approveTopup(\''+d.id+'\',\''+o.uid+'\','+parseInt(o.amount||0)+',\''+esc(o.client||"").replace(/'/g,"")+'\')">Начислить</button>' : '')+'</div>';
+    }).join('');
+  }catch(e){ console.error(e); const box=document.getElementById("admin-topups"); if(box) box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
+}
+async function approveTopup(docId, uid, amount, client){
+  if(!isAdmin()) return;
+  if(!confirm("Начислить "+amount.toLocaleString('ru-RU')+" ₽ пользователю "+client+"?")) return;
+  try{
+    await adminSetBalance(uid, amount, "Пополнение баланса (подтверждено)");
+    await firestore.collection("topups").doc(docId).update({ status:"approved", approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    showToast("Баланс начислен.");
+    loadAdminTopups();
+  }catch(e){ showToast("Ошибка: "+e.message); }
+}
+async function loadAdminOrders(){
+  try{
+    const snap = await firestore.collection("orders").orderBy("createdAt","desc").limit(30).get();
+    const box=document.getElementById("admin-orders");
+    if(!box) return;
+    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заказов нет.</p>'; return; }
+    box.innerHTML = snap.docs.map(function(d){
+      const o=d.data();
+      const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
+      const st = o.status||"new";
+      const state = orderStatusHtml(st);
+      const balBtn = (st==='new' && o.payMethod==='balance' && o.uid)
+        ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.8rem;margin-top:6px" onclick="confirmOrderBalance(\''+d.id+'\',\''+o.uid+'\','+parseInt(o.total||0)+',\''+esc(o.client||"").replace(/'/g,"")+'\')">Подтвердить + списать баланс</button>'
+        : '';
+      const stBtns = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'+
+        (st==='new' ? '<button style="background:var(--gold-d);color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'confirmed\')">Подтвердить</button>' : '')+
+        (st==='confirmed' ? '<button style="background:#2a6fb0;color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'shipped\')">Отправить</button>' : '')+
+        (st==='shipped' ? '<button style="background:var(--green);color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'delivered\')">Доставлен</button>' : '')+
+        (st==='delivered'||st==='approved' ? '' : '<button style="background:#b02323;color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'cancelled\')">Отменить</button>')+
+      '</div>';
+      return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+' / '+esc(o.phone||"")+'<br>'+
+        '<span style="color:var(--muted)">'+esc((o.items||[]).join("; "))+'</span><br>'+
+        '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · '+(o.payMethod==='balance'?'баланс':'карта ВТБ')+' · '+state+'<br>'+balBtn+stBtns+'</div>';
+    }).join('');
+  }catch(e){ console.error(e); const box=document.getElementById("admin-orders"); if(box) box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
+}
+async function setOrderStatus(docId, status){
+  if(!isAdmin()) return;
+  try{
+    if(status==='cancelled'){ if(!confirm("Отменить заказ?")) return; }
+    await firestore.collection("orders").doc(docId).update({ status: status, statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    if(status==='delivered'||status==='approved') await sendOrderEmail(docId);
+    loadAdminOrders();
+  }catch(e){ showToast("Ошибка: "+e.message); }
+}
+async function confirmOrderBalance(docId, uid, total, client){
+  if(!isAdmin()) return;
+  if(!confirm("Списать "+total.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и подтвердить заказ?")) return;
+  try{
+    await adminSetBalance(uid, -total, "Оплата заказа");
+    await firestore.collection("orders").doc(docId).update({ status:"approved", statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await sendOrderEmail(docId);
+    showToast("Заказ подтверждён, баланс списан.");
+    loadAdminOrders();
+  }catch(e){ showToast("Ошибка: "+e.message); }
+}
+// Отправка письма о заказе
+async function sendOrderEmail(docId){
+  try{
+    const doc = await firestore.collection("orders").doc(docId).get();
+    if(!doc.exists) return;
+    const o=doc.data();
+    await fetch("https://formsubmit.co/ajax/hibih228@gmail.com", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Accept":"application/json" },
+      body: JSON.stringify({
+        _subject:"Заказ выполнен — Memento",
+        Клиент: o.client, Телефон: o.phone,
+        "Состав": (o.items||[]).join("; "),
+        Сумма: parseInt(o.total||0).toLocaleString('ru-RU')+" ₽",
+        Статус: "Выполнен"
+      })
+    });
+  }catch(e){ console.error("email:", e); }
+}
+async function loadAdminGiftRequests(){
+  try{
+    const snap = await firestore.collection("giftRequests").orderBy("createdAt","desc").limit(30).get();
+    const box=document.getElementById("admin-gifts");
+    if(!box) return;
+    if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заявок нет.</p>'; return; }
+    box.innerHTML = snap.docs.map(function(d){
+      const o=d.data();
+      const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
+      const state = o.status==='approved' ? '<span style="color:var(--green)">выдан</span>' : '<span style="color:#b02323">ожидает</span>';
+      return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+'<br>'+
+        'Сертификат на <b>'+parseInt(o.amount||0).toLocaleString('ru-RU')+' ₽</b> · '+state+'<br>'+
+        (o.status!=='approved' ? '<button style="background:var(--green);color:#fff;border:none;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:.85rem;margin-top:6px" onclick="approveGiftRequest(\''+d.id+'\',\''+o.uid+'\','+parseInt(o.amount||0)+',\''+esc(o.client||"").replace(/'/g,"")+'\')">Выдать сертификат</button>' : '')+'</div>';
+    }).join('');
+  }catch(e){ console.error(e); const box=document.getElementById("admin-gifts"); if(box) box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
+}
+async function approveGiftRequest(docId, uid, amount, client){
+  if(!isAdmin()) return;
+  if(!confirm("Списать "+amount.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и выдать сертификат?")) return;
+  try{
+    await adminSetBalance(uid, -amount, "Покупка подарочного сертификата "+amount.toLocaleString('ru-RU'));
+    const code="MEM-"+Math.floor(100000+Math.random()*900000);
+    await firestore.collection("giftRequests").doc(docId).update({ status:"approved", code:code, approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    // создать документ сертификата в коллекции certificates (его можно ввести в заказе)
+    await firestore.collection("certificates").doc(code).set({
+      code: code, amount: amount, ownerUid: uid, status: "active",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // добавить сертификат в документ пользователя
+    const ref = firestore.collection("users").doc(uid);
+    const doc = await ref.get();
+    if(doc.exists){
+      const gifts = doc.data().gifts||[];
+      gifts.push({amount:amount, code:code});
+      await ref.update({ gifts: gifts });
+    }
+    showToast("Сертификат выдан. Код: "+code+" — его можно ввести в заказе как оплату.");
+    loadAdminGiftRequests();
+  }catch(e){ showToast("Ошибка: "+e.message); }
+}
+function toggleOps(id){ document.getElementById('wallet-'+id).classList.toggle('show'); }
+async function startTopup(){
+  if(!currentUser){ showToast("Войдите в аккаунт."); return; }
+  const amt=parseFloat(document.getElementById("topup-amount").value);
+  if(!amt||amt<100){ showToast("Укажите сумму от 100 ₽."); return; }
+  const text2="ПОПОЛНЕНИЕ БАЛАНСА\nКарта: "+CARD_VTB+"\nСумма: "+amt.toLocaleString('ru-RU')+" ₽\nПользователь: "+(currentUser.phone||currentUser.nick);
+  console.log(text2);
+  showToast("Переведите "+amt.toLocaleString('ru-RU')+" ₽ на карту "+CARD_VTB+". После перевода мы проверим и начислим баланс.");
+  try{
+    await firestore.collection("topups").add({
+      uid: currentUser.uid,
+      client: currentUser.nick,
+      phone: currentUser.phone||"",
+      amount: amt,
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast("Заявка отправлена на проверку. Мы начислим баланс после подтверждения перевода.");
+  }catch(e){ showToast("Ошибка: "+e.message); }
+}
+function getUsers(){ return {}; } // заменено Firestore — оставлено для совместимости
+function saveUsers(u){} // заменено Firestore
+
+/* ============ СЕРТИФИКАТЫ ============ */
+function buyGift(amount){
+  const confirmBox=document.getElementById("gift-confirm");
+  confirmBox.style.display="block";
+  let html='<div class="wallet-ops show"><h3 style="margin-bottom:10px;font-weight:normal">Покупка сертификата на '+amount.toLocaleString('ru-RU')+' ₽</h3>';
+  if(currentUser && getBalance()>=amount){
+    html+='<p style="font-size:.9rem;color:var(--muted);margin-bottom:10px">У вас достаточно средств на балансе для оплаты этого сертификата.</p>';
+    html+='<button class="btn" style="background:var(--gold)" onclick="confirmGift('+amount+')">Оплатить с баланса ('+amount.toLocaleString('ru-RU')+' ₽)</button>';
+  } else {
+    html+='<p style="font-size:.9rem;color:var(--muted);margin-bottom:10px">Переведите '+amount.toLocaleString('ru-RU')+' ₽ на карту <b>'+CARD_VTB+'</b> ('+VTB_HOLDER+'). После перевода нажмите кнопку — мы проверим и выдадим сертификат.</p>';
+    html+='<button class="btn" style="background:var(--gold)" onclick="requestGiftByCard('+amount+')">Я перевёл — отправить на проверку</button>';
+  }
+  html+='</div>';
+  confirmBox.innerHTML=html;
+  confirmBox.scrollIntoView({behavior:'smooth'});
+}
+async function confirmGift(amount){
+  if(!currentUser){ showToast("Войдите в аккаунт."); return; }
+  if(getBalance()<amount){ showToast("Недостаточно средств."); return; }
+  try{
+    await firestore.collection("giftRequests").add({
+      uid: currentUser.uid,
+      client: currentUser.nick,
+      amount: amount,
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById("gift-confirm").innerHTML=
+      '<div class="rev-item" style="background:#eaf5ea;border:1px solid #b7d6b7;padding:18px"><b>Заявка отправлена!</b><br>Сертификат на <b>'+amount.toLocaleString('ru-RU')+' ₽</b> будет выдан после подтверждения оплаты. Код сертификата появится в личном кабинете.</div>';
+  }catch(e){ showToast("Ошибка: "+e.message); }
+  renderProfile(); renderMyGifts();
+}
+function renderMyGifts(){
+  const box=document.getElementById("my-gifts");
+  if(!currentUser){ box.innerHTML='<p style="color:var(--muted)">Войдите, чтобы видеть свои сертификаты.</p>'; return; }
+  const gifts=(userData&&userData.gifts)||[];
+  let html = gifts.length ? gifts.map(g=>'<div class="rev-item"><b>Сертификат на '+g.amount.toLocaleString('ru-RU')+' ₽</b> <span style="color:var(--muted)">· код '+g.code+'</span></div>').join('') : '<p style="color:var(--muted)">У вас пока нет сертификатов.</p>'+
+    '<p style="font-size:.85rem;color:var(--muted);margin-top:8px">Выданные сертификаты появятся здесь после подтверждения оплаты администратором.</p>';
+  box.innerHTML = html;
+}
+async function requestGiftByCard(amount){
+  if(!currentUser){ showToast("Войдите в аккаунт."); return; }
+  try{
+    await firestore.collection("giftRequests").add({
+      uid: currentUser.uid,
+      client: currentUser.nick,
+      amount: amount,
+      viaCard: true,
+      status: "pending",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById("gift-confirm").innerHTML=
+      '<div class="rev-item" style="background:#eaf5ea;border:1px solid #b7d6b7;padding:18px"><b>Заявка отправлена!</b><br>Мы проверим перевод и выдадим сертификат на <b>'+amount.toLocaleString('ru-RU')+' ₽</b>. Код появится в личном кабинете.</div>';
+  }catch(e){ showToast("Ошибка: "+e.message); }
+}
+
+/* ============ МОДАЛКА ТОВАРА ============ */
+let curIdx=null, curImg=0;
+function openProductIdx(idxInList){ if(idxInList<0||idxInList>=PRODUCTScurrent.length) return; openProduct(idxInList); }
+function openProductByIdx(idxInList){ if(idxInList<0||idxInList>=PRODUCTScurrent.length) return; openProduct(idxInList); }
+function openProductByTitle(el){ if(!el) return; const h=el.querySelector('h3'); if(!h) return; const name=h.textContent; const idx=PRODUCTScurrent.findIndex(x=>x.name===name); if(idx>=0) openProduct(idx); }
+function openProduct(idx){ curIdx=idx; curImg=0; const p=PRODUCTScurrent[idx]; if(!p) return; if(p.name) addRecent(p.name); document.getElementById("pm-title").textContent=p.name; drawProductBody(); document.getElementById("product-modal").classList.add("open"); overlayShow(); }
+function closeProduct(){ document.getElementById("product-modal").classList.remove("open"); overlayHide(); }
+function drawProductBody(){
+  const p=PRODUCTScurrent[curIdx]; if(!p) return;
+  const imgs=(p.images&&p.images.length)?p.images:(p.image?[p.image]:[]);
+  let body='<div class="slider">';
+  if(imgs.length>1) body+='<button class="slider-arrow left" onclick="prevImg()">‹</button>';
+  body+= imgs.length ? '<img id="pm-img" src="'+imgs[Math.min(curImg,imgs.length-1)]+'">' : '<span>Фото модели</span>';
+  if(imgs.length>1) body+='<button class="slider-arrow right" onclick="nextImg()">›</button>';
+  body+='</div>';
+  if(imgs.length>1){ body+='<div class="slider-dots">'+imgs.map(function(_,i){return '<span class="'+(i===curImg?'on':'')+'" onclick="jumpImg('+i+')"></span>';}).join('')+'</div>'; }
+  body+='<div class="pm-specs"><h3 style="font-weight:normal;margin-bottom:8px">Характеристики</h3><table>';
+  let hasSpec=false;
+  SPEC_FIELDS.forEach(function(k){ const v=getSpecs(p)[k]; if(v!==undefined && v!==""){ body+='<tr><td>'+k+'</td><td>'+esc(v)+'</td></tr>'; hasSpec=true; } });
+  if(!hasSpec) body+='<tr><td colspan="2" style="color:var(--muted)">Характеристики пока не заполнены.</td></tr>';
+  body+='</table></div>';
+  // Цена со скидкой (если oldPrice задан)
+  var priceRow = p.oldPrice && p.oldPrice>p.price
+    ? '<span style="text-decoration:line-through;color:var(--muted);margin-right:8px">'+p.oldPrice.toLocaleString('ru-RU')+' ₽</span><b style="color:#b02323">'+p.price.toLocaleString('ru-RU')+' ₽</b>'
+    : '<b>'+p.price.toLocaleString('ru-RU')+' ₽</b>';
+  body+='<div style="margin-top:16px;font-size:1.2rem">'+priceRow+'</div>';
+  body+='<div class="pm-actions"><button class="pm-cart" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button><button class="pm-buy" style="background:var(--ink)" onclick="buyOneClick(\''+esc(p.name).replace(/'/g,"\\'")+'\','+p.price+')">Купить в 1 клик</button></div>';
+  // С этим покупают (рекомендации: те же характеристики бренда/стиля или той же категории)
+  var sameCat = PRODUCTScurrent.filter(function(x){ return x!==p && x.cat===p.cat; }).slice(0,3);
+  if(sameCat.length){
+    body+='<div class="pm-reviews" style="margin-top:20px"><h3 style="font-weight:normal;margin-bottom:8px">С этим покупают</h3><div style="display:flex;gap:8px;overflow-x:auto">'+
+      sameCat.map(function(x){
+        return '<div style="flex:0 0 120px;cursor:pointer;border:1px solid var(--line);padding:6px" onclick="openProductByIdx('+PRODUCTScurrent.indexOf(x)+')"><div class="img" style="height:90px;background:var(--cream)">'+(x.image?'<img src="'+x.image+'" alt="" style="width:100%;height:100%;object-fit:cover">':'<span>Фото</span>')+'</div><div style="font-size:.75rem;margin-top:4px">'+esc(x.name)+'</div><div style="font-size:.8rem;font-weight:bold">'+x.price.toLocaleString('ru-RU')+' ₽</div></div>';
+      }).join('')+'</div></div>';
+  }
+  const reviews=p.reviews||[];
+  body+='<div class="pm-reviews"><h3 style="font-weight:normal;margin-bottom:8px">Отзывы ('+reviews.length+')</h3>';
+  body+= reviews.length ? reviews.map(rev=>'<div class="rev-item"><b>'+esc(rev.name)+'</b> <span class="rev-stars">'+starStr(rev.stars)+'</span><div>'+esc(rev.text)+'</div></div>').join('') : '<p style="color:var(--muted);font-size:.9rem">Пока нет отзывов.</p>';
+  body+='<div class="rev-form" style="margin-top:12px"><div class="star-input" data-stars="5">'+[1,2,3,4,5].map(function(i){return '<span data-s="'+i+'" class="on">★</span>';}).join('')+'</div><input class="rf-text" placeholder="Ваш отзыв"><button onclick="addReviewPm(this)">Оставить отзыв</button></div></div>';
+  document.getElementById("pm-body").innerHTML=body;
+  document.getElementById("pm-body").querySelector(".star-input").addEventListener("click", function(ev){ const s=ev.target.getAttribute("data-s"); if(!s)return; this.setAttribute("data-stars",s); Array.prototype.slice.call(this.children).forEach(function(c){c.classList.toggle("on",parseInt(c.getAttribute("data-s"))<=s);}); });
+}
+function prevImg(){ curImg=Math.max(0,curImg-1); drawProductBody(); }
+function nextImg(){ const p=PRODUCTScurrent[curIdx]; const n=(p.images&&p.images.length)?p.images.length:(p.image?1:0); curImg=Math.min(n-1,curImg+1); drawProductBody(); }
+function jumpImg(i){ curImg=i; drawProductBody(); }
+function addReviewPm(btn){
+  if(!currentUser){ showToast("Войдите в аккаунт, чтобы оставить отзыв."); return; }
+  const form=btn.closest('.rev-form'); const txt=form.querySelector('.rf-text').value.trim();
+  if(!txt){ showToast('Напишите текст отзыва.'); return; }
+  const stars=parseInt(form.querySelector('.star-input').getAttribute('data-stars'))||5;
+  const p=PRODUCTScurrent[curIdx];
+  const revName = currentUser.nick || currentUser.phone || currentUser;
+  if(p){ if(!p.reviews) p.reviews=[]; p.reviews.push({name:revName,stars:stars,text:txt}); render(); drawProductBody(); saveData(); }
+}
+
+/* ============ ОБЩЕЕ ============ */
+function showContacts(e){ e.preventDefault(); go('about'); setTimeout(function(){ document.getElementById("contact-block").scrollIntoView({behavior:'smooth'}); },50); }
+function openDoc(id){ document.getElementById(id+'-modal').classList.add('show'); overlayShow(); }
+function closeDoc(){ document.querySelectorAll('.docwrap').forEach(d=>d.classList.remove('show')); overlayHide(); }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function renderContacts(){
+  const c=document.getElementById("contact-block");
+  c.innerHTML='<h3>Контакты</h3><div class="item"><div class="lbl">Магазин</div>'+CONTACTScurrent.shop+'</div><div class="item"><div class="lbl">Телефон</div>'+CONTACTScurrent.phone+'</div><div class="item"><div class="lbl">E-mail</div>'+CONTACTScurrent.email+'</div><div class="item"><div class="lbl">Адрес</div>'+CONTACTScurrent.address+'</div><div class="item"><div class="lbl">Режим работы</div>'+CONTACTScurrent.hours+'</div>';
+}
+
+/* ============ АВТОРИЗАЦИЯ (Firebase Auth) ============ */
+function openAuth(e){ if(e)e.preventDefault(); document.getElementById("authwrap").classList.add("show"); setMsg("li-msg",""); setMsg("rg-msg",""); }
+function closeAuth(){ document.getElementById("authwrap").classList.remove("show"); }
+function authTab(t){ document.getElementById("tab-login").classList.toggle("on",t==="login"); document.getElementById("tab-reg").classList.toggle("on",t==="reg"); document.getElementById("auth-login").style.display=t==="login"?"":"none"; document.getElementById("auth-reg").style.display=t==="reg"?"":"none"; }
+function setMsg(id,txt){ const el=document.getElementById(id); el.textContent=txt; el.className="auth-msg"+(txt&&txt.startsWith("Ошибка")?" err":""); }
+
+// Нормализация телефона к формату +7XXXXXXXXXX
+function normPhone(p){
+  let s = String(p).replace(/[^\d+]/g,"");
+  if(s.startsWith("8")) s = "+7"+s.slice(1);
+  else if(s.startsWith("7")) s = "+"+s;
+  else if(!s.startsWith("+")) s = "+"+s;
+  return s;
+}
+
+async function doRegister(){
+  const nick=document.getElementById("rg-nick").value.trim();
+  const pass=document.getElementById("rg-pass").value;
+  const phone=normPhone(document.getElementById("rg-phone").value);
+  if(!nick||pass.length<6||!phone){ setMsg("rg-msg","Ошибка: ник, пароль (мин. 6 симв.) и номер обязательны."); return; }
+  try{
+    const email = phone.replace(/[^\d]/g,"") + "@memento.shop";
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    await firestore.collection("users").doc(uid).set({
+      nick: nick, searchNick: nick.toLowerCase(), phone: phone,
+      balance: 0, history: [], gifts: [], createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Отдельная коллекция для входа по нику (разрешена на чтение авторизованным)
+    await firestore.collection("names").doc(nick.toLowerCase()).set({ uid: uid, phone: phone });
+    currentUser = { nick: nick, phone: phone, uid: uid };
+    userData = { nick: nick, phone: phone, balance:0, history:[], gifts:[], _ref: firestore.collection("users").doc(uid) };
+    setMsg("rg-msg","Регистрация успешна! Вы вошли как "+nick+".");
+    afterLogin(nick);
+  }catch(e){ setMsg("rg-msg","Ошибка: "+e.message); }
+}
+async function resolveUserEmail(id){
+  // id = номер / ник / email; возвращает email аккаунта в Auth
+  if(id.includes("@")) return id;
+  const isPhone = id.replace(/\D/g,"").length>=10;
+  if(isPhone){
+    const ph=normPhone(id);
+    return ph.replace(/[^\d]/g,"") + "@memento.shop";
+  }
+  try{
+    const snap = await firestore.collection("names").doc(id.toLowerCase()).get();
+    if(snap.exists){
+      const u = snap.data();
+      return u.phone ? u.phone.replace(/[^\d]/g,"")+"@memento.shop" : null;
+    }
+  }catch(e){}
+  return null;
+}
+async function doLogin(){
+  const id=document.getElementById("li-id").value.trim();
+  const pass=document.getElementById("li-pass").value;
+  if(!id||!pass){ setMsg("li-msg","Ошибка: введите логин и пароль."); return; }
+  try{
+    const email = await resolveUserEmail(id);
+    if(!email){ setMsg("li-msg","Ошибка: пользователь не найден."); return; }
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    const doc = await firestore.collection("users").doc(uid).get();
+    if(!doc.exists){
+      const nickFromEmail = email.split("@")[0];
+      await firestore.collection("users").doc(uid).set({ nick:nickFromEmail, searchNick:nickFromEmail.toLowerCase(), phone:"", balance:0, history:[], gifts:[] });
+    }
+    const data = doc.data() || {};
+    currentUser = { nick: data.nick||email.split("@")[0], phone:data.phone||"", uid: uid };
+    userData = Object.assign({}, data, { _ref: firestore.collection("users").doc(uid) });
+    // Явный вход в этой вкладке — разрешаем доступ владельца
+    window.__ownerSignedInThisSession = true;
+    setMsg("li-msg","Добро пожаловать, "+currentUser.nick+"!");
+    afterLogin(currentUser.nick);
+  }catch(e){ setMsg("li-msg","Ошибка: "+e.message); }
+}
+function afterLogin(nick){
+  window.__ownerSignedInThisSession = true;
+  document.getElementById("li-id").value=""; document.getElementById("li-pass").value="";
+  document.getElementById("rg-nick").value=""; document.getElementById("rg-pass").value=""; document.getElementById("rg-phone").value="";
+  setTimeout(function(){ closeAuth(); },600);
+  updateTopRight(nick);
+  renderTopBalance();
+  if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+  if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+}
+function updateTopRight(nick){
+  const badge=document.getElementById("usrbadge"), loginLink=document.getElementById("login-link");
+  if(loginLink){ loginLink.style.display=nick?"none":""; }
+  if(badge){ badge.querySelector("span").textContent=nick?"Привет, "+nick:""; badge.classList.toggle("on",!!nick); }
+  updateAdminNav();
+}
+async function logoutUser(){
+  await auth.signOut();
+  currentUser=null; userData=null;
+  updateTopRight(null); renderTopBalance(); renderProfile();
+  showToast("Вы вышли из аккаунта.");
+}
+// Восстановление сессии (Firebase Auth сам хранит токен)
+auth.onAuthStateChanged(function(user){
+  if(user){
+    // 🔒 ЖЁСТКАЯ ЗАЩИТА: автоматически восстановленная сессия никогда не даёт доступ владельца.
+    // Если сессия появилась без явного ввода пароля в этой вкладке — считаем её чужой и выходим.
+    if(!window.__ownerSignedInThisSession){
+      const uid=user.uid;
+      // Проверим, является ли этот пользователь владельцем (по базе)
+      firestore.collection("users").doc(uid).get().then(function(doc){
+        const d = doc.exists ? doc.data() : {};
+        const phone = d.phone||"";
+        if(phone === "+79277467217" || phone === "89277467217"){
+          // Это владелец, но вошёл автоматически (не в этой вкладке) — выходим!
+          auth.signOut();
+          showToast("Для доступа к владельцу пожалуйста войдите снова (номер + пароль).");
+          currentUser=null; userData=null;
+          updateTopRight(null); renderTopBalance(); updateAdminNav();
+          return;
+        }
+        // Обычный пользователь — показываем как обычно
+        currentUser={ nick:d.nick||"user", phone:phone, uid:uid };
+        userData=Object.assign({}, d, { _ref: firestore.collection("users").doc(uid) });
+        updateTopRight(currentUser.nick);
+        renderTopBalance();
+        if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+        if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+      }).catch(function(e){ console.error(e); });
+      return;
+    }
+    // Владелец вошёл явно в этой вкладке — полный доступ
+    const uid=user.uid;
+    const docRef=firestore.collection("users").doc(uid);
+    try{
+      docRef.get().then(function(doc){
+        const data = doc.exists ? doc.data() : {};
+        currentUser={ nick:data.nick||"user", phone:data.phone||"", uid:uid };
+        userData=Object.assign({}, data, { _ref: docRef });
+        updateTopRight(currentUser.nick);
+        renderTopBalance();
+        if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+        if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+      });
+    }catch(e){ console.error("load user doc:", e); }
+  }else{
+    currentUser=null; userData=null;
+    if(window.__unsub){ try{ window.__unsub(); }catch(e){} window.__unsub=null; }
+    updateTopRight(null);
+  }
+});
+function showGiftCongrats(g){
+  if(!g) return;
+  try{
+    const html='<div class="certificate"><h3>ПОЗДРАВЛЯЕМ!</h3>'+
+      '<div class="cert-amount">'+(parseInt(g.amount)||0).toLocaleString('ru-RU')+' ₽</div>'+
+      '<div>Подарочный сертификат от <b>'+CONTACTScurrent.shop+'</b></div>'+
+      '<div class="cert-code">'+(g.code||"")+'</div>'+
+      '<p>Желаем вам приятных покупок и только лучших моментов!<br>Пусть время идёт в вашу пользу. С наилучшими пожеланиями, команда Memento.</p></div>';
+    const w=document.getElementById("gift-confirm");
+    if(w){ w.style.display="block"; w.innerHTML=html; w.scrollIntoView({behavior:'smooth'}); }
+  }catch(e){ console.error(e); }
+}
+
+/* ============ РЕДАКТОР / НАСТРОЙКИ (только на этом ПК) ============ */
+document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="L"||e.key==="л"||e.key==="l")){ e.preventDefault(); showFabMenu(); } });
+let fabPendingAction = null;
+function showFabMenu(){
+  if(!isOwner()){ return; }
+  document.getElementById("fab-menu").classList.add("show");
+}
+function fabClick(){
+  if(!isOwner()){ return; }
+  const menu=document.getElementById("fab-menu");
+  if(menu.classList.contains("show")){ menu.classList.remove("show"); return; }
+  showFabMenu();
+}
+function fabAction(action){
+  document.getElementById("fab-menu").classList.remove("show");
+  if(action==='close') return;
+  if(action==='catalog'){ openEditor(); return; }
+  if(action==='account'){ openAccountEditor(); return; }
+  if(action==='changepass'){ openChangePass(); return; }
+}
+function showPass(title){
+  document.getElementById("pass-title").textContent = title || "Доступ к настройкам";
+  document.getElementById("passscreen").classList.add("show");
+  document.getElementById("pass-input").value="";
+  document.getElementById("pass-err").textContent="";
+  document.getElementById("pass-input").focus();
+}
+function hidePass(){ document.getElementById("passscreen").classList.remove("show"); }
+function tryPass(){
+  if(!isOwner()){ return; }
+  document.getElementById("edit-fab").classList.add("on");
+  hidePass();
+  document.getElementById("fab-menu").classList.add("show");
+}
+function openEditor(){ document.getElementById("passscreen").classList.remove("show"); document.getElementById("edit-fab").classList.add("on"); fillEditor(); document.getElementById("editor").classList.add("open"); }
+function closeEditor(){ document.getElementById("editor").classList.remove("open"); }
+// Смена кода доступа
+function openChangePass(){
+  const box = document.getElementById("editor");
+  box.querySelector("header h2").textContent = "Смена кода доступа";
+  box.querySelector(".wrap").innerHTML =
+    '<h3 style="margin-bottom:8px">Новый код доступа</h3>'+
+    '<p style="font-size:.85rem;color:var(--muted);margin-bottom:10px">Код нужен, чтобы открывать меню настроек на этом ПК.</p>'+
+    '<div class="ed-contact"><div><label>Старый код</label><input id="old-pass" type="password" placeholder="Текущий код"></div></div>'+
+    '<div class="ed-contact"><div><label>Новый код</label><input id="new-pass" type="password" placeholder="Новый код"></div></div>'+
+    '<div class="ed-contact"><div><label>Повторите</label><input id="new-pass2" type="password" placeholder="Ещё раз"></div></div>'+
+    '<div class="ed-actions" style="margin-top:16px"><button class="ed-save" onclick="saveNewPass()">Сохранить</button><button class="ed-reset" onclick="closeEditor()">Отмена</button></div>'+
+    '<p class="ed-locknote" id="pass-change-result"></p>';
+  document.getElementById("editor").classList.add("open");
+}
+function saveNewPass(){
+  const old=document.getElementById("old-pass").value;
+  const n1=document.getElementById("new-pass").value;
+  const n2=document.getElementById("new-pass2").value;
+  const res=document.getElementById("pass-change-result");
+  if(old!==EDIT_PASS){ res.textContent="Старый код неверный."; res.style.color="#b02323"; return; }
+  if(n1.length<4){ res.textContent="Новый код минимум 4 символа."; res.style.color="#b02323"; return; }
+  if(n1!==n2){ res.textContent="Пароли не совпадают."; res.style.color="#b02323"; return; }
+  localStorage.setItem("chasy_edit_pass_custom", n1);
+  const script = document.querySelector('script:last-of-type');
+  // Переопределить EDIT_PASS нельзя, используем переменную с проверкой
+  window.__customPass = n1;
+  res.textContent="Код доступа изменён!";
+  res.style.color="var(--green)";
+  setTimeout(closeEditor, 1200);
+}
+function checkCustomPass(v){ return (window.__customPass || EDIT_PASS) === v; }
+// Редактирование анкеты (профиль пользователя)
+function openAccountEditor(){
+  if(!currentUser){ showToast("Войдите в аккаунт."); return; }
+  const box=document.getElementById("editor");
+  box.querySelector("header h2").textContent="Редактировать анкету";
+  box.querySelector(".wrap").innerHTML=
+    '<h3 style="margin-bottom:8px">Анкета</h3>'+
+    '<div class="ed-contact"><div><label>Ник</label><input id="ae-nick" value="'+esc(currentUser.nick||"")+'"></div></div>'+
+    '<div class="ed-contact"><div><label>Телефон</label><input id="ae-phone" value="'+esc(currentUser.phone||"")+'"></div></div>'+
+    '<div class="ed-actions" style="margin-top:16px"><button class="ed-save" onclick="saveAccount()">Сохранить</button><button class="ed-reset" onclick="closeEditor()">Отмена</button></div>'+
+    '<p class="ed-locknote" id="ae-result"></p>';
+  document.getElementById("editor").classList.add("open");
+}
+async function saveAccount(){
+  if(!currentUser||!userData) return;
+  const nick=document.getElementById("ae-nick").value.trim();
+  const phone=normPhone(document.getElementById("ae-phone").value);
+  const res=document.getElementById("ae-result");
+  if(!nick){ res.textContent="Ник не может быть пустым."; res.style.color="#b02323"; return; }
+  try{
+    await userData._ref.update({ nick:nick, searchNick:nick.toLowerCase(), phone:phone });
+    // обновить names для входа по нику
+    await firestore.collection("names").doc(nick.toLowerCase()).set({ uid: currentUser.uid, phone: phone });
+    currentUser.nick=nick; currentUser.phone=phone;
+    res.textContent="Сохранено!";
+    res.style.color="var(--green)";
+    updateTopRight(nick);
+    renderTopBalance(); renderProfile();
+    setTimeout(closeEditor, 1200);
+  }catch(e){ res.textContent="Ошибка: "+e.message; res.style.color="#b02323"; }
+}
+function fillEditor(){ const c=CONTACTScurrent; document.getElementById("ec-shop").value=c.shop; document.getElementById("ec-phone").value=c.phone; document.getElementById("ec-email").value=c.email; document.getElementById("ec-address").value=c.address; document.getElementById("ec-hours").value=c.hours; drawEditorProducts(); }
+function drawEditorProducts(){
+  const box=document.getElementById("ed-products"); box.innerHTML="";
+  PRODUCTScurrent.forEach(function(p,i){
+    const d=document.createElement("div"); d.className="prod";
+    d.innerHTML=
+      '<div class="pr-edit"><input data-idx="'+i+'" data-f="name" value="'+esc(p.name)+'" placeholder="Название"></div>'+
+      '<div class="pr-edit"><select data-idx="'+i+'" data-f="cat">'+['men','women','smart','sport'].map(function(c){return '<option value="'+c+'"'+(p.cat===c?' selected':'')+'>'+CAT_NAME[c]+'</option>';}).join('')+'</select><input class="prc" data-idx="'+i+'" data-f="price" type="number" value="'+p.price+'" placeholder="Цена"></div>'+
+      '<div class="pr-edit"><input data-idx="'+i+'" data-f="color" value="'+esc(p.color||'')+'" placeholder="Цвет"></div>'+
+      '<div class="pr-edit"><input data-idx="'+i+'" data-f="image" value="'+esc(p.image)+'" placeholder="Главное фото"></div>'+
+      '<div class="pr-edit"><input data-idx="'+i+'" data-f="images" value="'+esc((p.images||[]).join(','))+'" placeholder="Фото слайдера (через ,)"></div>'+
+      '<textarea data-idx="'+i+'" data-f="desc" placeholder="Описание">'+esc(p.desc)+'</textarea>'+
+      '<div style="font-size:.85rem;font-weight:bold;color:var(--muted);margin:6px 0 2px">Характеристики</div>'+
+      SPEC_FIELDS.map(function(f){
+        const val = (p.specs && p.specs[f]) ? p.specs[f] : "";
+        return '<div class="pr-edit" style="margin-bottom:4px"><label style="min-width:130px;font-size:.82rem;color:var(--muted);align-self:center">'+f+'</label>'+
+          '<input data-idx="'+i+'" data-spec="'+esc(f)+'" value="'+esc(val)+'" placeholder="—"></div>';
+      }).join('')+
+      '<button class="del" data-i="'+i+'">Удалить</button>';
+    box.appendChild(d);
+  });
+}
+document.getElementById("ed-products").addEventListener("input", handleEd);
+document.getElementById("ed-products").addEventListener("change", handleEd);
+function handleEd(e){
+  const t=e.target, idx=t.getAttribute("data-idx"), f=t.getAttribute("data-f"), spec=t.getAttribute("data-spec");
+  if(idx===null) return;
+  if(spec!==null){
+    if(!PRODUCTScurrent[idx].specs) PRODUCTScurrent[idx].specs={};
+    PRODUCTScurrent[idx].specs[spec]=t.value;
+    return;
+  }
+  if(f===null) return;
+  let val=f==="price"?parseFloat(t.value)||0:t.value;
+  if(f==="images"){ val=t.value.split(",").map(function(s){return s.trim();}).filter(Boolean); }
+  PRODUCTScurrent[idx][f]=val;
+}
+document.getElementById("ed-products").addEventListener("click", function(e){ if(e.target.classList.contains("del")){ const idx=parseInt(e.target.getAttribute("data-i"),10); PRODUCTScurrent.splice(idx,1); drawEditorProducts(); } });
+function edAdd(){ PRODUCTScurrent.push({cat:"men",name:"Новый товар",price:0,color:"",image:"",images:[],specs:{},desc:"",reviews:[]}); drawEditorProducts(); }
+function edSave(){ CONTACTScurrent={shop:document.getElementById("ec-shop").value,phone:document.getElementById("ec-phone").value,email:document.getElementById("ec-email").value,address:document.getElementById("ec-address").value,hours:document.getElementById("ec-hours").value}; saveData(); render(); renderContacts(); showToast("Сохранено."); }
+function edReset(){ if(!confirm("Сбросить правки?")) return; localStorage.removeItem(LS_KEY); PRODUCTScurrent=PRODUCTS.slice(); CONTACTScurrent=Object.assign({},CONTACTS); render(); renderContacts(); fillEditor(); }
+function edPublish(){
+  CONTACTScurrent={shop:document.getElementById("ec-shop").value,phone:document.getElementById("ec-phone").value,email:document.getElementById("ec-email").value,address:document.getElementById("ec-address").value,hours:document.getElementById("ec-hours").value};
+  const seed=document.getElementById("seed"); seed.textContent=JSON.stringify({contacts:CONTACTScurrent,products:PRODUCTScurrent}); saveData();
+  const html="<!DOCTYPE html>"+document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:"text/html;charset=utf-8"}); const a=document.createElement("a"); const url=URL.createObjectURL(blob);
+  a.href=url; a.download="index.html"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},1000); render(); renderContacts();
+  showToast("Готово! Скачан новый index.html.");
+}
+
+renderContacts(); render(); renderTopBalance();
+// Открытие товара по ссылке вида #/product/0
+function handleHash(){
+  var h=location.hash || "";
+  var m=h.match(/^#\/product\/(\d+)/);
+  if(m){
+    go('catalog');
+    setTimeout(function(){ var idx=parseInt(m[1],10); if(idx>=0 && idx<PRODUCTScurrent.length) openProduct(idx); }, 150);
+  }
+}
+window.addEventListener("hashchange", handleHash);
+handleHash();
+
+/* ============ ЧАТ ПОДДЕРЖКИ ============ */
+let chatConv = null;
+let chatMsgsSub = null;
+function toggleChat(){
+  const c=document.getElementById("support-chat");
+  if(c.classList.contains("open")){ c.classList.remove("open"); return; }
+  if(!currentUser){ showToast("Сначала войдите в аккаунт, чтобы написать в поддержку."); return; }
+  c.classList.add("open");
+  openChatPanel();
+}
+async function openChatPanel(){
+  const body=document.getElementById("chat-body");
+  if(isOwner() && !chatConv){
+    // Владелец: список диалогов
+    try{
+      const snap=await firestore.collection("support").orderBy("createdAt","desc").limit(300).get();
+      const convs={};
+      snap.forEach(function(d){ const m=d.data(); const k=m.conv; if(!k) return; if(!convs[k]){ convs[k]={ nick:m.nick||"Пользователь", last:m.text||"", count:0 }; } });
+      const listEl=document.createElement("div");
+      let h='<div class="conv-title">Выберите диалог</div>';
+      const keys=Object.keys(convs);
+      if(!keys.length){ h+='<div class="conv-title">Пока нет обращений</div>'; }
+      keys.forEach(function(k){ h+='<div class="conv-item" onclick="openConv(\''+k+'\')"><div class="cn">'+esc(convs[k].nick)+'</div><div class="cl">'+esc(convs[k].last)+'</div></div>'; });
+      body.innerHTML='<div id="conv-list">'+h+'</div>';
+      // подавляем инпут в режиме списка
+      document.getElementById("chat-text").placeholder = "Выберите диалог выше";
+    }catch(e){ body.innerHTML='<div class="conv-title">Ошибка: '+esc(e.message)+'</div>'; }
+    return;
+  }
+  if(!chatConv){ chatConv = currentUser ? currentUser.uid : null; }
+  const backBtn = isOwner() ? '<button class="conv-back" onclick="closeConv()">← Все диалоги</button><div class="conv-title">Диалог</div>' : '<div class="conv-title">Диалог с поддержкой</div>';
+  body.innerHTML = backBtn + '<div id="chat-messages" style="min-height:100%"></div>';
+  loadConvMessages();
+}
+function openConv(k){
+  chatConv = k;
+  const body=document.getElementById("chat-body");
+  body.innerHTML = '<button class="conv-back" onclick="closeConv()">← Все диалоги</button><div class="conv-title">Диалог</div><div id="chat-messages" style="min-height:100%"></div>';
+  document.getElementById("chat-text").placeholder="Напишите ответ...";
+  loadConvMessages();
+}
+function closeConv(){
+  chatConv=null;
+  if(chatMsgsSub){ chatMsgsSub(); chatMsgsSub=null; }
+  openChatPanel();
+}
+function loadConvMessages(){
+  if(chatMsgsSub){ chatMsgsSub(); }
+  if(!chatConv) return;
+  chatMsgsSub = firestore.collection("support")
+    .where("conv","==",chatConv)
+    .orderBy("createdAt","asc")
+    .onSnapshot(function(snap){
+      const box=document.getElementById("chat-messages");
+      if(!box) return;
+      box.innerHTML="";
+      if(snap.empty){ box.innerHTML='<div class="conv-title" style="text-align:center;background:none">Сообщений пока нет. Напишите нам!</div>'; }
+      snap.forEach(function(d){
+        const m=d.data();
+        if(!m || !m.text) return;
+        const isMine = isOwner() ? (m.from==="owner") : (m.from!=="owner");
+        const who = m.from==="owner" ? "Поддержка" : esc(m.nick||"Вы");
+        box.innerHTML += '<div class="chat-msg '+(isMine?"me":"other")+'"><div class="who">'+who+'</div><div class="b">'+esc(String(m.text))+'</div></div>';
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+}
+async function sendChat(){
+  const inp=document.getElementById("chat-text");
+  const txt=inp.value.trim();
+  if(!txt) return;
+  if(!currentUser){ showToast("Войдите в аккаунт."); return; }
+  if(isOwner() && !chatConv){ showToast("Выберите диалог, которому отвечаете."); return; }
+  if(!chatConv) chatConv = currentUser.uid;
+  try{
+    await firestore.collection("support").add({
+      conv: chatConv,
+      from: isOwner() ? "owner" : "user",
+      nick: currentUser.nick || (currentUser.phone||""),
+      text: txt,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    inp.value="";
+  }catch(e){ showToast("Ошибка: "+e.message); }
+}
+document.addEventListener("click", function(e){
+  const b=document.getElementById("chat-bubble");
+  const c=document.getElementById("support-chat");
+  if(!b||!c) return;
+  if(!c.classList.contains("open")) return;
+  if(e.target.closest("#support-chat")||e.target===b) return;
+  // клик мимо чата не закрываем (можно закрыть только крестиком)
+});
+
+
+/* ============ ТОСТЫ И МОДАЛКИ ============ */
 function showToast(msg, type){
   var wrap=document.getElementById("toast-wrap");
   if(!wrap) return;
@@ -1049,7 +2046,7 @@ function confirmResolve(ok){
   var cb=__confirmCb; __confirmCb=null;
   if(cb) cb(ok);
 }
-// Не блокируем confirm системно — только наши showConfirm
+window.confirm = function(msg){ showConfirm(String(msg), null); return false; };
 var __ocProduct = null;
 function buyOneClick(name, price){
   var p=PRODUCTScurrent.find(function(x){ return x.name===name; });
