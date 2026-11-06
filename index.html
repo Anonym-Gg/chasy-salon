@@ -1306,9 +1306,9 @@ async function loadMyOrders(){
   try{
     const snap = await firestore.collection("orders")
       .where("uid","==",currentUser.uid)
-      .orderBy("createdAt","desc").limit(20).get();
+      .limit(20).get();
     if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">У вас пока нет заказов.</p>'; return; }
-    box.innerHTML = snap.docs.map(function(d){
+    box.innerHTML = sortDocsDesc(snap).map(function(d){
       const o=d.data();
       const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
       const state = orderStatusHtml(o.status||"new");
@@ -1330,11 +1330,11 @@ function orderStatusHtml(st){
 }
 async function loadAdminTopups(){
   try{
-    const snap = await firestore.collection("topups").orderBy("createdAt","desc").limit(30).get();
+    const snap = await firestore.collection("topups").limit(30).get();
     const box=document.getElementById("admin-topups");
     if(!box) return;
     if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заявок нет.</p>'; return; }
-    box.innerHTML = snap.docs.map(function(d){
+    box.innerHTML = sortDocsDesc(snap).map(function(d){
       const o=d.data();
       const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
       const state = o.status==='approved' ? '<span style="color:var(--green)">одобрено</span>' : '<span style="color:#b02323">ожидает</span>';
@@ -1356,11 +1356,11 @@ async function approveTopup(docId, uid, amount, client){
 }
 async function loadAdminOrders(){
   try{
-    const snap = await firestore.collection("orders").orderBy("createdAt","desc").limit(30).get();
+    const snap = await firestore.collection("orders").limit(30).get();
     const box=document.getElementById("admin-orders");
     if(!box) return;
     if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заказов нет.</p>'; return; }
-    box.innerHTML = snap.docs.map(function(d){
+    box.innerHTML = sortDocsDesc(snap).map(function(d){
       const o=d.data();
       const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
       const st = o.status||"new";
@@ -1421,11 +1421,11 @@ async function sendOrderEmail(docId){
 }
 async function loadAdminGiftRequests(){
   try{
-    const snap = await firestore.collection("giftRequests").orderBy("createdAt","desc").limit(30).get();
+    const snap = await firestore.collection("giftRequests").limit(30).get();
     const box=document.getElementById("admin-gifts");
     if(!box) return;
     if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">Заявок нет.</p>'; return; }
-    box.innerHTML = snap.docs.map(function(d){
+    box.innerHTML = sortDocsDesc(snap).map(function(d){
       const o=d.data();
       const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
       const state = o.status==='approved' ? '<span style="color:var(--green)">выдан</span>' : '<span style="color:#b02323">ожидает</span>';
@@ -1459,6 +1459,15 @@ async function approveGiftRequest(docId, uid, amount, client){
     loadAdminGiftRequests();
   }catch(e){ showToast("Ошибка: "+e.message); }
 }
+
+function sortDocsDesc(snap){
+  return snap.docs.slice().sort(function(a,b){
+    var ta=a.data().createdAt, tb=b.data().createdAt;
+    var sa=ta&&ta.seconds?ta.seconds:0, sb=tb&&tb.seconds?tb.seconds:0;
+    return sb-sa;
+  });
+}
+
 function toggleOps(id){ document.getElementById('wallet-'+id).classList.toggle('show'); }
 async function startTopup(){
   if(!currentUser){ showToast("Войдите в аккаунт."); return; }
@@ -1940,7 +1949,7 @@ async function openChatPanel(){
   if(isOwner() && !chatConv){
     // Владелец: список диалогов
     try{
-      const snap=await firestore.collection("support").orderBy("createdAt","desc").limit(300).get();
+      const snap=await firestore.collection("support").limit(300).get();
       const convs={};
       snap.forEach(function(d){ const m=d.data(); const k=m.conv; if(!k) return; if(!convs[k]){ convs[k]={ nick:m.nick||"Пользователь", last:m.text||"", count:0 }; } });
       const listEl=document.createElement("div");
@@ -1976,7 +1985,7 @@ function loadConvMessages(){
   if(!chatConv) return;
   chatMsgsSub = firestore.collection("support")
     .where("conv","==",chatConv)
-    .orderBy("createdAt","asc")
+    
     .onSnapshot(function(snap){
       const box=document.getElementById("chat-messages");
       if(!box) return;
