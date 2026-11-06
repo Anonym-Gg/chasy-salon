@@ -771,10 +771,11 @@ function go(page){
   if(page==='admin') renderAdminPage();
 }
 function updateAdminNav(){
+  const ownerActive = !!(isOwner() && window.__ownerSignedInThisSession);
   const btn=document.getElementById("nav-admin-btn");
-  if(btn){ btn.style.display = (isAdmin() && __ownerAuthOk) ? "" : "none"; }
+  if(btn){ btn.style.display = (isAdmin() && window.__ownerSignedInThisSession) ? "" : "none"; }
   const fab=document.getElementById("edit-fab");
-  if(fab){ fab.classList.toggle("on", !!(isOwner() && __ownerAuthOk)); }
+  if(fab){ fab.classList.toggle("on", ownerActive); }
 }
 function renderAdminPage(){
   const body=document.getElementById("admin-page-body");
@@ -1485,11 +1486,14 @@ async function doLogin(){
     const data = doc.data() || {};
     currentUser = { nick: data.nick||email.split("@")[0], phone:data.phone||"", uid: uid };
     userData = Object.assign({}, data, { _ref: firestore.collection("users").doc(uid) });
+    // Явный вход в этой вкладке — разрешаем доступ владельца
+    window.__ownerSignedInThisSession = true;
     setMsg("li-msg","Добро пожаловать, "+currentUser.nick+"!");
     afterLogin(currentUser.nick);
   }catch(e){ setMsg("li-msg","Ошибка: "+e.message); }
 }
 function afterLogin(nick){
+  window.__ownerSignedInThisSession = true;
   document.getElementById("li-id").value=""; document.getElementById("li-pass").value="";
   document.getElementById("rg-nick").value=""; document.getElementById("rg-pass").value=""; document.getElementById("rg-phone").value="";
   setTimeout(function(){ closeAuth(); },600);
@@ -1511,64 +1515,48 @@ async function logoutUser(){
   alert("Вы вышли из аккаунта.");
 }
 // Восстановление сессии (Firebase Auth сам хранит токен)
-auth.onAuthStateChanged(async function(user){
+auth.onAuthStateChanged(function(user){
   if(user){
+    // 🔒 ЖЁСТКАЯ ЗАЩИТА: автоматически восстановленная сессия никогда не даёт доступ владельца.
+    // Если сессия появилась без явного ввода пароля в этой вкладке — считаем её чужой и выходим.
+    if(!window.__ownerSignedInThisSession){
+      const uid=user.uid;
+      // Проверим, является ли этот пользователь владельцем (по базе)
+      firestore.collection("users").doc(uid).get().then(function(doc){
+        const d = doc.exists ? doc.data() : {};
+        const phone = d.phone||"";
+        if(phone === "+79277467217" || phone === "89277467217"){
+          // Это владелец, но вошёл автоматически (не в этой вкладке) — выходим!
+          auth.signOut();
+          alert("Для доступа к владельцу пожалуйста войдите снова (номер + пароль).");
+          currentUser=null; userData=null;
+          updateTopRight(null); renderTopBalance(); updateAdminNav();
+          return;
+        }
+        // Обычный пользователь — показываем как обычно
+        currentUser={ nick:d.nick||"user", phone:phone, uid:uid };
+        userData=Object.assign({}, d, { _ref: firestore.collection("users").doc(uid) });
+        updateTopRight(currentUser.nick);
+        renderTopBalance();
+        if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+        if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+      }).catch(function(e){ console.error(e); });
+      return;
+    }
+    // Владелец вошёл явно в этой вкладке — полный доступ
     const uid=user.uid;
     const docRef=firestore.collection("users").doc(uid);
-    // Сначала загружаем документ синхронно (жёстко), чтобы телефон/ник были сразу
     try{
-      const doc=await docRef.get();
-      let data={};
-      if(doc.exists){ data=doc.data(); }
-      else{
-        const nick = user.email ? user.email.split("@")[0] : "user"+uid.slice(0,4);
-        data={ nick:nick, searchNick:nick.toLowerCase(), phone:"", balance:0, history:[], gifts:[] };
-        await docRef.set(data);
-      }
-      currentUser={ nick:data.nick, phone:data.phone||"", uid:uid };
-      userData=Object.assign({}, data, { _ref: docRef });
-      updateTopRight(data.nick);
-      renderTopBalance();
-      if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
-      if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+      docRef.get().then(function(doc){
+        const data = doc.exists ? doc.data() : {};
+        currentUser={ nick:data.nick||"user", phone:data.phone||"", uid:uid };
+        userData=Object.assign({}, data, { _ref: docRef });
+        updateTopRight(currentUser.nick);
+        renderTopBalance();
+        if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
+        if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
+      });
     }catch(e){ console.error("load user doc:", e); }
-    // Затем подписка на живые изменения (баланс, сертификаты)
-    if(window.__unsub){ try{ window.__unsub(); }catch(e){} }
-    window.__unsub = docRef.onSnapshot(function(doc){
-      if(!doc.exists) return;
-      const data=doc.data();
-      const prevGifts = userData ? (userData.gifts||[]).length : 0;
-      userData = Object.assign({}, data, { _ref: docRef });
-      if(currentUser){ currentUser.nick=data.nick; currentUser.phone=data.phone||""; }
-      const newGifts=(data.gifts||[]).length;
-      if(newGifts>prevGifts && newGifts>0 && prevGifts!==undefined){
-        const latest=data.gifts[data.gifts.length-1];
-        showGiftCongrats(latest);
-      }
-      updateTopRight(data.nick);
-      renderTopBalance();
-      if(document.getElementById('pg-profile').classList.contains('active')) renderProfile();
-      if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
-    });
-    // 🔐 Владелец: при каждой загрузке страницы требуется повторно ввести пароль аккаунта
-    __ownerAuthOk = false;
-    updateAdminNav();
-    if(isOwner()){
-      var unsubAuth = null;
-      var doOwnerCheck = async function(){
-        var pwd = prompt("Введите пароль аккаунта для доступа к настройкам владельца:");
-        if(pwd===null){ alert("Доступ к настройкам заблокирован до следующего входа."); return; }
-        try{
-          var email = user.email;
-          var cred = await auth.signInWithEmailAndPassword(email, pwd);
-          if(cred.user && cred.user.uid === user.uid){
-            __ownerAuthOk = true;
-            updateAdminNav();
-          } else { alert("Неверный пароль."); }
-        }catch(e){ alert("Неверный пароль: "+e.message); }
-      };
-      doOwnerCheck();
-    }
   }else{
     currentUser=null; userData=null;
     if(window.__unsub){ try{ window.__unsub(); }catch(e){} window.__unsub=null; }
