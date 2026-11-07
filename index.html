@@ -825,7 +825,6 @@ function ensureProductIds(){
 }
 function findProductById(id){ return PRODUCTScurrent.find(function(p){ return p.id===id; }); }
 function findProductByName(name){ return PRODUCTScurrent.find(function(p){ return p.name===name; }); }
-ensureProductIds();
 
 /* ============ МИГРАЦИИ СТАРЫХ ДАННЫХ (корзина, избранное, недавние) ============ */
 // Внимание: вызываются ПОЗЖЕ, после объявления cart/loadCart/getFavs/RECENT_KEY.
@@ -942,6 +941,7 @@ function loadData(){
 let storedData = loadData();
 let CONTACTScurrent = storedData ? Object.assign({}, storedData.contacts) : Object.assign({}, CONTACTS);
 let PRODUCTScurrent = storedData ? storedData.products.slice() : PRODUCTS.slice();
+ensureProductIds();
 function saveData(){
   localStorage.setItem(LS_KEY, JSON.stringify({ contacts: CONTACTScurrent, products: PRODUCTScurrent }));
 }
