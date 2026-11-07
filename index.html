@@ -372,7 +372,20 @@
   .cf-box .cf-actions button{flex:1;padding:11px;border:none;cursor:pointer;font-family:inherit;font-size:.95rem;border-radius:6px}
   .cf-ok{background:#b02323;color:#fff}
   .cf-no{background:#e8e4da;color:var(--ink)}
-</style>
+  #cart-added-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:206;display:none;align-items:center;justify-content:center}
+  #cart-added-modal.show{display:flex}
+  .ca-box{background:#fff;width:380px;max-width:90vw;padding:24px;border-radius:12px;text-align:center}
+  .ca-box .ca-imgw{width:80px;height:80px;margin:0 auto 10px;background:var(--cream);border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .ca-box .ca-imgw img{width:100%;height:100%;object-fit:cover}
+  .ca-box h3{margin:0 0 4px;font-size:1.05rem}
+  .ca-box .ca-sub{color:var(--muted);font-size:.9rem;margin-bottom:6px}
+  .ca-box .ca-check{color:var(--green);font-size:.9rem;margin-bottom:14px}
+  .ca-box .ca-actions{display:flex;flex-direction:column;gap:8px}
+  .ca-box .ca-actions button{padding:12px;border:none;cursor:pointer;font-family:inherit;font-size:1rem;border-radius:6px}
+  .ca-go{background:var(--gold);color:#fff;font-weight:bold}
+  .ca-close{background:#e8e4da;color:var(--ink)}
+  .ca-total-row{display:flex;justify-content:space-between;background:var(--cream);border:1px solid var(--line);padding:10px 14px;border-radius:8px;margin:12px 0;font-size:.95rem}
+
 </head>
 <body>
 
@@ -665,6 +678,17 @@
   </div>
 </div></div>
 
+<div id="cart-added-modal"><div class="ca-box">
+  <div class="ca-imgw"><img id="ca-img" src="" alt="" style="display:none"></div>
+  <h3 id="ca-title">Товар</h3>
+  <div class="ca-sub" id="ca-sub"></div>
+  <div class="ca-check">✓ Добавлено в корзину</div>
+  <div class="ca-total-row"><span>В корзине: <b id="ca-count">0</b> шт</span><span>Итого: <b id="ca-total">0 ₽</b></span></div>
+  <div class="ca-actions">
+    <button class="ca-go" onclick="caGoCheckout()">Оформить заказ</button>
+    <button class="ca-close" onclick="closeCartAdded()">Продолжить покупки</button>
+  </div>
+</div></div>
 <div class="overlay" id="overlay" onclick="closePanels()"></div>
 
 <button class="edit-fab" id="edit-fab" onclick="fabClick()" title="Настройки (только владелец)">⋯</button>
@@ -746,7 +770,7 @@
   <div class="pm-body" id="pm-body"><div class="slider"><img id="pm-img" src="https://sun9-66.vkuserphoto.ru/s/v1/ig2/f1STkLcqIBGBJcMGDe4olG7qagW3BYVToFIsPUcQaPZZ24oNTvcjipQzNRRAo7cZENXek3g03MKAryPjDLDv1ZQ_.jpg?quality=95&amp;as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1024x1024&amp;from=bu&amp;cs=1024x0"></div><div class="pm-specs"><h3 style="font-weight:normal;margin-bottom:8px">Характеристики</h3><table><tbody><tr><td>Бренд</td><td>«Vey crown»</td></tr><tr><td>Модель / Артикул</td><td>055</td></tr><tr><td>Пол</td><td>Мужские</td></tr><tr><td>Стиль</td><td>Модный / современный</td></tr><tr><td>Тип движения</td><td>Механические</td></tr><tr><td>Производитель механизма</td><td>Другое</td></tr><tr><td>Страна производства механизма</td><td>Китай</td></tr><tr><td>Тип стекла</td><td>Минеральное закалённое стекло</td></tr><tr><td>Тип циферблата</td><td>Стрелочный (аналоговый)</td></tr><tr><td>Форма циферблата</td><td>Круглая</td></tr><tr><td>Диаметр корпуса</td><td>42 миллиметра</td></tr><tr><td>Толщина корпуса</td><td>8 миллиметров </td></tr><tr><td>Материал корпуса</td><td>Нержавеющая сталь</td></tr><tr><td>Материал браслета</td><td>Нержавеющая сталь</td></tr><tr><td>Тип застёжки</td><td>Одинарная складная пряжка</td></tr><tr><td>Материал застёжки</td><td>Нержавеющая сталь</td></tr><tr><td>Коронка</td><td>Обычная</td></tr><tr><td>Задняя крышка</td><td>Обычная (цельная)</td></tr><tr><td>Особенности</td><td>Светящиеся стрелки/метки, двойной календарь (число + день недели)</td></tr><tr><td>Водонепроницаемость</td><td>Нет</td></tr><tr><td>Нанесение логотипа на циферблат</td><td>Нет</td></tr><tr><td>Импортируемый товар</td><td>Нет</td></tr><tr><td>Таможенное оформление</td><td>Не требуется</td></tr><tr><td>Патентование источника происхождения</td><td>Не требуется</td></tr><tr><td>Спецпоставка для трансграничного экспорта</td><td>Нет</td></tr><tr><td>Регион происхождения</td><td>Гуандун</td></tr><tr><td>Упаковка</td><td>Другое</td></tr><tr><td>Сервис / гарантия</td><td>Гарантийная мастерская</td></tr><tr><td>Год выпуска / сезон</td><td>Другое</td></tr></tbody></table></div><div class="pm-actions"><button class="pm-cart" onclick="addToCart('Классика Строгая',1250)">В корзину</button><button class="pm-buy" onclick="goCheckout()">Купить</button></div><div class="pm-reviews"><h3 style="font-weight:normal;margin-bottom:8px">Отзывы (1)</h3><div class="rev-item"><b>Игорь</b> <span class="rev-stars">★★★★★</span><div>Отличные часы, смотрятся дороже своей цены.</div></div><div class="rev-form" style="margin-top:12px"><div class="star-input" data-stars="5"><span data-s="1" class="on">★</span><span data-s="2" class="on">★</span><span data-s="3" class="on">★</span><span data-s="4" class="on">★</span><span data-s="5" class="on">★</span></div><input class="rf-text" placeholder="Ваш отзыв"><button onclick="addReviewPm(this)">Оставить отзыв</button></div></div></div>
 </aside>
 
-<script id="seed" type="application/json">{"contacts":{"shop":"Memento","phone":"+79277467217","email":"hibih228@gmail.com","address":"г. Самара","hours":"Пн–Сб 10:00 – 20:00"},"products":[{"cat":"men","name":"Unranion Emmanuel","price":1250,"color":"Стальной, золотой циферблат","image":"https://sun9-66.vkuserphoto.ru/s/v1/ig2/f1STkLcqIBGBJcMGDe4olG7qagW3BYVToFIsPUcQaPZZ24oNTvcjipQzNRRAo7cZENXek3g03MKAryPjDLDv1ZQ_.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1024x1024&from=bu&cs=1024x0","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Кожа","Водозащита":"3 АТМ","Бренд":"«Vey crown»","Модель / Артикул":"055","Пол":"Мужские","Стиль":"Модный / современный","Тип движения":"Механические","Производитель механизма":"Другое","Страна производства механизма":"Китай","Тип стекла":"Минеральное закалённое стекло","Тип циферблата":"Стрелочный (аналоговый)","Форма циферблата":"Круглая","Диаметр корпуса":"42 миллиметра","Толщина корпуса":"8 миллиметров ","Материал корпуса":"Нержавеющая сталь","Материал браслета":"Нержавеющая сталь","Тип застёжки":"Одинарная складная пряжка","Материал застёжки":"Нержавеющая сталь","Коронка":"Обычная","Задняя крышка":"Обычная (цельная)","Особенности":"Светящиеся стрелки/метки, двойной календарь (число + день недели)","Водонепроницаемость":"Нет","Нанесение логотипа на циферблат":"Нет","Импортируемый товар":"Нет","Спецпоставка для трансграничного экспорта":"Нет","Таможенное оформление":"Не требуется","Патентование источника происхождения":"Не требуется","Регион происхождения":"Гуандун","Упаковка":"Другое","Сервис / гарантия":"Гарантийная мастерская","Год выпуска / сезон":"Другое"},"desc":"","reviews":[{"name":"Игорь","stars":5,"text":"Отличные часы, смотрятся дороже своей цены."}]},{"cat":"men","name":"Unranion Emmanuel","price":1250,"color":"Чёрный корпус, чёрный циферблат, золотистая окантовка  ","image":"https://sun9-38.vkuserphoto.ru/s/v1/ig2/Hki7ne4L5fW5GMcJGBMvbY0KzzVR_t8olZEPgN2FQ_OdiZGM7tMFVptFXN9xjsT0V8Zc9rO6tMMMj3xA05BTM6k9.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280,1440x1440,1777x1777&from=bu&cs=1777x0","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Сталь","Водозащита":"5 АТМ","Бренд":"«Vey crown»","Модель / Артикул":"055","Пол":"Мужские","Стиль":"Модный / современный","Тип движения":"Механические","Производитель механизма":"Другое","Страна производства механизма":"Китай","Тип стекла":"Минеральное закалённое стекло","Тип циферблата":"Стрелочный (аналоговый)","Форма циферблата":"Круглая","Диаметр корпуса":"42 миллиметра","Толщина корпуса":"8 миллиметров","Материал корпуса":"Нержавеющая сталь","Материал браслета":"Нержавеющая сталь","Тип застёжки":"Одинарная складная пряжка","Материал застёжки":"Нержавеющая сталь","Коронка":"Обычная  ","Задняя крышка":"Обычная (цельная)","Особенности":"Светящиеся стрелки/метки, двойной календарь (число + день недели)","Водонепроницаемость":"Нет","Нанесение логотипа на циферблат":"Нет","Импортируемый товар":"Нет","Таможенное оформление":"Не требуется","Патентование источника происхождения":"Не требуется","Спецпоставка для трансграничного экспорта":"Нет","Регион происхождения":"Гуандун","Упаковка":"Другое","Сервис / гарантия":"Гарантийная мастерская","Год выпуска / сезон":"Другое"},"desc":"Строгий циферблат, хронограф, чёрное покрытие корпуса.","reviews":[]},{"cat":"men","name":"Unranion Emmanuel","price":1250,"color":"серебристый","image":"https://sun9-52.vkuserphoto.ru/s/v1/ig2/4KJr_E3G07uaorQZuQt3ECdERni5jkb7kEuoffUomnVCj5VQPv40VM7lRQ56Y3SmaeCYnHYvqvNxMVJJMaR_lxCz.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1024x1024&from=bu&cs=1024x0","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Силикон","Водозащита":"3 АТМ","Модель / Артикул":"055","Пол":"Мужские","Бренд":"«Vey crown»","Стиль":"Модный / современный","Тип движения":"Механические","Производитель механизма":"Другое","Страна производства механизма":"Китай","Тип стекла":"Минеральное закалённое стекло","Тип циферблата":"Стрелочный (аналоговый)","Форма циферблата":"Круглая","Диаметр корпуса":"42 миллиметра","Толщина корпуса":"8 миллиметров","Материал корпуса":"Нержавеющая сталь","Материал браслета":"Нержавеющая сталь","Тип застёжки":"Одинарная складная пряжка","Материал застёжки":"Нержавеющая сталь","Коронка":"Обычная  ","Задняя крышка":"Обычная (цельная)","Особенности":"Светящиеся стрелки/метки, двойной календарь (число + день недели)","Водонепроницаемость":"Нет","Нанесение логотипа на циферблат":"Нет","Импортируемый товар":"Нет","Таможенное оформление":"Не требуется","Патентование источника происхождения":"Не требуется","Спецпоставка для трансграничного экспорта":"Нет","Регион происхождения":"Гуандун","Упаковка":"Другое","Сервис / гарантия":"Гарантийная мастерская","Год выпуска / сезон":"Другое"},"desc":"Лёгкие повседневные часы на каждый день.","reviews":[]},{"cat":"women","name":"Изящная","price":1300,"color":"золотистый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ"},"desc":"Тонкий корпус, золотистое покрытие, цепочка-браслет.","reviews":[]},{"cat":"women","name":"Жемчужная","price":1450,"color":"золотистый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ"},"desc":"Женственные часы с декоративными элементами под жемчуг.","reviews":[]},{"cat":"women","name":"Минимал","price":1200,"color":"белый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ"},"desc":"Аккуратный маленький циферблат, классический дизайн.","reviews":[]},{"cat":"smart","name":"Смарт Фийт","price":2400,"color":"черный","image":"","images":[],"specs":{"Экран":"AMOLED 1.4\"","Сенсоры":"Пульс, шаги","Батарея":"7 дней","Водозащита":"IP68"},"desc":"Умные часы с пульсометром и уведомлениями.","reviews":[]},{"cat":"smart","name":"Смарт Про","price":3200,"color":"черный","image":"","images":[],"specs":{"Экран":"AMOLED 1.7\"","Сенсоры":"Пульс, GPS","Батарея":"10 дней","Водозащита":"5 АТМ"},"desc":"Продвинутые смарт-часы с GPS и звонками.","reviews":[]},{"cat":"sport","name":"Спорт Фитес","price":1800,"color":"черный","image":"","images":[],"specs":{"Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"5 АТМ","Режимы":"Бег, вело"},"desc":"Спортивные часы-трекер для тренировок.","reviews":[]},{"cat":"sport","name":"Спорт Таймер","price":2100,"color":"белый","image":"","images":[],"specs":{"Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"10 АТМ","Функции":"Секундомер"},"desc":"Надёжные спортивные часы с таймером.","reviews":[]}]}</script>
+<script id="seed" type="application/json">{"contacts":{"shop":"Memento","phone":"+79277467217","email":"hibih228@gmail.com","address":"г. Самара","hours":"Пн–Сб 10:00 – 20:00"},"products":[{"cat":"men","name":"Unranion Emmanuel","price":1250,"color":"Стальной, золотой циферблат","image":"https://sun9-66.vkuserphoto.ru/s/v1/ig2/f1STkLcqIBGBJcMGDe4olG7qagW3BYVToFIsPUcQaPZZ24oNTvcjipQzNRRAo7cZENXek3g03MKAryPjDLDv1ZQ_.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1024x1024&from=bu&cs=1024x0","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Кожа","Водозащита":"3 АТМ","Бренд":"«Vey crown»","Модель / Артикул":"055","Пол":"Мужские","Стиль":"Модный / современный","Тип движения":"Механические","Производитель механизма":"Другое","Страна производства механизма":"Китай","Тип стекла":"Минеральное закалённое стекло","Тип циферблата":"Стрелочный (аналоговый)","Форма циферблата":"Круглая","Диаметр корпуса":"42 миллиметра","Толщина корпуса":"8 миллиметров ","Материал корпуса":"Нержавеющая сталь","Материал браслета":"Нержавеющая сталь","Тип застёжки":"Одинарная складная пряжка","Материал застёжки":"Нержавеющая сталь","Коронка":"Обычная","Задняя крышка":"Обычная (цельная)","Особенности":"Светящиеся стрелки/метки, двойной календарь (число + день недели)","Водонепроницаемость":"Нет","Нанесение логотипа на циферблат":"Нет","Импортируемый товар":"Нет","Спецпоставка для трансграничного экспорта":"Нет","Таможенное оформление":"Не требуется","Патентование источника происхождения":"Не требуется","Регион происхождения":"Гуандун","Упаковка":"Другое","Сервис / гарантия":"Гарантийная мастерская","Год выпуска / сезон":"Другое"},"desc":"","reviews":[{"name":"Игорь","stars":5,"text":"Отличные часы, смотрятся дороже своей цены."}],"id":"m1"},{"cat":"men","name":"Unranion Emmanuel","price":1250,"color":"Чёрный корпус, чёрный циферблат, золотистая окантовка  ","image":"https://sun9-38.vkuserphoto.ru/s/v1/ig2/Hki7ne4L5fW5GMcJGBMvbY0KzzVR_t8olZEPgN2FQ_OdiZGM7tMFVptFXN9xjsT0V8Zc9rO6tMMMj3xA05BTM6k9.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1080x1080,1280x1280,1440x1440,1777x1777&from=bu&cs=1777x0","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Сталь","Водозащита":"5 АТМ","Бренд":"«Vey crown»","Модель / Артикул":"055","Пол":"Мужские","Стиль":"Модный / современный","Тип движения":"Механические","Производитель механизма":"Другое","Страна производства механизма":"Китай","Тип стекла":"Минеральное закалённое стекло","Тип циферблата":"Стрелочный (аналоговый)","Форма циферблата":"Круглая","Диаметр корпуса":"42 миллиметра","Толщина корпуса":"8 миллиметров","Материал корпуса":"Нержавеющая сталь","Материал браслета":"Нержавеющая сталь","Тип застёжки":"Одинарная складная пряжка","Материал застёжки":"Нержавеющая сталь","Коронка":"Обычная  ","Задняя крышка":"Обычная (цельная)","Особенности":"Светящиеся стрелки/метки, двойной календарь (число + день недели)","Водонепроницаемость":"Нет","Нанесение логотипа на циферблат":"Нет","Импортируемый товар":"Нет","Таможенное оформление":"Не требуется","Патентование источника происхождения":"Не требуется","Спецпоставка для трансграничного экспорта":"Нет","Регион происхождения":"Гуандун","Упаковка":"Другое","Сервис / гарантия":"Гарантийная мастерская","Год выпуска / сезон":"Другое"},"desc":"Строгий циферблат, хронограф, чёрное покрытие корпуса.","reviews":[],"id":"m2"},{"cat":"men","name":"Unranion Emmanuel","price":1250,"color":"серебристый","image":"https://sun9-52.vkuserphoto.ru/s/v1/ig2/4KJr_E3G07uaorQZuQt3ECdERni5jkb7kEuoffUomnVCj5VQPv40VM7lRQ56Y3SmaeCYnHYvqvNxMVJJMaR_lxCz.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,1024x1024&from=bu&cs=1024x0","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Силикон","Водозащита":"3 АТМ","Модель / Артикул":"055","Пол":"Мужские","Бренд":"«Vey crown»","Стиль":"Модный / современный","Тип движения":"Механические","Производитель механизма":"Другое","Страна производства механизма":"Китай","Тип стекла":"Минеральное закалённое стекло","Тип циферблата":"Стрелочный (аналоговый)","Форма циферблата":"Круглая","Диаметр корпуса":"42 миллиметра","Толщина корпуса":"8 миллиметров","Материал корпуса":"Нержавеющая сталь","Материал браслета":"Нержавеющая сталь","Тип застёжки":"Одинарная складная пряжка","Материал застёжки":"Нержавеющая сталь","Коронка":"Обычная  ","Задняя крышка":"Обычная (цельная)","Особенности":"Светящиеся стрелки/метки, двойной календарь (число + день недели)","Водонепроницаемость":"Нет","Нанесение логотипа на циферблат":"Нет","Импортируемый товар":"Нет","Таможенное оформление":"Не требуется","Патентование источника происхождения":"Не требуется","Спецпоставка для трансграничного экспорта":"Нет","Регион происхождения":"Гуандун","Упаковка":"Другое","Сервис / гарантия":"Гарантийная мастерская","Год выпуска / сезон":"Другое"},"desc":"Лёгкие повседневные часы на каждый день.","reviews":[],"id":"m3"},{"cat":"women","name":"Изящная","price":1300,"color":"золотистый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ"},"desc":"Тонкий корпус, золотистое покрытие, цепочка-браслет.","reviews":[],"id":"m4"},{"cat":"women","name":"Жемчужная","price":1450,"color":"золотистый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ"},"desc":"Женственные часы с декоративными элементами под жемчуг.","reviews":[],"id":"m5"},{"cat":"women","name":"Минимал","price":1200,"color":"белый","image":"","images":[],"specs":{"Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ"},"desc":"Аккуратный маленький циферблат, классический дизайн.","reviews":[],"id":"m6"},{"cat":"smart","name":"Смарт Фийт","price":2400,"color":"черный","image":"","images":[],"specs":{"Экран":"AMOLED 1.4\"","Сенсоры":"Пульс, шаги","Батарея":"7 дней","Водозащита":"IP68"},"desc":"Умные часы с пульсометром и уведомлениями.","reviews":[],"id":"m7"},{"cat":"smart","name":"Смарт Про","price":3200,"color":"черный","image":"","images":[],"specs":{"Экран":"AMOLED 1.7\"","Сенсоры":"Пульс, GPS","Батарея":"10 дней","Водозащита":"5 АТМ"},"desc":"Продвинутые смарт-часы с GPS и звонками.","reviews":[],"id":"m8"},{"cat":"sport","name":"Спорт Фитес","price":1800,"color":"черный","image":"","images":[],"specs":{"Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"5 АТМ","Режимы":"Бег, вело"},"desc":"Спортивные часы-трекер для тренировок.","reviews":[],"id":"m9"},{"cat":"sport","name":"Спорт Таймер","price":2100,"color":"белый","image":"","images":[],"specs":{"Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"10 АТМ","Функции":"Секундомер"},"desc":"Надёжные спортивные часы с таймером.","reviews":[],"id":"m10"}]}</script>
 
 <script>
 /* ============================================================
@@ -772,18 +796,86 @@ const SPEC_FIELDS = [
 function getSpecs(p){ return p.specs || {}; }
 
 const PRODUCTS = [
-  { cat:"men", name:"Классика Строгая", price:1250, color:"черный", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Кожа","Водозащита":"3 АТМ" }, desc:"Мужские кварцевые часы, стальной корпус, кожаный ремешок.", reviews:[{name:"Игорь",stars:5,text:"Отличные часы, смотрятся дороже своей цены."}] },
-  { cat:"men", name:"Бизнес-Лайн", price:1400, color:"серебристый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Сталь","Водозащита":"5 АТМ" }, desc:"Строгий циферблат, хронограф, чёрное покрытие корпуса.", reviews:[] },
-  { cat:"men", name:"Дейли", price:1100, color:"серебристый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Силикон","Водозащита":"3 АТМ" }, desc:"Лёгкие повседневные часы на каждый день, водозащита.", reviews:[] },
-  { cat:"women", name:"Изящная", price:1300, color:"золотистый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ" }, desc:"Тонкий корпус, золотистое покрытие, цепочка-браслет.", reviews:[] },
-  { cat:"women", name:"Жемчужная", price:1450, color:"золотистый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ" }, desc:"Женственные часы с декоративными элементами под жемчуг.", reviews:[] },
-  { cat:"women", name:"Минимал", price:1200, color:"белый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ" }, desc:"Аккуратный маленький циферблат, классический дизайн.", reviews:[] },
-  { cat:"smart", name:"Смарт Фийт", price:2400, color:"черный", image:"", images:[], specs:{ "Экран":"AMOLED 1.4\"","Сенсоры":"Пульс, шаги","Батарея":"7 дней","Водозащита":"IP68" }, desc:"Умные часы с пульсометром и уведомлениями.", reviews:[] },
-  { cat:"smart", name:"Смарт Про", price:3200, color:"черный", image:"", images:[], specs:{ "Экран":"AMOLED 1.7\"","Сенсоры":"Пульс, GPS","Батарея":"10 дней","Водозащита":"5 АТМ" }, desc:"Продвинутые смарт-часы с GPS и звонками.", reviews:[] },
-  { cat:"sport", name:"Спорт Фитес", price:1800, color:"черный", image:"", images:[], specs:{ "Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"5 АТМ","Режимы":"Бег, вело" }, desc:"Спортивные часы-трекер для тренировок.", reviews:[] },
-  { cat:"sport", name:"Спорт Таймер", price:2100, color:"белый", image:"", images:[], specs:{ "Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"10 АТМ","Функции":"Секундомер" }, desc:"Надёжные спортивные часы с таймером.", reviews:[] }
+  { id:"m1", cat:"men", name:"Классика Строгая", price:1250, color:"черный", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Кожа","Водозащита":"3 АТМ" }, desc:"Мужские кварцевые часы, стальной корпус, кожаный ремешок.", reviews:[{name:"Игорь",stars:5,text:"Отличные часы, смотрятся дороже своей цены."}] },
+  { id:"m2", cat:"men", name:"Бизнес-Лайн", price:1400, color:"серебристый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Сталь","Водозащита":"5 АТМ" }, desc:"Строгий циферблат, хронограф, чёрное покрытие корпуса.", reviews:[] },
+  { id:"m3", cat:"men", name:"Дейли", price:1100, color:"серебристый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Силикон","Водозащита":"3 АТМ" }, desc:"Лёгкие повседневные часы на каждый день, водозащита.", reviews:[] },
+  { id:"m4", cat:"women", name:"Изящная", price:1300, color:"золотистый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ" }, desc:"Тонкий корпус, золотистое покрытие, цепочка-браслет.", reviews:[] },
+  { id:"m5", cat:"women", name:"Жемчужная", price:1450, color:"золотистый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ" }, desc:"Женственные часы с декоративными элементами под жемчуг.", reviews:[] },
+  { id:"m6", cat:"women", name:"Минимал", price:1200, color:"белый", image:"", images:[], specs:{ "Механизм":"Кварцевый","Корпус":"Металл","Ремешок":"Браслет","Водозащита":"3 АТМ" }, desc:"Аккуратный маленький циферблат, классический дизайн.", reviews:[] },
+  { id:"m7", cat:"smart", name:"Смарт Фийт", price:2400, color:"черный", image:"", images:[], specs:{ "Экран":"AMOLED 1.4\"","Сенсоры":"Пульс, шаги","Батарея":"7 дней","Водозащита":"IP68" }, desc:"Умные часы с пульсометром и уведомлениями.", reviews:[] },
+  { id:"m8", cat:"smart", name:"Смарт Про", price:3200, color:"черный", image:"", images:[], specs:{ "Экран":"AMOLED 1.7\"","Сенсоры":"Пульс, GPS","Батарея":"10 дней","Водозащита":"5 АТМ" }, desc:"Продвинутые смарт-часы с GPS и звонками.", reviews:[] },
+  { id:"m9", cat:"sport", name:"Спорт Фитес", price:1800, color:"черный", image:"", images:[], specs:{ "Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"5 АТМ","Режимы":"Бег, вело" }, desc:"Спортивные часы-трекер для тренировок.", reviews:[] },
+  { id:"m10", cat:"sport", name:"Спорт Таймер", price:2100, color:"белый", image:"", images:[], specs:{ "Корпус":"Полимер","Ремешок":"Силикон","Водозащита":"10 АТМ","Функции":"Секундомер" }, desc:"Надёжные спортивные часы с таймером.", reviews:[] }
 ];
 /* ================== КОНЕЦ БЛОКА ДАННЫХ ===================== */
+
+function ensureProductIds(){
+  var used = {};
+  PRODUCTScurrent.forEach(function(p){
+    if(!p.id || used[p.id]){
+      var base = p.name || "товар";
+      var slug = base.replace(/[^\w\u0400-\u04FF]+/g,"").toLowerCase() || "item";
+      var idx = 2;
+      var cand = slug;
+      while(used[cand]){ cand = slug + idx; idx++; }
+      p.id = cand;
+    }
+    used[p.id] = true;
+  });
+}
+function findProductById(id){ return PRODUCTScurrent.find(function(p){ return p.id===id; }); }
+function findProductByName(name){ return PRODUCTScurrent.find(function(p){ return p.name===name; }); }
+ensureProductIds();
+
+/* ============ МИГРАЦИИ СТАРЫХ ДАННЫХ (корзина, избранное, недавние) ============ */
+// Внимание: вызываются ПОЗЖЕ, после объявления cart/loadCart/getFavs/RECENT_KEY.
+function migrateCart(){
+  try{
+    var raw=localStorage.getItem("chasy_cart_v1");
+    if(!raw) return;
+    var c=JSON.parse(raw); var changed=false;
+    Object.keys(c).forEach(function(k){
+      var item=c[k];
+      if(item && item.id && findProductById(item.id)) return;
+      var p=findProductByName(k);
+      if(p){
+        c[p.id]={ id:p.id, name:p.name, price:p.price, qty:(item&&item.qty)||1 };
+        delete c[k];
+        changed=true;
+      } else if(item && item.name && findProductByName(item.name)){
+        var pp=findProductByName(item.name);
+        c[pp.id]={ id:pp.id, name:pp.name, price:pp.price, qty:item.qty||1 };
+        delete c[k];
+        changed=true;
+      }
+    });
+    if(changed) localStorage.setItem("chasy_cart_v1", JSON.stringify(c));
+  }catch(e){ console.error("migrateCart", e); }
+}
+function migrateFavs(){
+  try{
+    var f=getFavs(); var changed=false;
+    var mapped = f.map(function(x){
+      if(findProductById(x)) return x;
+      var p=findProductByName(x);
+      if(p){ changed=true; return p.id; }
+      return null;
+    }).filter(Boolean);
+    if(changed) saveFavs(mapped);
+  }catch(e){ console.error("migrateFavs", e); }
+}
+function migrateRecent(){
+  try{
+    var r=getRecent(); var changed=false;
+    var mapped = r.map(function(x){
+      if(findProductById(x)) return x;
+      var p=findProductByName(x);
+      if(p){ changed=true; return p.id; }
+      return null;
+    }).filter(Boolean);
+    if(changed) localStorage.setItem("chasy_recent_v1", JSON.stringify(mapped));
+  }catch(e){ console.error("migrateRecent", e); }
+}
 
 const LS_KEY = "chasy_salon_data_v1";
 const LS_PASS = "chasy_salon_edit_ok";
@@ -883,6 +975,7 @@ function updateAdminNav(){   const isOwnerActive = !!(isOwner() && currentUser);
 function renderAdminPage(){
   const body=document.getElementById("admin-page-body");
   if(!isAdmin()){ body.innerHTML='<p style="color:#b02323">Доступ запрещён.</p>'; return; }
+  __adminTab = __adminTab || "topups";
   body.innerHTML=
     '<div style="background:var(--cream);border:1px solid var(--line);padding:18px;margin-bottom:20px">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'+
@@ -895,13 +988,34 @@ function renderAdminPage(){
         '<button style="background:var(--ink);color:#fff;border:none;padding:10px 16px;cursor:pointer;font-family:inherit;font-size:.9rem" onclick="openChangePass()">🔑 Сменить код доступа</button>'+
       '</div>'+
     '</div>'+
-    '<div class="section-title" style="margin-top:0">Заявки на пополнение</div><div id="admin-topups">Загрузка...</div>'+
-    '<div class="section-title">Заказы</div><div id="admin-orders">Загрузка...</div>'+
-    '<div class="section-title">Заявки на сертификаты</div><div id="admin-gifts">Загрузка...</div>'+
-    '<button style="background:var(--ink);color:#fff;border:none;padding:11px 18px;cursor:pointer;font-family:inherit;font-size:.95rem;margin-top:14px" onclick="syncNicks()">Синхронизировать ники (восстановить вход по нику)</button>'+
+    '<div class="admin-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px">'+
+      '<button class="admin-tab" data-tab="topups" onclick="adminTab(\'topups\')" style="background:var(--ink);color:#fff;border:none;padding:10px 18px;cursor:pointer;font-family:inherit;font-size:.9rem;border-radius:20px">Заявки на пополнение</button>'+
+      '<button class="admin-tab" data-tab="orders" onclick="adminTab(\'orders\')" style="background:var(--cream);color:var(--ink);border:1px solid var(--line);padding:10px 18px;cursor:pointer;font-family:inherit;font-size:.9rem;border-radius:20px">Заказы</button>'+
+      '<button class="admin-tab" data-tab="gifts" onclick="adminTab(\'gifts\')" style="background:var(--cream);color:var(--ink);border:1px solid var(--line);padding:10px 18px;cursor:pointer;font-family:inherit;font-size:.9rem;border-radius:20px">Заявки на сертификаты</button>'+
+    '</div>'+
+    '<div id="admin-topups">Загрузка...</div>'+
+    '<div id="admin-orders" style="display:none">Загрузка...</div>'+
+    '<div id="admin-gifts" style="display:none">Загрузка...</div>'+
+    '<button style="background:var(--ink);color:#fff;border:none;padding:11px 18px;cursor:pointer;font-family:inherit;font-size:.95rem;margin-top:16px" onclick="syncNicks()">Синхронизировать ники (восстановить вход по нику)</button>'+
     '<div id="sync-result" style="font-size:.85rem;color:var(--muted);margin-top:8px"></div>';
-  loadAdminTopups(); loadAdminOrders(); loadAdminGiftRequests();
+  syncAdminTab();
 }
+var __adminTab = null;
+function syncAdminTab(){
+  var tab = __adminTab || "topups";
+  var map = { topups:["admin-topups",loadAdminTopups], orders:["admin-orders",loadAdminOrders], gifts:["admin-gifts",loadAdminGiftRequests] };
+  for(var k in map){
+    var el=document.getElementById(map[k][0]);
+    if(el){ el.style.display = (k===tab) ? "block" : "none"; }
+  }
+  document.querySelectorAll(".admin-tab").forEach(function(b){
+    b.style.background = b.getAttribute("data-tab")===tab ? "var(--ink)" : "var(--cream)";
+    b.style.color = b.getAttribute("data-tab")===tab ? "#fff" : "var(--ink)";
+  });
+  var fn = map[tab] ? map[tab][1] : null;
+  if(fn) fn();
+}
+function adminTab(tab){ __adminTab=tab; syncAdminTab(); }
 function setHero(on){
   const h=document.getElementById('hero-block');
   if(on){ h.style.display=''; } else { h.style.display='none'; }
@@ -938,7 +1052,7 @@ function render(){
       && (document.getElementById("search-input") ? document.getElementById("search-input").value==="" : true)
       && (document.getElementById("sort-select") ? document.getElementById("sort-select").value==="" : true);
     if(cleaning){
-      var recents=getRecent().map(function(n){ return PRODUCTScurrent.find(function(x){ return x.name===n; }); }).filter(Boolean);
+      var recents=getRecent().map(function(n){ return findProductById(n); }).filter(Boolean);
       if(recents.length){
         recentBox.style.display="block";
         recentBox.innerHTML='<div class="section-title" style="margin:8px 0 14px">Вы недавно смотрели</div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">'+
@@ -956,14 +1070,14 @@ function render(){
     const note = p.reviews && p.reviews.length ? '<span class="rev-stars">'+starStr(avgStars(p.reviews))+'</span> '+p.reviews.length+' отз.' : 'нет отзывов';
     el.innerHTML =
       '<div class="img" style="position:relative">' + (p.image ? '<img src="'+p.image+'" alt="'+p.name+'">' : '<span>Фото модели</span>') +
-      '<button onclick="event.stopPropagation();toggleFav(\''+esc(p.name).replace(/'/g,"\\'")+'\',this)" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)" class="fav-btn">'+(isFav(p.name)?'❤️':'🤍')+'</button>'+
+      '<button onclick="event.stopPropagation();toggleFav(\''+String(p.id).replace(/'/g,"")+'\',this)" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)" class="fav-btn">'+(isFav(p.id)?'❤️':'🤍')+'</button>'+
       (p.oldPrice && p.oldPrice>p.price ? '<span style="position:absolute;top:8px;left:8px;background:#b02323;color:#fff;font-size:.7rem;padding:3px 7px;border-radius:4px">СКИДКА '+(Math.round((1-p.price/p.oldPrice)*100))+'%</span>' : '')+
       '</div>' +
       '<span class="badge-cat">'+(CAT_NAME[p.cat]||p.cat)+'</span>'+
       '<h3>'+p.name+'</h3>' +
       '<div class="desc">'+p.desc+'</div>' +
       '<div class="row" onclick="event.stopPropagation()">'+(p.oldPrice && p.oldPrice>p.price ? '<span style="text-decoration:line-through;color:var(--muted);font-size:.85rem;margin-right:6px">'+p.oldPrice.toLocaleString('ru-RU')+'</span>':'')+'<span class="price">'+p.price.toLocaleString('ru-RU')+' ₽</span>' +
-      '<button class="add" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button></div>'+
+      '<button class="add" onclick="addToCartById(\''+String(p.id).replace(/'/g,"")+'\')">В корзину</button></div>'+
       '<div style="font-size:.78rem;color:var(--muted);margin-top:6px">'+note+'</div>';
     grid.appendChild(el);
   });
@@ -993,26 +1107,58 @@ function starStr(v){ var s=''; for(var i=1;i<=5;i++){ s+=i<=Math.round(v)?'★':
 const FAV_KEY = "chasy_favs_v1";
 function getFavs(){ try{ return JSON.parse(localStorage.getItem(FAV_KEY)||"[]"); }catch(e){ return []; } }
 function saveFavs(f){ localStorage.setItem(FAV_KEY, JSON.stringify(f)); }
-function isFav(name){ return getFavs().indexOf(name)!==-1; }
-function toggleFav(name, btn){
+function isFav(id){ return getFavs().indexOf(id)!==-1; }
+function toggleFav(id, btn){
   var f=getFavs();
-  var i=f.indexOf(name);
-  if(i===-1) f.push(name); else f.splice(i,1);
+  var i=f.indexOf(id);
+  if(i===-1) f.push(id); else f.splice(i,1);
   saveFavs(f);
-  if(btn){ btn.textContent = isFav(name)?'❤️':'🤍'; }
+  if(btn){ btn.textContent = isFav(id)?'❤️':'🤍'; }
 }
 const RECENT_KEY = "chasy_recent_v1";
 function getRecent(){ try{ return JSON.parse(localStorage.getItem(RECENT_KEY)||"[]"); }catch(e){ return []; } }
-function addRecent(name){
-  var r=getRecent().filter(function(x){ return x!==name; });
-  r.unshift(name);
+function addRecent(id){
+  var r=getRecent().filter(function(x){ return x!==id; });
+  r.unshift(id);
   if(r.length>10) r.length=10;
   localStorage.setItem(RECENT_KEY, JSON.stringify(r));
 }
 
 
+migrateCart(); migrateFavs(); migrateRecent();
+cart = loadCart();
+
 /* ============ КОРЗИНА ============ */
-function addToCart(name,price){ if(!cart[name]) cart[name]={price,qty:0}; cart[name].qty++; saveCart(); updateCart(); if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage(); openCart(); }
+function cartItemName(k){ var it=cart[k]; return (it&&it.name) ? it.name : k; }
+function cartItemPrice(k){ var it=cart[k]; return (it&&it.price!=null) ? it.price : 0; }
+function addToCartById(pid){
+  var p=findProductById(pid);
+  if(!p){ return; }
+  if(!cart[pid]) cart[pid]={ id:pid, name:p.name, price:p.price, qty:0 };
+  cart[pid].qty++;
+  cart[pid].name=p.name; cart[pid].price=p.price;
+  if(p.image && !cart[pid].image) cart[pid].image=p.image;
+  saveCart(); updateCart();
+  if(document.getElementById('pg-cart').classList.contains('active')) renderCartPage();
+  showCartAdded(pid);
+}
+function addToCart(name,price){ var p=findProductByName(name); if(p){ addToCartById(p.id); } else { showToast("Товар больше не в каталоге","err"); } }
+
+/* Модалка "Добавлено в корзину" */
+function showCartAdded(pid){
+  var p=findProductById(pid); if(!p) return;
+  var qty=cart[pid]?cart[pid].qty:1;
+  document.getElementById("ca-title").textContent=p.name;
+  document.getElementById("ca-sub").innerHTML= qty+" шт · "+(p.price*qty).toLocaleString('ru-RU')+' ₽';
+  document.getElementById("ca-img").src = (p.image||"");
+  document.getElementById("ca-img").style.display = p.image?"block":"none";
+  var total=0; Object.values(cart).forEach(function(x){ total+=x.price*x.qty; });
+  document.getElementById("ca-total").textContent=total.toLocaleString('ru-RU')+' ₽';
+  document.getElementById("ca-count").textContent=Object.values(cart).reduce(function(s,x){return s+x.qty;},0);
+  document.getElementById("cart-added-modal").classList.add("show");
+}
+function closeCartAdded(){ document.getElementById("cart-added-modal").classList.remove("show"); }
+function caGoCheckout(){ closeCartAdded(); goCheckout(); }
 function openCart(){ document.getElementById("cart-panel").classList.add("open"); overlayShow(); drawCart(); document.querySelector('#cart-panel header span').textContent='Корзина'; }
 function closePanels(){
   document.querySelectorAll('#cart-panel,#order-form,#product-modal').forEach(e=>e.classList.remove('open'));
@@ -1045,7 +1191,8 @@ function renderCartPage(){
     body.innerHTML='<div style="background:var(--cream);border:1px solid var(--line);padding:40px;text-align:center"><p style="color:var(--muted);margin-bottom:16px">Корзина пуста.</p><button style="background:var(--ink);color:#fff;border:none;padding:12px 24px;cursor:pointer;font-family:inherit;font-size:1rem" onclick="go(\'catalog\')">Перейти в каталог</button></div>';
     return;
   }
-  let html=names.map(n=>'<div class="ci" style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:10px"><div class="th"><div class="nm">'+n+'</div><div class="pr">'+cart[n].price.toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+n+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+n+'\',1)">+</button></div></div><button class="rm" onclick="chg(\''+n+'\',-999)">✕</button></div>').join('');
+  function cartKeyJs(k){ return String(k).replace(/'/g,""); }
+  let html=names.map(n=>'<div class="ci" style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:10px"><div class="th"><div class="nm">'+cartItemName(n)+'</div><div class="pr">'+cartItemPrice(n).toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+cartKeyJs(n)+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+cartKeyJs(n)+'\',1)">+</button></div></div><button class="rm" onclick="chg(\''+cartKeyJs(n)+'\',-999)">✕</button></div>').join('');
   let total=0; Object.values(cart).forEach(x=>total+=x.price*x.qty);
   html+='<div id="cart-total" style="background:var(--cream);border:1px solid var(--line);padding:18px;margin-top:14px"><div class="sum-row"><span>Итого:</span><span id="grand2" style="font-size:1.3rem;font-weight:bold">'+total.toLocaleString('ru-RU')+' ₽</span></div><button onclick="goCheckout()" style="width:100%;background:var(--gold);color:#fff;border:none;padding:14px;font-family:inherit;font-size:1.1rem;letter-spacing:1px;cursor:pointer">Оформить заказ</button></div>';
   body.innerHTML=html;
@@ -1055,7 +1202,7 @@ function drawCart(){
   const names=Object.keys(cart);
   if(!names.length){ body.innerHTML='<p style="color:#7a7265">Корзина пуста.</p>'; }
   else{
-    body.innerHTML=names.map(n=>'<div class="ci"><div class="th"><div class="nm">'+n+'</div><div class="pr">'+cart[n].price.toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+n+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+n+'\',1)">+</button></div></div><button class="rm" onclick="chg(\''+n+'\',-999)">✕</button></div>').join('');
+    body.innerHTML=names.map(n=>'<div class="ci"><div class="th"><div class="nm">'+cartItemName(n)+'</div><div class="pr">'+cartItemPrice(n).toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+String(n).replace(/'/g,"")+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+String(n).replace(/'/g,"")+'\',1)">+</button></div></div><button class="rm" onclick="chg(\''+String(n).replace(/'/g,"")+'\',-999)">✕</button></div>').join('');
   }
   let total=0; Object.values(cart).forEach(x=>total+=x.price*x.qty);
   document.getElementById("grand").textContent=total.toLocaleString('ru-RU')+' ₽';
@@ -1067,7 +1214,7 @@ function chg(name,d){ cart[name].qty+=d; if(cart[name].qty<=0) delete cart[name]
 function goCheckout(){
   if(!Object.keys(cart).length){ showToast("Корзина пуста."); return; }
   let html='<b>Ваш заказ:</b><br>', total=0;
-  Object.entries(cart).forEach(([n,x])=>{ html+=n+' × '+x.qty+' — '+(x.price*x.qty).toLocaleString('ru-RU')+' ₽<br>'; total+=x.price*x.qty; });
+  Object.entries(cart).forEach(([n,x])=>{ html+=cartItemName(n)+' × '+x.qty+' — '+(x.price*x.qty).toLocaleString('ru-RU')+' ₽<br>'; total+=x.price*x.qty; });
   html+='<b>Итого: '+total.toLocaleString('ru-RU')+' ₽</b>';
   document.getElementById("checkout-summary").innerHTML=html;
   document.getElementById("pay-options").innerHTML = buildPayOptions(total);
@@ -1117,7 +1264,7 @@ document.getElementById("checkout-form").addEventListener("submit", async functi
   const phone=document.getElementById("of-phone").value;
   const comment=document.getElementById("of-comment").value;
   let lines=[], total=0;
-  Object.entries(cart).forEach(([n,x])=>{ lines.push(n+' × '+x.qty); total+=x.price*x.qty; });
+  Object.entries(cart).forEach(([n,x])=>{ lines.push(cartItemName(n)+' × '+x.qty); total+=x.price*x.qty; });
   if(payMethod==='balance'){
     if(getBalance()<total){ showToast("Недостаточно средств на балансе."); return; }
     // Баланс не списывается клиентом — спишет админ при подтверждении заказа (Вариант B)
@@ -1574,7 +1721,7 @@ let curIdx=null, curImg=0;
 function openProductIdx(idxInList){ if(idxInList<0||idxInList>=PRODUCTScurrent.length) return; openProduct(idxInList); }
 function openProductByIdx(idxInList){ if(idxInList<0||idxInList>=PRODUCTScurrent.length) return; openProduct(idxInList); }
 function openProductByTitle(el){ if(!el) return; const h=el.querySelector('h3'); if(!h) return; const name=h.textContent; const idx=PRODUCTScurrent.findIndex(x=>x.name===name); if(idx>=0) openProduct(idx); }
-function openProduct(idx){ curIdx=idx; curImg=0; const p=PRODUCTScurrent[idx]; if(!p) return; if(p.name) addRecent(p.name); document.getElementById("pm-title").textContent=p.name; drawProductBody(); document.getElementById("product-modal").classList.add("open"); overlayShow(); }
+function openProduct(idx){ curIdx=idx; curImg=0; const p=PRODUCTScurrent[idx]; if(!p) return; if(p.name) addRecent(p.id||p.name); document.getElementById("pm-title").textContent=p.name; drawProductBody(); document.getElementById("product-modal").classList.add("open"); overlayShow(); }
 function closeProduct(){ document.getElementById("product-modal").classList.remove("open"); overlayHide(); }
 function drawProductBody(){
   const p=PRODUCTScurrent[curIdx]; if(!p) return;
@@ -1595,7 +1742,7 @@ function drawProductBody(){
     ? '<span style="text-decoration:line-through;color:var(--muted);margin-right:8px">'+p.oldPrice.toLocaleString('ru-RU')+' ₽</span><b style="color:#b02323">'+p.price.toLocaleString('ru-RU')+' ₽</b>'
     : '<b>'+p.price.toLocaleString('ru-RU')+' ₽</b>';
   body+='<div style="margin-top:16px;font-size:1.2rem">'+priceRow+'</div>';
-  body+='<div class="pm-actions"><button class="pm-cart" onclick="addToCart(\''+p.name+'\','+p.price+')">В корзину</button><button class="pm-buy" style="background:var(--ink)" onclick="buyOneClick(\''+esc(p.name).replace(/'/g,"\\'")+'\','+p.price+')">Купить в 1 клик</button></div>';
+  body+='<div class="pm-actions"><button class="pm-cart" onclick="addToCartById(\''+String(p.id).replace(/'/g,"")+'\')">В корзину</button><button class="pm-buy" style="background:var(--ink)" onclick="buyOneClickById(\''+String(p.id).replace(/'/g,"")+'\')">Купить в 1 клик</button></div>';
   // С этим покупают (рекомендации: те же характеристики бренда/стиля или той же категории)
   var sameCat = PRODUCTScurrent.filter(function(x){ return x!==p && x.cat===p.cat; }).slice(0,3);
   if(sameCat.length){
@@ -1906,7 +2053,7 @@ function handleEd(e){
   PRODUCTScurrent[idx][f]=val;
 }
 document.getElementById("ed-products").addEventListener("click", function(e){ if(e.target.classList.contains("del")){ const idx=parseInt(e.target.getAttribute("data-i"),10); PRODUCTScurrent.splice(idx,1); drawEditorProducts(); } });
-function edAdd(){ PRODUCTScurrent.push({cat:"men",name:"Новый товар",price:0,color:"",image:"",images:[],specs:{},desc:"",reviews:[]}); drawEditorProducts(); }
+function edAdd(){ var np={id:"new"+(Date.now().toString(36)),cat:"men",name:"Новый товар",price:0,color:"",image:"",images:[],specs:{},desc:"",reviews:[]}; PRODUCTScurrent.push(np); drawEditorProducts(); }
 function edSave(){ CONTACTScurrent={shop:document.getElementById("ec-shop").value,phone:document.getElementById("ec-phone").value,email:document.getElementById("ec-email").value,address:document.getElementById("ec-address").value,hours:document.getElementById("ec-hours").value}; saveData(); render(); renderContacts(); showToast("Сохранено."); }
 function edReset(){ showConfirm("Сбросить все правки и вернуть исходные данные?", function(ok){ if(!ok) return; localStorage.removeItem(LS_KEY); PRODUCTScurrent=PRODUCTS.slice(); CONTACTScurrent=Object.assign({},CONTACTS); render(); renderContacts(); fillEditor(); }); }
 function edPublish(){
@@ -2053,15 +2200,16 @@ function confirmResolve(ok){
 }
 
 var __ocProduct = null;
-function buyOneClick(name, price){
-  var p=PRODUCTScurrent.find(function(x){ return x.name===name; });
-  __ocProduct = { name:name, price:price };
+function buyOneClickById(pid){
+  var p=findProductById(pid); if(!p) return;
+  __ocProduct = { id:p.id, name:p.name, price:p.price };
   if(!currentUser){ showToast("Войдите в аккаунт, чтобы оформить заказ в 1 клик","err"); openAuth({preventDefault:function(){}}); return; }
-  document.getElementById("oc-title").textContent="Купить в 1 клик: "+name+" ("+price.toLocaleString('ru-RU')+" ₽)";
+  document.getElementById("oc-title").textContent="Купить в 1 клик: "+p.name+" ("+p.price.toLocaleString('ru-RU')+" ₽)";
   document.getElementById("oc-name").value="";
   document.getElementById("oc-phone").value="";
   document.getElementById("oneclick-modal").classList.add("show");
 }
+function buyOneClick(name, price){ var p=findProductByName(name); if(p){ buyOneClickById(p.id); } else { showToast("Товар не найден","err"); } }
 function closeOneClick(){ document.getElementById("oneclick-modal").classList.remove("show"); }
 function submitOneClick(){
   if(!__ocProduct) return;
