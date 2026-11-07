@@ -1341,7 +1341,7 @@ async function loadAdminTopups(){
 }
 async function approveTopup(docId, uid, amount, client){
   if(!isAdmin()) return;
-  if(!confirm("Начислить "+amount.toLocaleString('ru-RU')+" ₽ пользователю "+client+"?")) return;
+  showConfirm("Начислить "+amount.toLocaleString('ru-RU')+" ₽ пользователю "+client+"?", function(ok){ if(!ok){ return; } doApprove(uid, amount); }); return;
   try{
     await adminSetBalance(uid, amount, "Пополнение баланса (подтверждено)");
     await firestore.collection("topups").doc(docId).update({ status:"approved", approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
@@ -1378,7 +1378,7 @@ async function loadAdminOrders(){
 async function setOrderStatus(docId, status){
   if(!isAdmin()) return;
   try{
-    if(status==='cancelled'){ if(!confirm("Отменить заказ?")) return; }
+    if(status==='cancelled'){ showConfirm("Отменить заказ?", function(ok){ if(ok){ setOrderStatus2(docId, status); } }); return; }
     await firestore.collection("orders").doc(docId).update({ status: status, statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     if(status==='delivered'||status==='approved') await sendOrderEmail(docId);
     loadAdminOrders();
@@ -2024,7 +2024,7 @@ function confirmResolve(ok){
   var cb=__confirmCb; __confirmCb=null;
   if(cb) cb(ok);
 }
-window.confirm = function(msg){ showConfirm(String(msg), null); return false; };
+
 var __ocProduct = null;
 function buyOneClick(name, price){
   var p=PRODUCTScurrent.find(function(x){ return x.name===name; });
