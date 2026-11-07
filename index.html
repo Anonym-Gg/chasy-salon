@@ -1416,14 +1416,16 @@ async function setOrderStatus(docId, status){
 }
 async function confirmOrderBalance(docId, uid, total, client){
   if(!isAdmin()) return;
-  if(!confirm("Списать "+total.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и подтвердить заказ?")) return;
-  try{
-    await adminSetBalance(uid, -total, "Оплата заказа");
-    await firestore.collection("orders").doc(docId).update({ status:"approved", statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    await sendOrderEmail(docId);
-    showToast("Заказ подтверждён, баланс списан.");
-    loadAdminOrders();
-  }catch(e){ showToast("Ошибка: "+e.message); }
+  showConfirm("Списать "+total.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и подтвердить заказ?", async function(ok){
+    if(!ok) return;
+    try{
+      await adminSetBalance(uid, -total, "Оплата заказа");
+      await firestore.collection("orders").doc(docId).update({ status:"approved", statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await sendOrderEmail(docId);
+      showToast("Заказ подтверждён, баланс списан.");
+      loadAdminOrders();
+    }catch(e){ showToast("Ошибка: "+e.message); }
+  });
 }
 // Отправка письма о заказе
 async function sendOrderEmail(docId){
@@ -1462,27 +1464,24 @@ async function loadAdminGiftRequests(){
 }
 async function approveGiftRequest(docId, uid, amount, client){
   if(!isAdmin()) return;
-  if(!confirm("Списать "+amount.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и выдать сертификат?")) return;
-  try{
-    await adminSetBalance(uid, -amount, "Покупка подарочного сертификата "+amount.toLocaleString('ru-RU'));
-    const code="MEM-"+Math.floor(100000+Math.random()*900000);
-    await firestore.collection("giftRequests").doc(docId).update({ status:"approved", code:code, approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    // создать документ сертификата в коллекции certificates (его можно ввести в заказе)
-    await firestore.collection("certificates").doc(code).set({
-      code: code, amount: amount, ownerUid: uid, status: "active",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // добавить сертификат в документ пользователя
-    const ref = firestore.collection("users").doc(uid);
-    const doc = await ref.get();
-    if(doc.exists){
-      const gifts = doc.data().gifts||[];
-      gifts.push({amount:amount, code:code});
-      await ref.update({ gifts: gifts });
-    }
-    showToast("Сертификат выдан. Код: "+code+" — его можно ввести в заказе как оплату.");
-    loadAdminGiftRequests();
-  }catch(e){ showToast("Ошибка: "+e.message); }
+  showConfirm("Списать "+amount.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и выдать сертификат?", async function(ok){
+    if(!ok) return;
+    try{
+      await adminSetBalance(uid, -amount, "Покупка подарочного сертификата "+amount.toLocaleString('ru-RU'));
+      var code="MEM-"+Math.floor(100000+Math.random()*900000);
+      await firestore.collection("giftRequests").doc(docId).update({ status:"approved", code:code, approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await firestore.collection("certificates").doc(code).set({ code: code, amount: amount, ownerUid: uid, status: "active", createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      var ref = firestore.collection("users").doc(uid);
+      var doc = await ref.get();
+      if(doc.exists){
+        var gifts = doc.data().gifts||[];
+        gifts.push({amount:amount, code:code});
+        await ref.update({ gifts: gifts });
+      }
+      showToast("Сертификат выдан. Код: "+code+" — его можно ввести в заказе как оплату.");
+      loadAdminGiftRequests();
+    }catch(e){ showToast("Ошибка: "+e.message); }
+  });
 }
 
 function sortDocsDesc(snap){
@@ -1911,7 +1910,7 @@ function handleEd(e){
 document.getElementById("ed-products").addEventListener("click", function(e){ if(e.target.classList.contains("del")){ const idx=parseInt(e.target.getAttribute("data-i"),10); PRODUCTScurrent.splice(idx,1); drawEditorProducts(); } });
 function edAdd(){ PRODUCTScurrent.push({cat:"men",name:"Новый товар",price:0,color:"",image:"",images:[],specs:{},desc:"",reviews:[]}); drawEditorProducts(); }
 function edSave(){ CONTACTScurrent={shop:document.getElementById("ec-shop").value,phone:document.getElementById("ec-phone").value,email:document.getElementById("ec-email").value,address:document.getElementById("ec-address").value,hours:document.getElementById("ec-hours").value}; saveData(); render(); renderContacts(); showToast("Сохранено."); }
-function edReset(){ if(!confirm("Сбросить правки?")) return; localStorage.removeItem(LS_KEY); PRODUCTScurrent=PRODUCTS.slice(); CONTACTScurrent=Object.assign({},CONTACTS); render(); renderContacts(); fillEditor(); }
+function edReset(){ showConfirm("Сбросить все правки и вернуть исходные данные?", function(ok){ if(!ok) return; localStorage.removeItem(LS_KEY); PRODUCTScurrent=PRODUCTS.slice(); CONTACTScurrent=Object.assign({},CONTACTS); render(); renderContacts(); fillEditor(); }); }
 function edPublish(){
   CONTACTScurrent={shop:document.getElementById("ec-shop").value,phone:document.getElementById("ec-phone").value,email:document.getElementById("ec-email").value,address:document.getElementById("ec-address").value,hours:document.getElementById("ec-hours").value};
   const seed=document.getElementById("seed"); seed.textContent=JSON.stringify({contacts:CONTACTScurrent,products:PRODUCTScurrent}); saveData();
