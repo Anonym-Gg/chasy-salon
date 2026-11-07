@@ -1301,18 +1301,48 @@ async function loadMyOrders(){
   try{
     const snap = await firestore.collection("orders")
       .where("uid","==",currentUser.uid)
-      .limit(20).get();
+      .limit(30).get();
     if(snap.empty){ box.innerHTML='<p style="color:var(--muted)">У вас пока нет заказов.</p>'; return; }
+    const steps = ["new","confirmed","shipped","delivered"];
+    const stepNames = { new:"Принят", confirmed:"Подтверждён", shipped:"Отправлен", delivered:"Доставлен" };
     box.innerHTML = sortDocsDesc(snap).map(function(d){
       const o=d.data();
       const date = o.createdAt ? new Date(o.createdAt.seconds*1000).toLocaleString('ru-RU') : "—";
-      const state = orderStatusHtml(o.status||"new");
+      const st = (o.status==="approved" ? "delivered" : (o.status||"new"));
+      const curStep = st==="cancelled" ? -1 : steps.indexOf(st);
+      // Прогресс этапов
+      let stepsHtml = "";
+      if(curStep === -1){
+        stepsHtml = '<div style="color:#999;font-size:.85rem">✖ Заказ отменён</div>';
+      } else {
+        stepsHtml = '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:8px 0">' +
+          steps.map(function(s, i){
+            const done = i <= curStep;
+            const lbl = stepNames[s];
+            return '<div style="display:flex;align-items:center;gap:4px"><div style="background:'+(done?'var(--gold)':'var(--line)')+';color:'+(done?'#fff':'var(--muted)')+';border-radius:14px;padding:3px 10px;font-size:.75rem">'+lbl+'</div>'+(i<steps.length-1?'<div style="width:10px;height:2px;background:'+(i<curStep?'var(--gold)':'var(--line)')+'"></div>':'')+'</div>';
+          }).join('') + '</div>';
+      }
+      // Товары заказа с ценами и кликом на модалку
+      const itemsHtml = (o.items||[]).map(function(it){
+        // it может быть строкой вида "Классика Строгая × 1"
+        var nm = String(it).split(" × ")[0];
+        var pr = PRODUCTScurrent.find(function(p){ return p.name===nm; });
+        const priceStr = o.total ? "" : "";
+        return '<div style="font-size:.85rem;cursor:pointer;color:var(--gold-d);text-decoration:underline" onclick="openByName(\''+nm.replace(/'/g,"")+'\')">'+esc(it)+'</div>';
+      }).join('');
       const payLabel = o.payMethod==='balance' ? 'баланс' : (o.payMethod==='cert' ? 'сертификат' : 'карта ВТБ');
-      return '<div class="rev-item"><b>'+date+'</b> — '+state+'<br>'+
-        '<span style="color:var(--muted)">'+esc((o.items||[]).join("; "))+'</span><br>'+
-        '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · оплата: '+payLabel+'</div>';
+      return '<div class="rev-item"><b>'+date+'</b> — '+orderStatusHtml(o.status||"new")+'<br>'+
+        itemsHtml+'<br>'+
+        '<b>Сумма: '+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · оплата: '+payLabel+'<br>'+
+        stepsHtml+'</div>';
     }).join('');
   }catch(e){ console.error(e); box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
+}
+// Открыть товар по имени из заказа
+function openByName(name){
+  var idx = PRODUCTScurrent.findIndex(function(x){ return x.name===name; });
+  if(idx>=0) openProduct(idx);
+  else showToast("Товар больше не в каталоге");
 }
 function orderStatusHtml(st){
   switch(st){
