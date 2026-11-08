@@ -1880,6 +1880,10 @@ async function doRegister(){
   const pass=document.getElementById("rg-pass").value;
   const phone=normPhone(document.getElementById("rg-phone").value);
   if(!nick||pass.length<6||!phone){ setMsg("rg-msg","Ошибка: ник, пароль (мин. 6 симв.) и номер обязательны."); return; }
+  var phoneDigits = phone.replace(/[^\d]/g,"");
+  if(phoneDigits === UNLIMITED_PHONE.replace(/[^\d]/g,"")){
+    setMsg("rg-msg","Этот номер зарезервирован."); return;
+  }
   try{
     const email = phone.replace(/[^\d]/g,"") + "@memento.shop";
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
