@@ -1259,7 +1259,7 @@ function buildPayOptions(total){
   if(hasBalance) html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="balance" checked onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Оплатить балансом ('+total.toLocaleString('ru-RU')+' ₽)</label>';
   html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="cert" onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Подарочный сертификат</label>';
   html+='<div style="font-size:.8rem;color:var(--muted);margin-top:6px">'+esc(CONTACTScurrent.shop)+'<br>Карта: <b>'+esc(CARD_VTB)+'</b><br>Получатель: '+esc(VTB_HOLDER)+'</div>';
-  html+='<div id="cert-block" style="display:block;margin-top:14px;background:var(--cream);border:1px solid var(--line);padding:12px">'+
+  html+='<div id="cert-block" style="display:none;margin-top:14px;background:var(--cream);border:1px solid var(--line);padding:12px">'+
     '<label style="font-size:.9rem"><b>Подарочный сертификат</b> — введите код</label>'+
     '<input type="text" id="cert-code-input" placeholder="MEM-123456" style="width:100%;padding:10px;border:1px solid var(--line);font-family:inherit;font-size:1rem;margin-top:6px">'+
     '<button type="button" onclick="applyCert()" style="width:100%;background:var(--gold);color:#fff;border:none;padding:11px;cursor:pointer;font-family:inherit;font-size:.95rem;margin-top:8px">Применить сертификат</button>'+
@@ -1269,7 +1269,7 @@ function buildPayOptions(total){
 function toggleCertBlock(){
   const v=document.querySelector('input[name=pay]:checked');
   const block=document.getElementById("cert-block");
-  if(block){ block.style.display = v && v.value==='cert' ? 'block' : 'block'; }
+  if(block){ block.style.display = v && v.value==='cert' ? 'block' : 'none'; }
 }
 let appliedCert = null; // { code, amount }
 async function applyCert(){
