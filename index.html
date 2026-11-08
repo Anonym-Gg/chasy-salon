@@ -1431,6 +1431,7 @@ function renderTopBalance(){
 }
 function renderProfile(){
   const w=document.getElementById("profile-widget");
+  if(currentUser) reloadUserData();
   if(!currentUser){
     w.innerHTML='<div style="background:var(--cream);border:1px solid var(--line);padding:30px;text-align:center"><p style="margin-bottom:14px">Войдите, чтобы увидеть баланс и сертификаты.</p><button style="background:var(--ink);color:#fff;border:none;padding:12px 24px;cursor:pointer;font-family:inherit;font-size:1rem" onclick="openAuth(event)">Войти / Зарегистрироваться</button></div>';
     return;
