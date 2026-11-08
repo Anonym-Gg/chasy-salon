@@ -1296,6 +1296,7 @@ document.getElementById("checkout-form").addEventListener("submit", async functi
   const name=document.getElementById("of-name").value;
   const phone=document.getElementById("of-phone").value;
   const comment=document.getElementById("of-comment").value;
+  if(!name.trim() || !phone.trim()){ __orderSubmitting = false; showToast("Заполните имя и телефон.","err"); return; }
   const curCart = checkoutCart || cart;
   let lines=[], total=0;
   Object.entries(curCart).forEach(([n,x])=>{ lines.push(cartItemName(n)+' × '+x.qty); total+=x.price*x.qty; });
