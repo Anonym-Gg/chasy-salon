@@ -897,6 +897,13 @@ const firebaseConfig = {
   appId: "1:603314641443:web:d28da1aa20bb7e22192f96",
   measurementId: "G-4N4H0862HG"
 };
+if(typeof window.firebase === "undefined" || typeof window.firebase.initializeApp !== "function"){
+  document.addEventListener("DOMContentLoaded", function(){
+    var b = document.body;
+    if(b){ b.innerHTML = '<div style="font-family:sans-serif;max-width:520px;margin:60px auto;padding:30px;text-align:center"><h2>Сайт временно недоступен</h2><p style="color:#666">Не удалось загрузить сервисы Firebase. Проверьте подключение к интернету и обновите страницу.</p><button onclick="location.reload()" style="background:#1c1c1c;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:1rem">Обновить</button></div>'; }
+  });
+  throw new Error("Firebase SDK not loaded (offline)");
+}
 firebase.initializeApp(firebaseConfig);
 firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 const firestore = firebase.firestore();
@@ -924,13 +931,6 @@ async function loadUserFromFirestore(phoneOrNick){
     if(!q2.empty){ return q2.docs[0]; }
     return null;
   }catch(e){ console.error("loadUserFromFirestore", e); return null; }
-}
-
-async function createUserInFirestore(nick, phone, password){
-  const ref = firestore.collection("users").doc();
-  const data = { nick, phone, password, balance:0, history:[], gifts:[], createdAt: firebase.firestore.FieldValue.serverTimestamp() };
-  await ref.set(data);
-  return ref;
 }
 
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
