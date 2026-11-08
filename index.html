@@ -1958,15 +1958,14 @@ async function doRegister(){
   }
   try{
     const email = phone.replace(/[^\d]/g,"") + "@memento.shop";
-    const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    const uid = cred.user.uid;
     const nkey = nick.toLowerCase();
     const existingName = await firestore.collection("names").doc(nkey).get();
     if(existingName.exists){
-      await firestore.collection("users").doc(uid).delete();
-      setMsg("rg-msg","Этот ник уже занят. Выберите другой."); 
+      setMsg("rg-msg","Этот ник уже занят. Выберите другой.");
       return;
     }
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
     await firestore.collection("users").doc(uid).set({
       nick: nick, searchNick: nkey, phone: phone,
       balance: 0, history: [], gifts: [], createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -2228,7 +2227,7 @@ function edSave(){ CONTACTScurrent={shop:document.getElementById("ec-shop").valu
 function edReset(){ showConfirm("Сбросить все правки и вернуть исходные данные?", function(ok){ if(!ok) return; localStorage.removeItem(LS_KEY); PRODUCTScurrent=PRODUCTS.slice(); CONTACTScurrent=Object.assign({},CONTACTS); render(); renderContacts(); fillEditor(); }); }
 function edPublish(){
   CONTACTScurrent={shop:document.getElementById("ec-shop").value,phone:document.getElementById("ec-phone").value,email:document.getElementById("ec-email").value,address:document.getElementById("ec-address").value,hours:document.getElementById("ec-hours").value};
-  const seed=document.getElementById("seed"); seed.textContent=JSON.stringify({contacts:CONTACTScurrent,products:PRODUCTScurrent}); saveData(true);
+  const seed=document.getElementById("seed"); seed.textContent=JSON.stringify({contacts:CONTACTScurrent,products:PRODUCTScurrent}).replace(/<\//g,"<\\/"); saveData(true);
   const html="<!DOCTYPE html>"+document.documentElement.outerHTML;
   const blob=new Blob([html],{type:"text/html;charset=utf-8"}); const a=document.createElement("a"); const url=URL.createObjectURL(blob);
   a.href=url; a.download="index.html"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -2254,7 +2253,11 @@ let chatConv = null;
 let chatMsgsSub = null;
 function toggleChat(){
   const c=document.getElementById("support-chat");
-  if(c.classList.contains("open")){ c.classList.remove("open"); return; }
+  if(c.classList.contains("open")){
+    c.classList.remove("open");
+    if(chatMsgsSub){ chatMsgsSub(); chatMsgsSub=null; }
+    return;
+  }
   if(!currentUser){ showToast("Сначала войдите в аккаунт, чтобы написать в поддержку."); return; }
   c.classList.add("open");
   openChatPanel();
