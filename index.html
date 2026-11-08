@@ -1729,10 +1729,13 @@ async function syncNicks(){
 }
 async function approveGiftRequest(docId, uid, amount, client){
   if(!isAdmin()) return;
-  showConfirm("Списать "+amount.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и выдать сертификат?", async function(ok){
+  const grDoc = await firestore.collection("giftRequests").doc(docId).get();
+  const grData = grDoc.exists ? grDoc.data() : {};
+  const viaCard = grData.viaCard === true;
+  showConfirm((viaCard ? "Выдать сертификат на "+amount.toLocaleString('ru-RU')+" ₽ пользователю "+client+" (оплачено картой)?" : "Списать "+amount.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и выдать сертификат?"), async function(ok){
     if(!ok) return;
     try{
-      await adminSetBalance(uid, -amount, "Покупка подарочного сертификата "+amount.toLocaleString('ru-RU'));
+      if(!viaCard) await adminSetBalance(uid, -amount, "Покупка подарочного сертификата "+amount.toLocaleString('ru-RU'));
       var code="MEM-"+Math.floor(100000+Math.random()*900000);
       await firestore.collection("giftRequests").doc(docId).update({ status:"approved", code:code, approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
       await firestore.collection("certificates").doc(code).set({ code: code, amount: amount, ownerUid: uid, status: "active", createdAt: firebase.firestore.FieldValue.serverTimestamp() });
