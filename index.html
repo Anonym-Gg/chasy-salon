@@ -1258,7 +1258,7 @@ function buildPayOptions(total){
   html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="card" '+(hasBalance?'':'checked')+' onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Перевод на карту ВТБ</label>';
   if(hasBalance) html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="balance" checked onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Оплатить балансом ('+total.toLocaleString('ru-RU')+' ₽)</label>';
   html+='<label class="check-line" style="display:flex;align-items:center;gap:8px"><input type="radio" name="pay" value="cert" onchange="toggleCertBlock()" style="accent-color:var(--gold)"> Подарочный сертификат</label>';
-  html+='<div style="font-size:.8rem;color:var(--muted);margin-top:6px">'+CONTACTScurrent.shop+'<br>Карта: <b>'+CARD_VTB+'</b><br>Получатель: '+VTB_HOLDER+'</div>';
+  html+='<div style="font-size:.8rem;color:var(--muted);margin-top:6px">'+esc(CONTACTScurrent.shop)+'<br>Карта: <b>'+esc(CARD_VTB)+'</b><br>Получатель: '+esc(VTB_HOLDER)+'</div>';
   html+='<div id="cert-block" style="display:block;margin-top:14px;background:var(--cream);border:1px solid var(--line);padding:12px">'+
     '<label style="font-size:.9rem"><b>Подарочный сертификат</b> — введите код</label>'+
     '<input type="text" id="cert-code-input" placeholder="MEM-123456" style="width:100%;padding:10px;border:1px solid var(--line);font-family:inherit;font-size:1rem;margin-top:6px">'+
@@ -1857,7 +1857,7 @@ function closeDoc(){ document.querySelectorAll('.docwrap').forEach(d=>d.classLis
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function renderContacts(){
   const c=document.getElementById("contact-block");
-  c.innerHTML='<h3>Контакты</h3><div class="item"><div class="lbl">Магазин</div>'+CONTACTScurrent.shop+'</div><div class="item"><div class="lbl">Телефон</div>'+CONTACTScurrent.phone+'</div><div class="item"><div class="lbl">E-mail</div>'+CONTACTScurrent.email+'</div><div class="item"><div class="lbl">Адрес</div>'+CONTACTScurrent.address+'</div><div class="item"><div class="lbl">Режим работы</div>'+CONTACTScurrent.hours+'</div>';
+  c.innerHTML='<h3>Контакты</h3><div class="item"><div class="lbl">Магазин</div>'+esc(CONTACTScurrent.shop)+'</div><div class="item"><div class="lbl">Телефон</div>'+esc(CONTACTScurrent.phone)+'</div><div class="item"><div class="lbl">E-mail</div>'+esc(CONTACTScurrent.email)+'</div><div class="item"><div class="lbl">Адрес</div>'+esc(CONTACTScurrent.address)+'</div><div class="item"><div class="lbl">Режим работы</div>'+esc(CONTACTScurrent.hours)+'</div>';
 }
 
 /* ============ АВТОРИЗАЦИЯ (Firebase Auth) ============ */
