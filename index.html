@@ -1288,6 +1288,7 @@ async function applyCert(){
   }catch(e){ result.style.color="#b02323"; result.textContent="Ошибка: "+e.message; appliedCert=null; }
 }
 var __orderSubmitting = false;
+var __submittingAction = false;
 document.getElementById("checkout-form").addEventListener("submit", async function(e){
   e.preventDefault();
   if(__orderSubmitting){ showToast("Заказ уже отправляется, подождите..."); return; }
@@ -1781,8 +1782,10 @@ function sortDocsDesc(snap){
 function toggleOps(id){ document.getElementById('wallet-'+id).classList.toggle('show'); }
 async function startTopup(){
   if(!currentUser){ showToast("Войдите в аккаунт."); return; }
+  if(__submittingAction){ showToast("Подождите, заявка уже отправляется..."); return; }
   const amt=parseFloat(document.getElementById("topup-amount").value);
   if(!amt||amt<100){ showToast("Укажите сумму от 100 ₽."); return; }
+  __submittingAction = true;
   const text2="ПОПОЛНЕНИЕ БАЛАНСА\nКарта: "+CARD_VTB+"\nСумма: "+amt.toLocaleString('ru-RU')+" ₽\nПользователь: "+(currentUser.phone||currentUser.nick);
   console.log(text2);
   showToast("Переведите "+amt.toLocaleString('ru-RU')+" ₽ на карту "+CARD_VTB+". После перевода мы проверим и начислим баланс.");
@@ -1797,6 +1800,7 @@ async function startTopup(){
     });
     showToast("Заявка отправлена на проверку. Мы начислим баланс после подтверждения перевода.");
   }catch(e){ showToast("Ошибка: "+e.message); }
+  __submittingAction = false;
 }
 function getUsers(){ return {}; } // заменено Firestore — оставлено для совместимости
 function saveUsers(u){} // заменено Firestore
@@ -1819,7 +1823,9 @@ function buyGift(amount){
 }
 async function confirmGift(amount){
   if(!currentUser){ showToast("Войдите в аккаунт."); return; }
+  if(__submittingAction){ showToast("Подождите, заявка уже отправляется..."); return; }
   if(getBalance()<amount){ showToast("Недостаточно средств."); return; }
+  __submittingAction = true;
   try{
     await firestore.collection("giftRequests").add({
       uid: currentUser.uid,
@@ -1831,6 +1837,7 @@ async function confirmGift(amount){
     document.getElementById("gift-confirm").innerHTML=
       '<div class="rev-item" style="background:#eaf5ea;border:1px solid #b7d6b7;padding:18px"><b>Заявка отправлена!</b><br>Сертификат на <b>'+amount.toLocaleString('ru-RU')+' ₽</b> будет выдан после подтверждения оплаты. Код сертификата появится в личном кабинете.</div>';
   }catch(e){ showToast("Ошибка: "+e.message); }
+  __submittingAction = false;
   renderProfile(); renderMyGifts();
 }
 function renderMyGifts(){
@@ -1843,6 +1850,8 @@ function renderMyGifts(){
 }
 async function requestGiftByCard(amount){
   if(!currentUser){ showToast("Войдите в аккаунт."); return; }
+  if(__submittingAction){ showToast("Подождите, заявка уже отправляется..."); return; }
+  __submittingAction = true;
   try{
     await firestore.collection("giftRequests").add({
       uid: currentUser.uid,
@@ -1855,6 +1864,7 @@ async function requestGiftByCard(amount){
     document.getElementById("gift-confirm").innerHTML=
       '<div class="rev-item" style="background:#eaf5ea;border:1px solid #b7d6b7;padding:18px"><b>Заявка отправлена!</b><br>Мы проверим перевод и выдадим сертификат на <b>'+amount.toLocaleString('ru-RU')+' ₽</b>. Код появится в личном кабинете.</div>';
   }catch(e){ showToast("Ошибка: "+e.message); }
+  __submittingAction = false;
 }
 
 /* ============ МОДАЛКА ТОВАРА ============ */
@@ -1869,7 +1879,7 @@ function drawProductBody(){
   const imgs=(p.images&&p.images.length)?p.images:(p.image?[p.image]:[]);
   let body='<div class="slider">';
   if(imgs.length>1) body+='<button class="slider-arrow left" onclick="prevImg()">‹</button>';
-  body+= imgs.length ? '<img id="pm-img" src="'+imgs[Math.min(curImg,imgs.length-1)]+'">' : '<span>Фото модели</span>';
+  body+= imgs.length ? '<img id="pm-img" src="'+esc(imgs[Math.min(curImg,imgs.length-1)])+'">' : '<span>Фото модели</span>';
   if(imgs.length>1) body+='<button class="slider-arrow right" onclick="nextImg()">›</button>';
   body+='</div>';
   if(imgs.length>1){ body+='<div class="slider-dots">'+imgs.map(function(_,i){return '<span class="'+(i===curImg?'on':'')+'" onclick="jumpImg('+i+')"></span>';}).join('')+'</div>'; }
@@ -1889,7 +1899,7 @@ function drawProductBody(){
   if(sameCat.length){
     body+='<div class="pm-reviews" style="margin-top:20px"><h3 style="font-weight:normal;margin-bottom:8px">С этим покупают</h3><div style="display:flex;gap:8px;overflow-x:auto">'+
       sameCat.map(function(x){
-        return '<div style="flex:0 0 120px;cursor:pointer;border:1px solid var(--line);padding:6px" onclick="openProductByIdx('+PRODUCTScurrent.indexOf(x)+')"><div class="img" style="height:90px;background:var(--cream)">'+(x.image?'<img src="'+x.image+'" alt="" style="width:100%;height:100%;object-fit:cover">':'<span>Фото</span>')+'</div><div style="font-size:.75rem;margin-top:4px">'+esc(x.name)+'</div><div style="font-size:.8rem;font-weight:bold">'+x.price.toLocaleString('ru-RU')+' ₽</div></div>';
+        return '<div style="flex:0 0 120px;cursor:pointer;border:1px solid var(--line);padding:6px" onclick="openProductByIdx('+PRODUCTScurrent.indexOf(x)+')"><div class="img" style="height:90px;background:var(--cream)">'+(x.image?'<img src="'+esc(x.image)+'" alt="" style="width:100%;height:100%;object-fit:cover">':'<span>Фото</span>')+'</div><div style="font-size:.75rem;margin-top:4px">'+esc(x.name)+'</div><div style="font-size:.8rem;font-weight:bold">'+x.price.toLocaleString('ru-RU')+' ₽</div></div>';
       }).join('')+'</div></div>';
   }
   const reviews=p.reviews||[];
