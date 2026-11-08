@@ -1511,7 +1511,7 @@ async function loadMyOrders(){
       }
       const itemsHtml = (o.items||[]).map(function(it){
         var nm = String(it).split(" × ")[0];
-        return '<div style="font-size:.85rem;cursor:pointer;color:var(--gold-d);text-decoration:underline" onclick="openByName(\''+nm.replace(/'/g,"")+'\')">'+esc(it)+'</div>';
+        return '<div style="font-size:.85rem;cursor:pointer;color:var(--gold-d);text-decoration:underline" onclick="openByName(\''+nm.replace(/['"]/g,"")+'\')">'+esc(it)+'</div>';
       }).join('');
       const payLabel = o.payMethod==='balance' ? 'баланс' : (o.payMethod==='cert' ? 'сертификат' : 'карта ВТБ');
       return '<div class="rev-item"><b>'+date+'</b> — '+orderStatusHtml(o.status||"new")+'<br>'+
