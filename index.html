@@ -886,6 +886,7 @@ const LS_KEY = "chasy_salon_data_v1";
 const LS_PASS = "chasy_salon_edit_ok";
 const USERS_KEY = "chasy_salon_users";
 const EDIT_PASS = "sharm2026";
+window.__customPass = localStorage.getItem("chasy_edit_pass_custom") || null;
 
 /* ============ FIREBASE ИНИЦИАЛИЗАЦИЯ ============ */
 const firebaseConfig = {
@@ -1321,10 +1322,18 @@ document.getElementById("checkout-form").addEventListener("submit", async functi
     status: "new",
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
-  // 1) Сохраняем заказ в Firestore
+  // 1) Сохраняем заказ в Firestore (обязательно; при ошибке — прерываем оформление)
+  var orderSaved = false;
   try{
     await firestore.collection("orders").add(order);
+    orderSaved = true;
   }catch(err){ console.error("save order:", err); }
+  if(!orderSaved){
+    __orderSubmitting = false;
+    showToast("Не удалось сохранить заказ. Проверьте соединение и повторите.","err");
+    document.getElementById("order-ok").style.display="none";
+    return;
+  }
   // Если сертификат — погашаем сразу и создаём запрос на зачисление остатка на баланс
   if(certUsed){
     try{
@@ -1652,7 +1661,10 @@ async function setOrderStatus(docId, status){
       return;
     }
     await firestore.collection("orders").doc(docId).update({ status: status, statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    if(status==='delivered'||status==='approved') await sendOrderEmail(docId);
+    if(status==='delivered'||status==='approved'){
+      const od = await firestore.collection("orders").doc(docId).get();
+      if(od.exists && !od.data().emailSent){ await sendOrderEmail(docId); await firestore.collection("orders").doc(docId).update({ emailSent: true }); }
+    }
     loadAdminOrders();
   }catch(e){ showToast("Ошибка: "+e.message); }
 }
@@ -1675,6 +1687,7 @@ async function sendOrderEmail(docId){
   try{
     const doc = await firestore.collection("orders").doc(docId).get();
     if(!doc.exists) return;
+    if(doc.data().emailSent){ return; }
     const o=doc.data();
     await fetch("https://formsubmit.co/ajax/hibih228@gmail.com", {
       method:"POST",
@@ -2084,6 +2097,12 @@ function showPass(title){
 function hidePass(){ document.getElementById("passscreen").classList.remove("show"); }
 function tryPass(){
   if(!isOwner()){ return; }
+  const v=document.getElementById("pass-input").value;
+  if(!checkCustomPass(v)){
+    const err=document.getElementById("pass-err");
+    if(err){ err.textContent="Неверный код доступа."; err.style.color="#b02323"; }
+    return;
+  }
   document.getElementById("edit-fab").classList.add("on");
   hidePass();
   document.getElementById("fab-menu").classList.add("show");
