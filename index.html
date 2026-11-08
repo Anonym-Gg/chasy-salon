@@ -938,7 +938,7 @@ function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function loadData(){
   try{
     const raw = localStorage.getItem(LS_KEY);
-    if(raw){ const d = JSON.parse(raw); if(Array.isArray(d.products) && d.products.length>0) return d; }
+    if(raw){ const d = JSON.parse(raw); if(d.owner===true && Array.isArray(d.products) && d.products.length>0) return d; }
     const seed = document.getElementById("seed").textContent;
     if(seed){ const s = JSON.parse(seed); if(s && Array.isArray(s.products)) return s; }
   }catch(e){}
@@ -948,8 +948,8 @@ let storedData = loadData();
 let CONTACTScurrent = storedData ? Object.assign({}, storedData.contacts) : Object.assign({}, CONTACTS);
 let PRODUCTScurrent = storedData ? storedData.products.slice() : PRODUCTS.slice();
 ensureProductIds();
-function saveData(){
-  localStorage.setItem(LS_KEY, JSON.stringify({ contacts: CONTACTScurrent, products: PRODUCTScurrent }));
+function saveData(owner){
+  localStorage.setItem(LS_KEY, JSON.stringify({ owner: owner===true, contacts: CONTACTScurrent, products: PRODUCTScurrent }));
 }
 
 let cart = loadCart();
@@ -1919,7 +1919,7 @@ function addReviewPm(btn){
   const stars=parseInt(form.querySelector('.star-input').getAttribute('data-stars'))||5;
   const p=PRODUCTScurrent[curIdx];
   const revName = currentUser.nick || currentUser.phone || currentUser;
-  if(p){ if(!p.reviews) p.reviews=[]; p.reviews.push({name:revName,stars:stars,text:txt}); render(); drawProductBody(); saveData(); }
+  if(p){ if(!p.reviews) p.reviews=[]; p.reviews.push({name:revName,stars:stars,text:txt}); render(); drawProductBody(); }
 }
 
 /* ============ ОБЩЕЕ ============ */
@@ -2218,17 +2218,17 @@ function handleEd(e){
     return;
   }
   if(f===null) return;
-  let val=f==="price"?parseFloat(t.value)||0:t.value;
+  let val=f==="price"?Math.max(0,parseFloat(t.value)||0):t.value;
   if(f==="images"){ val=t.value.split(",").map(function(s){return s.trim();}).filter(Boolean); }
   PRODUCTScurrent[idx][f]=val;
 }
 document.getElementById("ed-products").addEventListener("click", function(e){ if(e.target.classList.contains("del")){ const idx=parseInt(e.target.getAttribute("data-i"),10); PRODUCTScurrent.splice(idx,1); drawEditorProducts(); } });
 function edAdd(){ var np={id:"new"+(Date.now().toString(36)),cat:"men",name:"Новый товар",price:0,color:"",image:"",images:[],specs:{},desc:"",reviews:[]}; PRODUCTScurrent.push(np); drawEditorProducts(); }
-function edSave(){ CONTACTScurrent={shop:document.getElementById("ec-shop").value,phone:document.getElementById("ec-phone").value,email:document.getElementById("ec-email").value,address:document.getElementById("ec-address").value,hours:document.getElementById("ec-hours").value}; saveData(); render(); renderContacts(); showToast("Сохранено."); }
+function edSave(){ CONTACTScurrent={shop:document.getElementById("ec-shop").value,phone:document.getElementById("ec-phone").value,email:document.getElementById("ec-email").value,address:document.getElementById("ec-address").value,hours:document.getElementById("ec-hours").value}; saveData(true); render(); renderContacts(); showToast("Сохранено."); }
 function edReset(){ showConfirm("Сбросить все правки и вернуть исходные данные?", function(ok){ if(!ok) return; localStorage.removeItem(LS_KEY); PRODUCTScurrent=PRODUCTS.slice(); CONTACTScurrent=Object.assign({},CONTACTS); render(); renderContacts(); fillEditor(); }); }
 function edPublish(){
   CONTACTScurrent={shop:document.getElementById("ec-shop").value,phone:document.getElementById("ec-phone").value,email:document.getElementById("ec-email").value,address:document.getElementById("ec-address").value,hours:document.getElementById("ec-hours").value};
-  const seed=document.getElementById("seed"); seed.textContent=JSON.stringify({contacts:CONTACTScurrent,products:PRODUCTScurrent}); saveData();
+  const seed=document.getElementById("seed"); seed.textContent=JSON.stringify({contacts:CONTACTScurrent,products:PRODUCTScurrent}); saveData(true);
   const html="<!DOCTYPE html>"+document.documentElement.outerHTML;
   const blob=new Blob([html],{type:"text/html;charset=utf-8"}); const a=document.createElement("a"); const url=URL.createObjectURL(blob);
   a.href=url; a.download="index.html"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
