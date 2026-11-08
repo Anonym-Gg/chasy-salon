@@ -1411,7 +1411,8 @@ async function reloadUserData(){
     if(document.getElementById('pg-gifts').classList.contains('active')) renderMyGifts();
     // Обновляем содержимое профиля, но БЕЗ повторного вызова reloadUserData (чтобы не зациклиться)
     if(document.getElementById('pg-profile').classList.contains('active')) renderProfileLike();
-  } finally {
+  } catch(e){ console.error("reloadUserData:", e); }
+  finally {
     window.__reloadingUserData = false;
   }
 }
