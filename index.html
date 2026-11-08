@@ -2373,6 +2373,7 @@ function confirmResolve(ok){
 }
 
 var __ocProduct = null;
+var __ocSubmitting = false;
 function buyOneClickById(pid){
   var p=findProductById(pid); if(!p) return;
   __ocProduct = { id:p.id, name:p.name, price:p.price };
@@ -2386,9 +2387,11 @@ function buyOneClick(name, price){ var p=findProductByName(name); if(p){ buyOneC
 function closeOneClick(){ document.getElementById("oneclick-modal").classList.remove("show"); }
 function submitOneClick(){
   if(!__ocProduct) return;
+  if(__ocSubmitting){ showToast("Заявка уже отправляется, подождите..."); return; }
   var nm=document.getElementById("oc-name").value.trim();
   var ph=document.getElementById("oc-phone").value.trim();
   if(!nm||!ph){ showToast("Заполните имя и телефон","err"); return; }
+  __ocSubmitting = true;
   try{
     firestore.collection("orders").add({
       uid: currentUser ? currentUser.uid : null,
@@ -2401,10 +2404,12 @@ function submitOneClick(){
       status: "new",
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function(){
+      __ocSubmitting = false;
+      __ocProduct = null;
       showToast("Заявка принята! Мы перезвоним вам в ближайшее время.","ok");
       closeOneClick();
-    }).catch(function(e){ showToast("Ошибка: "+e.message,"err"); });
-  }catch(e){ showToast("Ошибка: "+e.message,"err"); }
+    }).catch(function(e){ __ocSubmitting = false; showToast("Ошибка: "+e.message,"err"); });
+  }catch(e){ __ocSubmitting = false; showToast("Ошибка: "+e.message,"err"); }
 }
 
 </script>
