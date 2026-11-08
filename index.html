@@ -912,7 +912,6 @@ const UNLIMITED_PHONE = "+79277467217";
 
 let currentUser = null;
 let userData = null; // { balance, history, gifts, nick }
-let fbReady = false;
 
 async function fbAuthSession(){
   // Пустая заглушка-проверка: определим состояние через сессию localStorage,
@@ -2042,7 +2041,6 @@ function showGiftCongrats(g){
 
 /* ============ РЕДАКТОР / НАСТРОЙКИ (только на этом ПК) ============ */
 document.addEventListener("keydown",function(e){ if(e.ctrlKey&&e.shiftKey&&(e.key==="L"||e.key==="л"||e.key==="l")){ e.preventDefault(); showFabMenu(); } });
-let fabPendingAction = null;
 function showFabMenu(){
   if(!isOwner()){ return; }
   document.getElementById("fab-menu").classList.add("show");
