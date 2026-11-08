@@ -1884,12 +1884,18 @@ async function doRegister(){
     const email = phone.replace(/[^\d]/g,"") + "@memento.shop";
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     const uid = cred.user.uid;
+    const nkey = nick.toLowerCase();
+    const existingName = await firestore.collection("names").doc(nkey).get();
+    if(existingName.exists){
+      await firestore.collection("users").doc(uid).delete();
+      setMsg("rg-msg","Этот ник уже занят. Выберите другой."); 
+      return;
+    }
     await firestore.collection("users").doc(uid).set({
-      nick: nick, searchNick: nick.toLowerCase(), phone: phone,
+      nick: nick, searchNick: nkey, phone: phone,
       balance: 0, history: [], gifts: [], createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Отдельная коллекция для входа по нику (разрешена на чтение авторизованным)
-    await firestore.collection("names").doc(nick.toLowerCase()).set({ uid: uid, phone: phone });
+    await firestore.collection("names").doc(nkey).set({ uid: uid, phone: phone });
     currentUser = { nick: nick, phone: phone, uid: uid };
     userData = { nick: nick, phone: phone, balance:0, history:[], gifts:[], _ref: firestore.collection("users").doc(uid) };
     setMsg("rg-msg","Регистрация успешна! Вы вошли как "+nick+".");
@@ -2083,9 +2089,13 @@ async function saveAccount(){
   const res=document.getElementById("ae-result");
   if(!nick){ res.textContent="Ник не может быть пустым."; res.style.color="#b02323"; return; }
   try{
-    await userData._ref.update({ nick:nick, searchNick:nick.toLowerCase(), phone:phone });
-    // обновить names для входа по нику
-    await firestore.collection("names").doc(nick.toLowerCase()).set({ uid: currentUser.uid, phone: phone });
+    const nkey = nick.toLowerCase();
+    const existingName = await firestore.collection("names").doc(nkey).get();
+    if(existingName.exists && existingName.data().uid !== currentUser.uid){
+      res.textContent="Этот ник уже занят другим пользователем."; res.style.color="#b02323"; return;
+    }
+    await userData._ref.update({ nick:nick, searchNick:nkey, phone:phone });
+    await firestore.collection("names").doc(nkey).set({ uid: currentUser.uid, phone: phone });
     currentUser.nick=nick; currentUser.phone=phone;
     res.textContent="Сохранено!";
     res.style.color="var(--green)";
