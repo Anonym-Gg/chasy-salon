@@ -1551,7 +1551,8 @@ async function loadMyOrders(){
             return '<div style="display:flex;align-items:center;gap:4px"><div style="background:'+(done?'var(--gold)':'var(--line)')+';color:'+(done?'#fff':'var(--muted)')+';border-radius:14px;padding:3px 10px;font-size:.75rem">'+lbl+'</div>'+(i<steps.length-1?'<div style="width:10px;height:2px;background:'+(i<curStep?'var(--gold)':'var(--line)')+'"></div>':'')+'</div>';
           }).join('') + '</div>';
       }
-      const itemsHtml = (o.items||[]).map(function(it){
+      const itemsArr = Array.isArray(o.items) ? o.items : (o.items ? [o.items] : []);
+        const itemsHtml = itemsArr.map(function(it){
         var nm = String(it).split(" × ")[0];
         return '<div style="font-size:.85rem;cursor:pointer;color:var(--gold-d);text-decoration:underline" onclick="openByName(\''+nm.replace(/['"]/g,"")+'\')">'+esc(it)+'</div>';
       }).join('');
@@ -1632,7 +1633,7 @@ async function loadAdminOrders(){
         (st==='delivered'||st==='approved' ? '' : '<button style="background:#b02323;color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'cancelled\')">Отменить</button>')+
       '</div>';
       return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+' / '+esc(o.phone||"")+'<br>'+
-        '<span style="color:var(--muted)">'+esc((o.items||[]).join("; "))+'</span><br>'+
+        '<span style="color:var(--muted)">'+esc((Array.isArray(o.items)?o.items:(o.items?[o.items]:[])).join("; "))+'</span><br>'+
         '<b>'+parseInt(o.total||0).toLocaleString('ru-RU')+' ₽</b> · '+(o.payMethod==='balance'?'баланс':'карта ВТБ')+' · '+state+'<br>'+balBtn+stBtns+'</div>';
     }).join('');
   }catch(e){ console.error(e); const box=document.getElementById("admin-orders"); if(box) box.innerHTML='<p style="color:var(--muted)">Не удалось загрузить.</p>'; }
@@ -1681,7 +1682,7 @@ async function sendOrderEmail(docId){
       body: JSON.stringify({
         _subject:"Заказ выполнен — Memento",
         Клиент: o.client, Телефон: o.phone,
-        "Состав": (o.items||[]).join("; "),
+        "Состав": (Array.isArray(o.items)?o.items:(o.items?[o.items]:[])).join("; "),
         Сумма: parseInt(o.total||0).toLocaleString('ru-RU')+" ₽",
         Статус: "Выполнен"
       })
