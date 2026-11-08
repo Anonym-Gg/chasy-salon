@@ -1602,6 +1602,8 @@ async function approveTopup(docId, uid, amount, client){
 }
 async function doApproveTopup(docId, uid, amount, client){
   try{
+    const docT = await firestore.collection("topups").doc(docId).get();
+    if(docT.exists && docT.data().status === "approved"){ showToast("Заявка уже одобрена."); return; }
     await adminSetBalance(uid, amount, "Пополнение баланса (подтверждено)");
     await firestore.collection("topups").doc(docId).update({ status:"approved", approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
     showToast("Баланс начислен.");
