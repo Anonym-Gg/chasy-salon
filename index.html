@@ -1287,8 +1287,11 @@ async function applyCert(){
     result.textContent = "Сертификат на "+appliedCert.amount.toLocaleString('ru-RU')+" ₽ применён. Остаток после заказа вернётся на баланс.";
   }catch(e){ result.style.color="#b02323"; result.textContent="Ошибка: "+e.message; appliedCert=null; }
 }
+var __orderSubmitting = false;
 document.getElementById("checkout-form").addEventListener("submit", async function(e){
   e.preventDefault();
+  if(__orderSubmitting){ showToast("Заказ уже отправляется, подождите..."); return; }
+  __orderSubmitting = true;
   const pay=document.querySelector('input[name=pay]:checked');
   const payMethod = pay?pay.value:'card';
   const name=document.getElementById("of-name").value;
@@ -1298,11 +1301,11 @@ document.getElementById("checkout-form").addEventListener("submit", async functi
   let lines=[], total=0;
   Object.entries(curCart).forEach(([n,x])=>{ lines.push(cartItemName(n)+' × '+x.qty); total+=x.price*x.qty; });
   if(payMethod==='balance'){
-    if(getBalance()<total){ showToast("Недостаточно средств на балансе."); return; }
+    if(getBalance()<total){ __orderSubmitting = false; showToast("Недостаточно средств на балансе."); return; }
     // Баланс не списывается клиентом — спишет админ при подтверждении заказа (Вариант B)
   } else if(payMethod==='cert'){
-    if(!appliedCert){ showToast("Сначала примените сертификат."); return; }
-    if(appliedCert.amount < total){ showToast("Номинала сертификата недостаточно для этого заказа ("+appliedCert.amount.toLocaleString('ru-RU')+" ₽ < "+total.toLocaleString('ru-RU')+" ₽)."); return; }
+    if(!appliedCert){ __orderSubmitting = false; showToast("Сначала примените сертификат."); return; }
+    if(appliedCert.amount < total){ __orderSubmitting = false; showToast("Номинала сертификата недостаточно для этого заказа ("+appliedCert.amount.toLocaleString('ru-RU')+" ₽ < "+total.toLocaleString('ru-RU')+" ₽)."); return; }
   } else {
     const text2="ПЕРЕВОД НА КАРТУ\nКарта: "+CARD_VTB+"\nСумма: "+total.toLocaleString('ru-RU')+" ₽\nНазначение: заказ "+name;
     console.log(text2);
@@ -1374,6 +1377,7 @@ document.getElementById("checkout-form").addEventListener("submit", async functi
   }
   checkoutCart = null;
   saveCart(); updateCart(); drawCart(); renderTopBalance(); renderProfile();
+  __orderSubmitting = false;
   setTimeout(function(){ document.getElementById("order-ok").style.display="none"; closePanels(); }, 7000);
 });
 
