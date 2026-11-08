@@ -128,6 +128,8 @@
   .ci .qty{display:flex;align-items:center;gap:8px;margin-top:6px}
   .ci .qty button{width:24px;height:24px;border:1px solid var(--line);background:#fff;cursor:pointer}
   .ci .rm{margin-left:auto;background:none;border:none;color:#b02323;cursor:pointer;font-size:1.1rem}
+  .ci .ci-oc{margin-top:8px;background:var(--ink);color:#fff;border:none;padding:6px 14px;border-radius:14px;cursor:pointer;font-family:inherit;font-size:.8rem}
+  .ci .ci-oc:hover{background:var(--gold)}
   .ci .ci-img{width:60px;height:60px;flex:none;background:var(--cream);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.7rem}
   .ci .ci-img img{width:100%;height:100%;object-fit:cover}
   #cart-total{padding:16px 18px;border-top:1px solid var(--line)}
@@ -1204,7 +1206,7 @@ function renderCartPage(){
     return;
   }
   function cartKeyJs(k){ return String(k).replace(/'/g,""); }
-  let html=names.map(n=>'<div class="ci" style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:10px"><div class="ci-img">'+(cartItemImg(n)?'<img src="'+cartItemImg(n)+'">':'⌚')+'</div><div class="th"><div class="nm">'+cartItemName(n)+'</div><div class="pr">'+cartItemPrice(n).toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+cartKeyJs(n)+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+cartKeyJs(n)+'\',1)">+</button></div></div><button class="rm" onclick="chg(\''+cartKeyJs(n)+'\',-999)">✕</button></div>').join('');
+  let html=names.map(n=>'<div class="ci" style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:10px"><div class="ci-img">'+(cartItemImg(n)?'<img src="'+cartItemImg(n)+'">':'⌚')+'</div><div class="th"><div class="nm">'+cartItemName(n)+'</div><div class="pr">'+cartItemPrice(n).toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+cartKeyJs(n)+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+cartKeyJs(n)+'\',1)">+</button></div><button class="ci-oc" onclick="goCheckoutFor(\''+cartKeyJs(n)+'\')">Оформить</button></div><button class="rm" onclick="chg(\''+cartKeyJs(n)+'\',-999)">✕</button></div>').join('');
   let total=0; Object.values(cart).forEach(x=>total+=x.price*x.qty);
   html+='<div id="cart-total" style="background:var(--cream);border:1px solid var(--line);padding:18px;margin-top:14px"><div class="sum-row"><span>Итого:</span><span id="grand2" style="font-size:1.3rem;font-weight:bold">'+total.toLocaleString('ru-RU')+' ₽</span></div><button onclick="goCheckout()" style="width:100%;background:var(--gold);color:#fff;border:none;padding:14px;font-family:inherit;font-size:1.1rem;letter-spacing:1px;cursor:pointer">Оформить заказ</button></div>';
   body.innerHTML=html;
@@ -1214,7 +1216,7 @@ function drawCart(){
   const names=Object.keys(cart);
   if(!names.length){ body.innerHTML='<p style="color:#7a7265">Корзина пуста.</p>'; }
   else{
-    body.innerHTML=names.map(n=>'<div class="ci"><div class="ci-img">'+(cartItemImg(n)?'<img src="'+cartItemImg(n)+'">':'⌚')+'</div><div class="th"><div class="nm">'+cartItemName(n)+'</div><div class="pr">'+cartItemPrice(n).toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+String(n).replace(/'/g,"")+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+String(n).replace(/'/g,"")+'\',1)">+</button></div></div><button class="rm" onclick="chg(\''+String(n).replace(/'/g,"")+'\',-999)">✕</button></div>').join('');
+    body.innerHTML=names.map(n=>'<div class="ci"><div class="ci-img">'+(cartItemImg(n)?'<img src="'+cartItemImg(n)+'">':'⌚')+'</div><div class="th"><div class="nm">'+cartItemName(n)+'</div><div class="pr">'+cartItemPrice(n).toLocaleString('ru-RU')+' ₽ /шт</div><div class="qty"><button onclick="chg(\''+String(n).replace(/'/g,"")+'\',-1)">−</button><span>'+cart[n].qty+'</span><button onclick="chg(\''+String(n).replace(/'/g,"")+'\',1)">+</button></div><button class="ci-oc" onclick="goCheckoutFor(\''+String(n).replace(/'/g,"")+'\')">Оформить</button></div><button class="rm" onclick="chg(\''+String(n).replace(/'/g,"")+'\',-999)">✕</button></div>').join('');
   }
   let total=0; Object.values(cart).forEach(x=>total+=x.price*x.qty);
   document.getElementById("grand").textContent=total.toLocaleString('ru-RU')+' ₽';
