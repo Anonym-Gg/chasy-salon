@@ -1062,7 +1062,7 @@ function render(){
         recentBox.style.display="block";
         recentBox.innerHTML='<div class="section-title" style="margin:8px 0 14px">Вы недавно смотрели</div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">'+
           recents.slice(0,6).map(function(p){
-            return '<div class="card" onclick="openProductByIdx('+PRODUCTScurrent.indexOf(p)+')" style="cursor:pointer"><div class="img" style="height:120px">'+(p.image?'<img src="'+p.image+'" alt="">':'<span>Фото</span>')+'</div><h3 style="font-size:.85rem">'+esc(p.name)+'</h3><div class="price" style="font-size:.9rem">'+p.price.toLocaleString('ru-RU')+' ₽</div></div>';
+            return '<div class="card" onclick="openProductByIdx('+PRODUCTScurrent.indexOf(p)+')" style="cursor:pointer"><div class="img" style="height:120px">'+(p.image?'<img src="'+esc(p.image)+'" alt="">':'<span>Фото</span>')+'</div><h3 style="font-size:.85rem">'+esc(p.name)+'</h3><div class="price" style="font-size:.9rem">'+p.price.toLocaleString('ru-RU')+' ₽</div></div>';
           }).join('')+'</div>';
       } else { recentBox.style.display="none"; }
     } else { recentBox.style.display="none"; }
@@ -1074,7 +1074,7 @@ function render(){
     el.setAttribute("onclick","openProductByIdx(this.getAttribute('data-idx'))");
     const note = p.reviews && p.reviews.length ? '<span class="rev-stars">'+starStr(avgStars(p.reviews))+'</span> '+p.reviews.length+' отз.' : 'нет отзывов';
     el.innerHTML =
-      '<div class="img" style="position:relative">' + (p.image ? '<img src="'+p.image+'" alt="'+p.name+'">' : '<span>Фото модели</span>') +
+      '<div class="img" style="position:relative">' + (p.image ? '<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'">' : '<span>Фото модели</span>') +
       '<button onclick="event.stopPropagation();toggleFav(\''+String(p.id).replace(/'/g,"")+'\',this)" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)" class="fav-btn">'+(isFav(p.id)?'❤️':'🤍')+'</button>'+
       (p.oldPrice && p.oldPrice>p.price ? '<span style="position:absolute;top:8px;left:8px;background:#b02323;color:#fff;font-size:.7rem;padding:3px 7px;border-radius:4px">СКИДКА '+(Math.round((1-p.price/p.oldPrice)*100))+'%</span>' : '')+
       '</div>' +
