@@ -1079,9 +1079,9 @@ function render(){
       '<button onclick="event.stopPropagation();toggleFav(\''+String(p.id).replace(/'/g,"")+'\',this)" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)" class="fav-btn">'+(isFav(p.id)?'❤️':'🤍')+'</button>'+
       (p.oldPrice && p.oldPrice>p.price ? '<span style="position:absolute;top:8px;left:8px;background:#b02323;color:#fff;font-size:.7rem;padding:3px 7px;border-radius:4px">СКИДКА '+(Math.round((1-p.price/p.oldPrice)*100))+'%</span>' : '')+
       '</div>' +
-      '<span class="badge-cat">'+(CAT_NAME[p.cat]||p.cat)+'</span>'+
-      '<h3>'+p.name+'</h3>' +
-      '<div class="desc">'+p.desc+'</div>' +
+      '<span class="badge-cat">'+esc(CAT_NAME[p.cat]||p.cat)+'</span>'+
+      '<h3>'+esc(p.name)+'</h3>' +
+      '<div class="desc">'+esc(p.desc)+'</div>' +
       '<div class="row" onclick="event.stopPropagation()">'+(p.oldPrice && p.oldPrice>p.price ? '<span style="text-decoration:line-through;color:var(--muted);font-size:.85rem;margin-right:6px">'+p.oldPrice.toLocaleString('ru-RU')+'</span>':'')+'<span class="price">'+p.price.toLocaleString('ru-RU')+' ₽</span>' +
       '<button class="add" onclick="addToCartById(\''+String(p.id).replace(/'/g,"")+'\')">В корзину</button></div>'+
       '<div style="font-size:.78rem;color:var(--muted);margin-top:6px">'+note+'</div>';
@@ -1675,6 +1675,8 @@ async function confirmOrderBalance(docId, uid, total, client){
   showConfirm("Списать "+total.toLocaleString('ru-RU')+" ₽ со счёта "+client+" и подтвердить заказ?", async function(ok){
     if(!ok) return;
     try{
+      const curr = await firestore.collection("orders").doc(docId).get();
+      if(curr.exists && curr.data().status === "approved"){ showToast("Заказ уже подтверждён — повторное списание отменено."); loadAdminOrders(); return; }
       await adminSetBalance(uid, -total, "Оплата заказа");
       await firestore.collection("orders").doc(docId).update({ status:"approved", statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() });
       await sendOrderEmail(docId);
