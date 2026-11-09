@@ -1640,7 +1640,7 @@ async function loadAdminOrders(){
         (st==='new' ? '<button style="background:var(--gold-d);color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'confirmed\')">Подтвердить</button>' : '')+
         (st==='confirmed' ? '<button style="background:#2a6fb0;color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'shipped\')">Отправить</button>' : '')+
         (st==='shipped' ? '<button style="background:var(--green);color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'delivered\')">Доставлен</button>' : '')+
-        (st==='delivered'||st==='approved' ? '' : '<button style="background:#b02323;color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'cancelled\')">Отменить</button>')+
+        (st==='delivered'||st==='approved'||st==='cancelled' ? '' : '<button style="background:#b02323;color:#fff;border:none;padding:5px 10px;cursor:pointer;font-family:inherit;font-size:.8rem" onclick="setOrderStatus(\''+d.id+'\',\'cancelled\')">Отменить</button>')+
       '</div>';
       return '<div class="rev-item"><b>'+date+'</b> — '+esc(o.client||"")+' / '+esc(o.phone||"")+'<br>'+
         '<span style="color:var(--muted)">'+esc((Array.isArray(o.items)?o.items:(o.items?[o.items]:[])).join("; "))+'</span><br>'+
@@ -1658,6 +1658,8 @@ if(status==='cancelled'){
         firestore.collection("orders").doc(docId).get().then(function(doc){
           if(!doc.exists) return;
           const o = doc.data();
+          // Защита от повторной отмены: уже отменённый заказ не трогаем
+          if(o.status === "cancelled"){ showToast("Заказ уже отменён."); return; }
           const ops = [];
           // Если оплачен сертификатом — возвращаем сертификат в активные
           if(o && o.cert && o.cert.code){
