@@ -2325,6 +2325,8 @@ async function sendChat(){
   if(!txt) return;
   if(!currentUser){ showToast("Войдите в аккаунт."); return; }
   if(isOwner() && !chatConv){ showToast("Выберите диалог, которому отвечаете."); return; }
+  if(window.__chatSending){ showToast("Сообщение уже отправляется..."); return; }
+  window.__chatSending = true;
   if(!chatConv) chatConv = currentUser.uid;
   try{
     await firestore.collection("support").add({
@@ -2335,7 +2337,8 @@ async function sendChat(){
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     inp.value="";
-  }catch(e){ showToast("Ошибка: "+e.message); }
+    window.__chatSending = false;
+  }catch(e){ window.__chatSending = false; showToast("Ошибка: "+e.message); }
 }
 document.addEventListener("click", function(e){
   const b=document.getElementById("chat-bubble");
