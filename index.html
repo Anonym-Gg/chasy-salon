@@ -2065,6 +2065,10 @@ function updateTopRight(nick){
 }
 async function logoutUser(){
   await auth.signOut();
+  if(chatMsgsSub){ chatMsgsSub(); chatMsgsSub=null; }
+  chatConv=null;
+  appliedCert=null;
+  __ocProduct=null;
   currentUser=null; userData=null;
   updateTopRight(null); renderTopBalance(); renderProfile();
   showToast("Вы вышли из аккаунта.");
