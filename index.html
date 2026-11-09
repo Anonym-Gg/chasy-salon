@@ -957,7 +957,7 @@ let catalogSel = { cats:[], colors:[], min:null, max:null };
 const CART_KEY = "chasy_cart_v1";
 function saveCart(){ try{ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }catch(e){} }
 function loadCart(){
-  try{ const r=localStorage.getItem(CART_KEY); return r?JSON.parse(r):{}; }catch(e){ return {}; }
+  try{ const r=localStorage.getItem(CART_KEY); const v=r?JSON.parse(r):{}; return (v && typeof v==="object" && !Array.isArray(v)) ? v : {}; }catch(e){ return {}; }
 }
 
 /* ============ РОУТЕР ПОД-СТРАНИЦ ============ */
@@ -1111,7 +1111,7 @@ function starStr(v){ var s=''; for(var i=1;i<=5;i++){ s+=i<=Math.round(v)?'★':
 
 /* ============ ИЗБРАННОЕ + НЕДАВНО ПРОСМОТРЕННЫЕ ============ */
 const FAV_KEY = "chasy_favs_v1";
-function getFavs(){ try{ return JSON.parse(localStorage.getItem(FAV_KEY)||"[]"); }catch(e){ return []; } }
+function getFavs(){ try{ const v=JSON.parse(localStorage.getItem(FAV_KEY)||"[]"); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
 function saveFavs(f){ localStorage.setItem(FAV_KEY, JSON.stringify(f)); }
 function isFav(id){ return getFavs().indexOf(id)!==-1; }
 function toggleFav(id, btn){
@@ -1122,7 +1122,7 @@ function toggleFav(id, btn){
   if(btn){ btn.textContent = isFav(id)?'❤️':'🤍'; }
 }
 const RECENT_KEY = "chasy_recent_v1";
-function getRecent(){ try{ return JSON.parse(localStorage.getItem(RECENT_KEY)||"[]"); }catch(e){ return []; } }
+function getRecent(){ try{ const v=JSON.parse(localStorage.getItem(RECENT_KEY)||"[]"); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
 function addRecent(id){
   var r=getRecent().filter(function(x){ return x!==id; });
   r.unshift(id);
