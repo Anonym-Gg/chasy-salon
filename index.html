@@ -1651,11 +1651,36 @@ async function loadAdminOrders(){
 async function setOrderStatus(docId, status){
   if(!isAdmin()) return;
   try{
-    if(status==='cancelled'){
+if(status==='cancelled'){
       showConfirm("Отменить заказ?", function(ok){
         if(!ok) return;
-        firestore.collection("orders").doc(docId).update({ status:"cancelled", statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }).then(function(){
-          showToast("Заказ отменён.");
+        var certReturned = false;
+        firestore.collection("orders").doc(docId).get().then(function(doc){
+          if(!doc.exists) return;
+          const o = doc.data();
+          const ops = [];
+          // Если оплачен сертификатом — возвращаем сертификат в активные
+          if(o && o.cert && o.cert.code){
+            certReturned = true;
+            ops.push(firestore.collection("certificates").doc(o.cert.code).update({ status:"active", usedBy: null, usedAt: null }));
+            // Остаток сверх суммы заказа возвращаем на баланс пользователя, если он был зафиксирован
+            if(o.cert.remainder > 0){
+              ops.push(firestore.collection("topups").add({
+                uid: o.uid||null,
+                client: (o.client)||"",
+                phone: (o.phone)||"",
+                amount: o.cert.remainder,
+                reason: "Возврат остатка по отменённому заказу ("+o.cert.code+")",
+                fromCert: o.cert.code,
+                status: "pending",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              }));
+            }
+          }
+          ops.push(firestore.collection("orders").doc(docId).update({ status:"cancelled", statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() }));
+          return Promise.all(ops);
+        }).then(function(){
+          showToast("Заказ отменён."+(certReturned ? " Сертификат возвращён." : ""));
           loadAdminOrders();
         }).catch(function(e){ showToast("Ошибка: "+e.message); });
       });
@@ -1703,6 +1728,7 @@ async function sendOrderEmail(docId){
         Статус: "Выполнен"
       })
     });
+    await firestore.collection("orders").doc(docId).update({ emailSent: true });
   }catch(e){ console.error("email:", e); }
 }
 async function loadAdminGiftRequests(){
